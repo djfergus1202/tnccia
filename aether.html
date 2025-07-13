@@ -3,17 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Aether: Interactive Strategic Blueprint</title>
+    <title>Aether: Interactive Strategic Hub</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <!-- Chosen Palette: Warm Neutrals -->
-    <!-- Application Structure Plan: A tab-based SPA structure is chosen for optimal usability. This allows users to non-linearly explore the key pillars of the Aether strategy (The Vision, The Product, The AI Mentor, Market Fit) without being forced into a long, linear scroll. This structure breaks down the dense report into digestible, thematic sections. Key interactions include an interactive mock-up of the Career Canvas, simulated AI analysis cards, and a dynamic competitive analysis chart, all designed to make the abstract concepts of the report tangible and easily understandable. -->
+    <!-- Application Structure Plan: The application is redesigned around a central "Strategy Feed" dashboard to create a dynamic, social, and "Facebook-like" experience. The previous tabbed sections are now dedicated views accessible from a persistent sidebar, improving focus (e.g., the Career Canvas is now a full-screen workspace). This structure supports a user flow of reviewing live updates on the dashboard, diving deep into a specific tool like the canvas, and then returning. The search bar now simulates web searches via a modal, connecting the user's internal strategy to external information. -->
     <!-- Visualization & Content Choices: 
-        - Market Gap: Goal is to inform. Presented as interactive cards (HTML/CSS) instead of static text for better engagement.
-        - Competitive Analysis: Goal is to compare. Presented as a dynamic Chart.js Bubble Chart to visualize Aether's unique positioning against multiple dimensions (AI Capability, Integration Level). This is more insightful than a static table.
-        - Core Product: Goal is to demonstrate. Presented as a simplified, interactive Career Canvas mock-up (HTML/CSS/Canvas) to let users "feel" the product vision.
-        - AI Features: Goal is to explain. Presented as interactive cards with "Run Analysis" buttons that simulate the AI's proactive insights, making the core differentiator tangible.
-        - All choices adhere to the NO SVG/Mermaid rule, using Chart.js for data visualization and HTML/Canvas for diagrams. -->
+        - Strategy Feed: Goal is to inform/engage. Presented as a scrollable list of activity cards (HTML/CSS), mimicking a social feed. Interaction includes simulated like/comment buttons.
+        - Web Search: Goal is to explore. Presented as a modal window with simulated search results, triggered by a dedicated button.
+        - Career Canvas: Goal is to iterate. Moved to a dedicated view for a more immersive experience. Node creation/editing is retained.
+        - Competitive Analysis: Goal is to compare. Retained in a dedicated view with the interactive chart and details panel.
+        - All choices adhere to the NO SVG/Mermaid rule. -->
     <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
     <style>
         :root {
@@ -24,6 +24,7 @@
             --accent-primary: #4A90E2;
             --accent-secondary: #357ABD;
             --border-color: #E5E7EB;
+            --highlight-bg: #FDE68A;
         }
         body {
             font-family: 'Inter', sans-serif;
@@ -48,13 +49,6 @@
         .content-section.active {
             display: block;
         }
-        .card-hover-effect {
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-        }
-        .card-hover-effect:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
-        }
         #career-canvas {
             background-color: #F9FAFB;
             background-image:
@@ -64,6 +58,11 @@
         }
         .node {
             touch-action: none;
+            transition: box-shadow 0.2s ease;
+        }
+        .node.highlight {
+            box-shadow: 0 0 0 4px var(--highlight-bg);
+            border-radius: 10px;
         }
         .chart-container {
             position: relative;
@@ -73,106 +72,115 @@
             max-width: 800px;
             max-height: 500px;
         }
+        mark {
+            background-color: var(--highlight-bg);
+            color: var(--text-primary);
+            padding: 0 2px;
+            border-radius: 3px;
+        }
+        .feed-card-icon {
+            width: 40px;
+            height: 40px;
+            flex-shrink: 0;
+        }
     </style>
 </head>
 <body class="antialiased">
 
     <div class="min-h-screen flex flex-col lg:flex-row">
         <!-- Navigation Sidebar -->
-        <aside class="w-full lg:w-64 bg-alt border-b lg:border-r border-border-color p-4 lg:p-6 flex-shrink-0">
-            <h1 class="text-2xl font-bold text-accent-primary mb-8">Aether</h1>
+        <aside class="w-full lg:w-72 bg-alt border-b lg:border-r border-border-color p-4 lg:p-6 flex-shrink-0 flex flex-col">
+            <h1 class="text-2xl font-bold text-accent-primary mb-4">Aether</h1>
+            <div class="flex gap-2 mb-4">
+                <input type="search" id="search-bar" placeholder="Search strategy..." class="w-full p-2 border border-border-color rounded-lg focus:ring-2 focus:ring-accent-primary focus:outline-none">
+                <button id="web-search-btn" title="Search the Web" class="p-2 border border-border-color rounded-lg hover:bg-gray-100">
+                    <svg class="w-5 h-5 text-gray-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 21a9.004 9.004 0 008.716-6.747M12 21a9.004 9.004 0 01-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3m0 18c-2.485 0-4.5-4.03-4.5-9S9.515 3 12 3m0 0a8.997 8.997 0 017.843 4.582M12 3a8.997 8.997 0 00-7.843 4.582m15.686 0A11.953 11.953 0 0112 10.5c-2.998 0-5.74-1.1-7.843-2.918m15.686 0A8.959 8.959 0 0121 12c0 .778-.099 1.533-.284 2.253m0 0A17.919 17.919 0 0112 16.5c-3.162 0-6.133-.815-8.716-2.247m0 0A9.015 9.015 0 013 12c0-1.605.42-3.113 1.157-4.418" /></svg>
+                </button>
+            </div>
             <nav id="main-nav" class="flex flex-row lg:flex-col gap-2">
-                <button data-target="vision" class="nav-item w-full text-left p-3 rounded-lg font-medium active">The Vision</button>
-                <button data-target="product" class="nav-item w-full text-left p-3 rounded-lg font-medium">The Product</button>
-                <button data-target="ai" class="nav-item w-full text-left p-3 rounded-lg font-medium">The AI Mentor</button>
-                <button data-target="market" class="nav-item w-full text-left p-3 rounded-lg font-medium">Market Fit</button>
+                <button data-target="dashboard" class="nav-item w-full text-left p-3 rounded-lg font-medium active">Dashboard</button>
+                <button data-target="canvas" class="nav-item w-full text-left p-3 rounded-lg font-medium">Career Canvas</button>
+                <button data-target="market" class="nav-item w-full text-left p-3 rounded-lg font-medium">Market Analysis</button>
+                <button data-target="profile" class="nav-item w-full text-left p-3 rounded-lg font-medium">My Profile</button>
             </nav>
         </aside>
 
         <!-- Main Content Area -->
         <main class="flex-1 p-4 sm:p-6 lg:p-10 overflow-y-auto">
 
-            <!-- Section: The Vision -->
-            <section id="vision" class="content-section active">
-                <div class="max-w-4xl mx-auto">
-                    <h2 class="text-3xl font-bold mb-2">Bridge the Career Strategy Gap</h2>
-                    <p class="text-lg text-text-secondary mb-8">Aether is an integrated Career Strategy Environment that combines visual goal mapping with a proactive AI mentor, helping STEAM professionals connect their ambitions to real-world skills and opportunities.</p>
-                    
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 text-center">
-                        <div class="bg-alt p-6 rounded-xl shadow-sm border border-border-color">
-                            <div class="text-4xl mb-3">🌐</div>
-                            <h3 class="font-bold mb-2">Networking & Job Boards</h3>
-                            <p class="text-sm text-text-secondary">Platforms like LinkedIn are reactive, showing you what's available now, but lack tools for long-term strategic planning.</p>
-                        </div>
-                        <div class="bg-alt p-6 rounded-xl shadow-sm border border-border-color">
-                            <div class="text-4xl mb-3">🎓</div>
-                            <h3 class="font-bold mb-2">Learning Platforms</h3>
-                            <p class="text-sm text-text-secondary">Coursera and edX offer the "how" of skill building, but can't help you decide *which* skills to learn for your specific goals.</p>
-                        </div>
-                        <div class="bg-alt p-6 rounded-xl shadow-sm border border-border-color">
-                            <div class="text-4xl mb-3">📝</div>
-                            <h3 class="font-bold mb-2">Generic Productivity Tools</h3>
-                            <p class="text-sm text-text-secondary">Using tools like Notion requires immense manual effort and the resulting plan is static, blind to real-time market shifts.</p>
-                        </div>
-                    </div>
-
-                    <div class="mt-10 p-6 bg-accent-primary/10 rounded-xl text-center">
-                        <h3 class="text-xl font-bold text-accent-secondary">This fragmentation creates the "Career Strategy Gap."</h3>
-                        <p class="mt-2 text-text-secondary">Ambitious professionals are forced into an inefficient workflow, using disconnected tools to manage their career vision, skill development, and job search. Aether is designed to fill this void.</p>
-                    </div>
+            <!-- Section: Dashboard -->
+            <section id="dashboard" class="content-section active">
+                <h2 class="text-3xl font-bold mb-6">Strategy Feed</h2>
+                <div id="strategy-feed" class="space-y-6 max-w-3xl mx-auto">
+                    <!-- Feed items will be injected by JS -->
                 </div>
             </section>
 
-            <!-- Section: The Product -->
-            <section id="product" class="content-section">
-                 <h2 class="text-3xl font-bold mb-2">The Career Canvas</h2>
-                 <p class="text-lg text-text-secondary mb-6 max-w-4xl">This is an interactive mock-up of Aether's core interface. Drag the nodes to organize your plan. The canvas provides a limitless, non-linear workspace that mirrors the nature of a STEAM career, allowing you to map everything from high-level ambitions to granular tasks in one place.</p>
-                <div id="career-canvas-container" class="relative w-full h-[60vh] bg-alt rounded-xl border border-border-color shadow-lg overflow-hidden">
+            <!-- Section: Career Canvas -->
+            <section id="canvas" class="content-section h-full flex flex-col">
+                 <div class="flex-shrink-0">
+                    <h2 class="text-3xl font-bold mb-2">Career Canvas</h2>
+                    <p class="text-lg text-text-secondary mb-4 max-w-4xl searchable">Your dynamic workspace for visual strategy. Drag nodes, edit titles, and add new goals.</p>
+                    <div class="flex gap-2 mb-4">
+                        <button id="add-rock-btn" class="px-4 py-2 text-sm font-medium text-white bg-slate-700 rounded-lg hover:bg-slate-800">Add Rock</button>
+                        <button id="add-pebble-btn" class="px-4 py-2 text-sm font-medium text-sky-800 bg-sky-200 rounded-lg hover:bg-sky-300">Add Pebble</button>
+                        <button id="add-sand-btn" class="px-4 py-2 text-sm font-medium text-amber-800 bg-amber-100 rounded-lg hover:bg-amber-200">Add Sand</button>
+                    </div>
+                 </div>
+                <div id="career-canvas-container" class="flex-grow relative w-full bg-alt rounded-xl border border-border-color shadow-lg overflow-hidden">
                     <div id="career-canvas" class="absolute top-0 left-0 w-full h-full cursor-grab">
                         <canvas id="connector-canvas" class="absolute top-0 left-0 w-full h-full pointer-events-none"></canvas>
-                        <!-- Nodes will be added here by JS -->
-                    </div>
-                </div>
-            </section>
-
-            <!-- Section: The AI Mentor -->
-            <section id="ai" class="content-section">
-                <h2 class="text-3xl font-bold mb-2">Your Proactive AI Mentor</h2>
-                <p class="text-lg text-text-secondary mb-8 max-w-4xl">Aether's AI doesn't just organize, it advises. By synthesizing your career plan with real-time data from job markets and academic trends, it provides unsolicited, strategic counsel. Click below to see simulated examples.</p>
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    
-                    <div class="bg-alt p-6 rounded-xl shadow-sm border border-border-color card-hover-effect flex flex-col">
-                        <h3 class="text-xl font-bold mb-2 text-green-600">Skill Gap Analysis</h3>
-                        <p class="text-text-secondary mb-4 flex-grow">The AI analyzes your goals against market demand to find missing skills.</p>
-                        <button class="ai-btn mt-auto w-full bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded-lg" data-type="skill">Run Analysis</button>
-                        <div class="ai-result mt-4 text-sm p-4 bg-green-50 rounded-lg border border-green-200" style="display: none;"></div>
-                    </div>
-
-                    <div class="bg-alt p-6 rounded-xl shadow-sm border border-border-color card-hover-effect flex flex-col">
-                        <h3 class="text-xl font-bold mb-2 text-blue-600">Opportunity Engine</h3>
-                        <p class="text-text-secondary mb-4 flex-grow">Scans job boards, conferences, and funding announcements for opportunities matching your profile.</p>
-                        <button class="ai-btn mt-auto w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-lg" data-type="opportunity">Find Opportunities</button>
-                         <div class="ai-result mt-4 text-sm p-4 bg-blue-50 rounded-lg border border-blue-200" style="display: none;"></div>
-                    </div>
-
-                    <div class="bg-alt p-6 rounded-xl shadow-sm border border-border-color card-hover-effect flex flex-col">
-                        <h3 class="text-xl font-bold mb-2 text-red-600">Risk Identification</h3>
-                        <p class="text-text-secondary mb-4 flex-grow">Identifies declining demand for skills in your plan, helping you future-proof your career.</p>
-                        <button class="ai-btn mt-auto w-full bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded-lg" data-type="risk">Assess Risks</button>
-                         <div class="ai-result mt-4 text-sm p-4 bg-red-50 rounded-lg border border-red-200" style="display: none;"></div>
                     </div>
                 </div>
             </section>
             
             <!-- Section: Market Fit -->
             <section id="market" class="content-section">
-                <h2 class="text-3xl font-bold mb-2">A New Category: The Career Strategy Environment</h2>
-                <p class="text-lg text-text-secondary mb-8 max-w-4xl">Aether isn't just another tool; it's a new category of software designed to integrate career planning in a way no single competitor can. This chart visualizes Aether's unique position in the market. Click on a bubble for more details.</p>
+                <h2 class="text-3xl font-bold mb-2">Market Analysis</h2>
+                <p class="text-lg text-text-secondary mb-8 max-w-4xl searchable">Aether creates a new category: the Career Strategy Environment. This chart visualizes its unique position. Click on a bubble for details.</p>
                 <div class="chart-container bg-alt p-4 rounded-xl border border-border-color shadow-sm">
                     <canvas id="competitor-chart"></canvas>
                 </div>
+                <div id="competitor-details" class="mt-4 max-w-4xl mx-auto p-4 bg-alt rounded-lg border border-border-color shadow-sm" style="display: none;"></div>
+            </section>
+
+            <!-- Section: My Profile -->
+            <section id="profile" class="content-section">
+                <div class="max-w-2xl mx-auto">
+                    <h2 class="text-3xl font-bold mb-2">My Profile</h2>
+                    <p class="text-lg text-text-secondary mb-8 searchable">Link your professional accounts to integrate your public presence with your private career strategy.</p>
+                    <div class="space-y-4">
+                        <div>
+                            <label for="linkedin-url" class="block text-sm font-medium text-text-secondary">LinkedIn Profile</label>
+                            <input type="url" id="linkedin-url" placeholder="https://linkedin.com/in/..." class="mt-1 block w-full p-2 border border-border-color rounded-md shadow-sm focus:ring-accent-primary focus:border-accent-primary">
+                        </div>
+                        <div>
+                            <label for="github-url" class="block text-sm font-medium text-text-secondary">GitHub Profile</label>
+                            <input type="url" id="github-url" placeholder="https://github.com/..." class="mt-1 block w-full p-2 border border-border-color rounded-md shadow-sm focus:ring-accent-primary focus:border-accent-primary">
+                        </div>
+                        <div>
+                            <label for="portfolio-url" class="block text-sm font-medium text-text-secondary">Personal Portfolio / Website</label>
+                            <input type="url" id="portfolio-url" placeholder="https://your-site.com" class="mt-1 block w-full p-2 border border-border-color rounded-md shadow-sm focus:ring-accent-primary focus:border-accent-primary">
+                        </div>
+                    </div>
+                    <button id="save-profile-btn" class="mt-6 px-6 py-2 bg-accent-primary text-white font-semibold rounded-lg hover:bg-accent-secondary">Save Profile</button>
+                    <div id="save-confirmation" class="mt-4 text-green-600" style="display: none;">Profile saved!</div>
+                </div>
             </section>
         </main>
+    </div>
+
+    <!-- Web Search Modal -->
+    <div id="web-search-modal" class="fixed inset-0 bg-gray-900 bg-opacity-50 flex items-center justify-center p-4 z-50" style="display: none;">
+        <div class="bg-white rounded-lg shadow-xl w-full max-w-2xl max-h-[80vh] flex flex-col">
+            <div class="p-4 border-b flex justify-between items-center">
+                <h3 class="text-lg font-bold">Web Search Results</h3>
+                <button id="close-search-modal" class="text-gray-500 hover:text-gray-800">&times;</button>
+            </div>
+            <div id="search-results-content" class="p-6 overflow-y-auto">
+                <!-- Search results will be injected here -->
+            </div>
+        </div>
     </div>
 
 <script>
@@ -180,259 +188,246 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- DATA STORE ---
     const appData = {
-        aiInsights: {
-            skill: "<strong>Insight:</strong> Your goal is 'Quantum Computing Researcher,' but 75% of recent papers in this field mention 'Quantum Error Correction,' which isn't in your plan. Consider adding the top-rated course on edX to fill this gap.",
-            opportunity: "<strong>Opportunity:</strong> A new Postdoctoral Research position in 'Computational Neuroscience' just opened at MIT's McGovern Institute. Its requirements for Python and statistical modeling are a 90% match with your skills.",
-            risk: "<strong>Risk:</strong> Your skill 'AngularJS' has seen a 40% decline in job mentions over the past two years, while 'React' and 'Vue.js' have grown by over 150%. Consider prioritizing a project using a more modern framework to stay competitive."
-        },
+        feedItems: [
+            { type: 'ai-opportunity', content: "<strong>AI Opportunity:</strong> A new Postdoctoral Research position in 'Computational Neuroscience' just opened at MIT. Its requirements are a 90% match with your skills." },
+            { type: 'node-add', content: "You added a new <strong>Rock</strong>: 'Become a Robotics Engineer'." },
+            { type: 'ai-risk', content: "<strong>AI Risk:</strong> Your skill 'AngularJS' has seen a 40% decline in job mentions. Consider prioritizing a project using a more modern framework." },
+            { type: 'profile-update', content: "You updated your <strong>LinkedIn Profile</strong>." },
+            { type: 'node-edit', content: "You updated the goal 'Master Core Skills' to 'Master Core Skills (ROS)'." },
+            { type: 'ai-skill', content: "<strong>AI Skill Gap:</strong> 75% of recent papers in Quantum Computing mention 'Quantum Error Correction,' which isn't in your plan. Consider adding a course." },
+        ],
         competitors: [
             { name: 'LinkedIn', ai: 1, integration: 1, size: 40, details: '<strong>Paradigm:</strong> Networking & Jobs<br><strong>AI:</strong> Reactive job suggestions & resume help.' },
             { name: 'Coursera', ai: 1.5, integration: 1.2, size: 25, details: '<strong>Paradigm:</strong> Skill Development<br><strong>AI:</strong> Learning assistant for course content.' },
             { name: 'Notion', ai: 1.2, integration: 2, size: 30, details: '<strong>Paradigm:</strong> Unstructured Knowledge Hub<br><strong>AI:</strong> Reactive text summary & generation.' },
-            { name: 'Aether', ai: 4, integration: 4, size: 10, details: '<strong>Paradigm:</strong> Career Strategy Environment<br><strong>AI:</strong> Proactive mentor for strategic counsel.' }
+            { name: 'Aether', ai: 4, integration: 4, size: 15, details: '<strong>Paradigm:</strong> Career Strategy Environment<br><strong>AI:</strong> Proactive mentor for strategic counsel.' }
         ],
         canvasNodes: [
             { id: 'n1', type: 'rock', title: 'Become a Robotics Engineer', x: 50, y: 150 },
             { id: 'n2', type: 'pebble', title: 'Master Core Skills (ROS)', x: 350, y: 50 },
             { id: 'n3', type: 'pebble', title: 'Build Project Portfolio', x: 350, y: 150 },
             { id: 'n4', type: 'pebble', title: 'Secure Top Internship', x: 350, y: 250 },
-            { id: 'n5', type: 'sand', title: 'Complete ROS 2 Tutorial', x: 600, y: 50 },
-            { id: 'n6', type: 'sand', title: 'Publish project on GitHub', x: 600, y: 150 },
         ],
-        canvasConnections: [
-            { from: 'n1', to: 'n2' }, { from: 'n1', to: 'n3' }, { from: 'n1', to: 'n4' },
-            { from: 'n2', to: 'n5' }, { from: 'n3', to: 'n6' }
-        ]
+        canvasConnections: [ { from: 'n1', to: 'n2' }, { from: 'n1', to: 'n3' }, { from: 'n1', to: 'n4' } ]
     };
 
     // --- NAVIGATION ---
     const nav = document.getElementById('main-nav');
     const sections = document.querySelectorAll('.content-section');
-
     nav.addEventListener('click', (e) => {
         if (e.target.tagName === 'BUTTON') {
             const targetId = e.target.dataset.target;
-            
             nav.querySelectorAll('button').forEach(btn => btn.classList.remove('active'));
             e.target.classList.add('active');
-
-            sections.forEach(section => {
-                section.classList.remove('active');
-                if (section.id === targetId) {
-                    section.classList.add('active');
-                }
-            });
-            // Re-initialize charts/canvases if they are in the activated tab
+            sections.forEach(section => section.classList.toggle('active', section.id === targetId));
             if (targetId === 'market') initCompetitorChart();
-            if (targetId === 'product') initCareerCanvas();
+            if (targetId === 'canvas') initCareerCanvas();
         }
     });
 
-    // --- AI MENTOR SECTION ---
-    const aiButtons = document.querySelectorAll('.ai-btn');
-    aiButtons.forEach(button => {
-        button.addEventListener('click', (e) => {
-            const type = e.target.dataset.type;
-            const resultContainer = e.target.nextElementSibling;
-            
-            resultContainer.style.display = 'none';
-            resultContainer.innerHTML = '<div class="flex items-center"><div class="animate-spin rounded-full h-4 w-4 border-b-2 border-gray-900 mr-2"></div>Analyzing...</div>';
-            resultContainer.style.display = 'block';
-
-            setTimeout(() => {
-                resultContainer.innerHTML = appData.aiInsights[type];
-            }, 1500);
+    // --- DASHBOARD / STRATEGY FEED ---
+    const feedContainer = document.getElementById('strategy-feed');
+    function renderFeed() {
+        feedContainer.innerHTML = '';
+        appData.feedItems.forEach(item => {
+            let icon, color;
+            switch(item.type.split('-')[1]) {
+                case 'opportunity': icon = '💡'; color = 'blue'; break;
+                case 'risk': icon = '⚠️'; color = 'red'; break;
+                case 'skill': icon = '🧠'; color = 'green'; break;
+                case 'add': icon = '➕'; color = 'gray'; break;
+                case 'edit': icon = '✏️'; color = 'gray'; break;
+                case 'update': icon = '👤'; color = 'indigo'; break;
+                default: icon = '🔔'; color = 'gray';
+            }
+            const card = `
+                <div class="bg-alt p-4 rounded-lg shadow-sm border border-border-color flex items-start gap-4">
+                    <div class="feed-card-icon bg-${color}-100 text-${color}-600 rounded-full flex items-center justify-center text-xl">${icon}</div>
+                    <div class="flex-1">
+                        <p class="text-text-secondary searchable">${item.content}</p>
+                        <div class="flex items-center gap-4 text-sm text-gray-500 mt-2">
+                            <span>👍 Like</span>
+                            <span>💬 Comment</span>
+                            <span>🔗 Share</span>
+                            <span class="ml-auto">Just now</span>
+                        </div>
+                    </div>
+                </div>
+            `;
+            feedContainer.insertAdjacentHTML('beforeend', card);
         });
-    });
+    }
 
     // --- MARKET FIT SECTION ---
     let competitorChart = null;
     function initCompetitorChart() {
-        if (competitorChart) {
-            competitorChart.destroy();
-        }
+        if (competitorChart) competitorChart.destroy();
+        const competitorDetailsPanel = document.getElementById('competitor-details');
         const ctx = document.getElementById('competitor-chart').getContext('2d');
         competitorChart = new Chart(ctx, {
-            type: 'bubble',
-            data: {
-                datasets: appData.competitors.map(c => ({
-                    label: c.name,
-                    data: [{ x: c.ai, y: c.integration, r: c.size / 2 }],
-                    backgroundColor: c.name === 'Aether' ? 'rgba(74, 144, 226, 0.7)' : 'rgba(107, 114, 128, 0.5)',
-                    borderColor: c.name === 'Aether' ? 'rgba(74, 144, 226, 1)' : 'rgba(107, 114, 128, 1)',
-                    borderWidth: 1,
-                    details: c.details
-                }))
-            },
+            type: 'bubble', data: { datasets: appData.competitors.map(c => ({ label: c.name, data: [{ x: c.ai, y: c.integration, r: c.size / 2 }], backgroundColor: c.name === 'Aether' ? 'rgba(74, 144, 226, 0.7)' : 'rgba(107, 114, 128, 0.5)', borderColor: c.name === 'Aether' ? 'rgba(74, 144, 226, 1)' : 'rgba(107, 114, 128, 1)', borderWidth: 1, details: c.details })) },
             options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: { display: true, position: 'bottom' },
-                    tooltip: {
-                        callbacks: {
-                            label: function(context) {
-                                let label = context.dataset.label || '';
-                                if (label) {
-                                    label += ': ';
-                                }
-                                const details = context.dataset.details.split('<br>');
-                                return [label, ...details];
-                            }
-                        }
+                responsive: true, maintainAspectRatio: false,
+                onClick: (evt, elements) => {
+                    if (elements.length > 0) {
+                        const dsIndex = elements[0].datasetIndex;
+                        const details = competitorChart.data.datasets[dsIndex].details;
+                        const label = competitorChart.data.datasets[dsIndex].label;
+                        competitorDetailsPanel.innerHTML = `<h4 class="font-bold text-lg mb-2">${label}</h4><div class="text-sm text-text-secondary">${details}</div>`;
+                        competitorDetailsPanel.style.display = 'block';
                     }
                 },
-                scales: {
-                    x: {
-                        title: { display: true, text: 'AI Capability (Reactive -> Proactive)' },
-                        min: 0, max: 5,
-                        ticks: {
-                            callback: function(value, index, values) {
-                                return ['Origin', 'Reactive', 'Assisted', 'Guided', 'Proactive', 'Partner'][value];
-                            }
-                        }
-                    },
-                    y: {
-                        title: { display: true, text: 'Integration Level (Single-Purpose -> Integrated)' },
-                         min: 0, max: 5,
-                         ticks: {
-                            callback: function(value, index, values) {
-                                return ['Origin', 'Single', 'Multi-Tool', 'Connected', 'Integrated', 'Holistic'][value];
-                            }
-                        }
-                    }
-                }
+                plugins: { legend: { display: true, position: 'bottom' }, tooltip: { enabled: false } },
+                scales: { x: { title: { display: true, text: 'AI Capability (Reactive -> Proactive)' }, min: 0, max: 5, ticks: { callback: (v) => ['Origin', 'Reactive', 'Assisted', 'Guided', 'Proactive', 'Partner'][v]}}, y: { title: { display: true, text: 'Integration Level (Single-Purpose -> Integrated)' }, min: 0, max: 5, ticks: { callback: (v) => ['Origin', 'Single', 'Multi-Tool', 'Connected', 'Integrated', 'Holistic'][v] }}}
             }
         });
     }
 
-    // --- PRODUCT / CAREER CANVAS SECTION ---
+    // --- CAREER CANVAS SECTION ---
     const careerCanvasContainer = document.getElementById('career-canvas-container');
     const careerCanvas = document.getElementById('career-canvas');
-    const connectorCanvas = document.getElementById('connector-canvas').getContext('2d');
-    let nodes = {};
-    let isDragging = false;
-    let activeNode = null;
-    let offset = { x: 0, y: 0 };
-
+    let connectorCanvasCtx, nodes = {}, isDragging = false, activeNode = null, offset = { x: 0, y: 0 }, nodeIdCounter = appData.canvasNodes.length;
+    
     function createNode(nodeData) {
         const nodeEl = document.createElement('div');
         nodeEl.id = nodeData.id;
         nodeEl.className = 'node absolute p-3 rounded-lg shadow-md cursor-move';
-        let bgColor, textColor, borderColor;
+        let bgColor, textColor;
         switch(nodeData.type) {
-            case 'rock':
-                bgColor = 'bg-slate-700'; textColor = 'text-white'; borderColor = 'border-slate-900';
-                nodeEl.innerHTML = `<h3 class="font-bold">${nodeData.title}</h3>`;
-                break;
-            case 'pebble':
-                bgColor = 'bg-sky-200'; textColor = 'text-sky-800'; borderColor = 'border-sky-400';
-                 nodeEl.innerHTML = `<h4 class="font-semibold">${nodeData.title}</h4>`;
-                break;
-            case 'sand':
-                bgColor = 'bg-amber-100'; textColor = 'text-amber-800'; borderColor = 'border-amber-300';
-                nodeEl.innerHTML = `<p class="text-sm">${nodeData.title}</p>`;
-                break;
+            case 'rock': bgColor = 'bg-slate-700'; textColor = 'text-white'; break;
+            case 'pebble': bgColor = 'bg-sky-200'; textColor = 'text-sky-800'; break;
+            case 'sand': bgColor = 'bg-amber-100'; textColor = 'text-amber-800'; break;
         }
         nodeEl.classList.add(bgColor, textColor);
-        nodeEl.style.left = `${nodeData.x}px`;
-        nodeEl.style.top = `${nodeData.y}px`;
-        nodeEl.style.borderLeft = `5px solid`;
-        nodeEl.style.borderColor = `var(--${nodeData.type === 'rock' ? 'accent-secondary' : nodeData.type === 'pebble' ? 'accent-primary' : 'border-color'})`;
+        nodeEl.style.left = `${nodeData.x}px`; nodeEl.style.top = `${nodeData.y}px`;
+        nodeEl.style.borderLeft = `5px solid var(--accent-primary)`;
+        
+        const titleEl = document.createElement('input');
+        titleEl.type = 'text'; titleEl.value = nodeData.title;
+        titleEl.className = 'bg-transparent w-full focus:outline-none focus:bg-white/20 rounded p-1 searchable-node';
+        titleEl.dataset.nodeId = nodeData.id;
+        nodeEl.appendChild(titleEl);
         careerCanvas.appendChild(nodeEl);
         nodes[nodeData.id] = { el: nodeEl, ...nodeData };
-        return nodeEl;
+        titleEl.addEventListener('blur', () => { nodes[nodeData.id].title = titleEl.value; });
+        nodeEl.addEventListener('pointerdown', (e) => {
+            if(e.target.tagName === 'INPUT') return;
+            isDragging = true; activeNode = nodeEl; careerCanvas.classList.add('cursor-grabbing'); activeNode.style.zIndex = 10;
+            const rect = activeNode.getBoundingClientRect(); offset.x = e.clientX - rect.left; offset.y = e.clientY - rect.top;
+        });
     }
     
     function drawConnections() {
-        const canvas = connectorCanvas.canvas;
-        canvas.width = careerCanvasContainer.clientWidth;
-        canvas.height = careerCanvasContainer.clientHeight;
-        connectorCanvas.clearRect(0, 0, canvas.width, canvas.height);
-        
+        const canvas = connectorCanvasCtx.canvas;
+        canvas.width = careerCanvasContainer.clientWidth; canvas.height = careerCanvasContainer.clientHeight;
+        connectorCanvasCtx.clearRect(0, 0, canvas.width, canvas.height);
         appData.canvasConnections.forEach(conn => {
-            const fromNode = nodes[conn.from];
-            const toNode = nodes[conn.to];
+            const fromNode = nodes[conn.from], toNode = nodes[conn.to];
             if (!fromNode || !toNode) return;
-
-            const fromRect = fromNode.el.getBoundingClientRect();
-            const toRect = toNode.el.getBoundingClientRect();
-            const containerRect = careerCanvasContainer.getBoundingClientRect();
-
-            const startX = fromRect.right - containerRect.left;
-            const startY = fromRect.top + fromRect.height / 2 - containerRect.top;
-            const endX = toRect.left - containerRect.left;
-            const endY = toRect.top + toRect.height / 2 - containerRect.top;
-
-            connectorCanvas.beginPath();
-            connectorCanvas.moveTo(startX, startY);
-            connectorCanvas.bezierCurveTo(startX + 50, startY, endX - 50, endY, endX, endY);
-            connectorCanvas.strokeStyle = '#9CA3AF';
-            connectorCanvas.lineWidth = 2;
-            connectorCanvas.stroke();
+            const fromRect = fromNode.el.getBoundingClientRect(), toRect = toNode.el.getBoundingClientRect(), containerRect = careerCanvasContainer.getBoundingClientRect();
+            const startX = fromRect.right - containerRect.left, startY = fromRect.top + fromRect.height / 2 - containerRect.top;
+            const endX = toRect.left - containerRect.left, endY = toRect.top + toRect.height / 2 - containerRect.top;
+            connectorCanvasCtx.beginPath(); connectorCanvasCtx.moveTo(startX, startY);
+            connectorCanvasCtx.bezierCurveTo(startX + 50, startY, endX - 50, endY, endX, endY);
+            connectorCanvasCtx.strokeStyle = '#9CA3AF'; connectorCanvasCtx.lineWidth = 2; connectorCanvasCtx.stroke();
         });
     }
 
     function initCareerCanvas() {
-        // Clear previous nodes if any
-        careerCanvas.querySelectorAll('.node').forEach(n => n.remove());
-        nodes = {};
-
-        appData.canvasNodes.forEach(nodeData => {
-            const nodeEl = createNode(nodeData);
-
-            nodeEl.addEventListener('pointerdown', (e) => {
-                isDragging = true;
-                activeNode = nodeEl;
-                careerCanvas.classList.remove('cursor-grab');
-                careerCanvas.classList.add('cursor-grabbing');
-                activeNode.style.zIndex = 10;
-                const rect = activeNode.getBoundingClientRect();
-                const containerRect = careerCanvasContainer.getBoundingClientRect();
-                offset.x = e.clientX - rect.left;
-                offset.y = e.clientY - rect.top;
-            });
-        });
-        
-        drawConnections();
+        careerCanvas.innerHTML = '<canvas id="connector-canvas" class="absolute top-0 left-0 w-full h-full pointer-events-none"></canvas>';
+        connectorCanvasCtx = document.getElementById('connector-canvas').getContext('2d');
+        nodes = {}; appData.canvasNodes.forEach(createNode); drawConnections();
     }
     
     careerCanvasContainer.addEventListener('pointermove', (e) => {
         if (!isDragging || !activeNode) return;
         e.preventDefault();
         const containerRect = careerCanvasContainer.getBoundingClientRect();
-        let x = e.clientX - containerRect.left - offset.x;
-        let y = e.clientY - containerRect.top - offset.y;
-        
+        let x = e.clientX - containerRect.left - offset.x, y = e.clientY - containerRect.top - offset.y;
         x = Math.max(0, Math.min(x, containerRect.width - activeNode.offsetWidth));
         y = Math.max(0, Math.min(y, containerRect.height - activeNode.offsetHeight));
-
-        activeNode.style.left = `${x}px`;
-        activeNode.style.top = `${y}px`;
+        activeNode.style.left = `${x}px`; activeNode.style.top = `${y}px`;
+        nodes[activeNode.id].x = x; nodes[activeNode.id].y = y;
         drawConnections();
     });
-
-    careerCanvasContainer.addEventListener('pointerup', () => {
-        if (isDragging) {
-            isDragging = false;
-            careerCanvas.classList.remove('cursor-grabbing');
-            careerCanvas.classList.add('cursor-grab');
-            if(activeNode) activeNode.style.zIndex = 1;
-            activeNode = null;
-        }
-    });
     
-    careerCanvasContainer.addEventListener('pointerleave', () => {
-       if (isDragging) {
-            isDragging = false;
-            careerCanvas.classList.remove('cursor-grabbing');
-            careerCanvas.classList.add('cursor-grab');
-            if(activeNode) activeNode.style.zIndex = 1;
-            activeNode = null;
-        }
+    const stopDragging = () => { if (isDragging) { isDragging = false; careerCanvas.classList.remove('cursor-grabbing'); if(activeNode) activeNode.style.zIndex = 1; activeNode = null; }};
+    careerCanvasContainer.addEventListener('pointerup', stopDragging);
+    careerCanvasContainer.addEventListener('pointerleave', stopDragging);
+
+    document.getElementById('add-rock-btn').addEventListener('click', () => addNode('rock', 'New Rock'));
+    document.getElementById('add-pebble-btn').addEventListener('click', () => addNode('pebble', 'New Pebble'));
+    document.getElementById('add-sand-btn').addEventListener('click', () => addNode('sand', 'New Sand Task'));
+
+    function addNode(type, title) {
+        const newNodeData = { id: `n${++nodeIdCounter}`, type: type, title: title, x: 20, y: 20 };
+        appData.canvasNodes.push(newNodeData); createNode(newNodeData);
+    }
+
+    // --- PROFILE SECTION ---
+    document.getElementById('save-profile-btn').addEventListener('click', () => {
+        const confirmation = document.getElementById('save-confirmation');
+        confirmation.style.display = 'block';
+        setTimeout(() => { confirmation.style.display = 'none'; }, 2000);
     });
+
+    // --- SEARCH FUNCTIONALITY ---
+    const searchBar = document.getElementById('search-bar');
+    let originalTexts = new Map();
+    function performSearch(term) {
+        originalTexts.forEach((originalHTML, element) => { element.innerHTML = originalHTML; });
+        originalTexts.clear();
+        document.querySelectorAll('.node.highlight').forEach(n => n.classList.remove('highlight'));
+        if (!term) return;
+        const regex = new RegExp(term, 'gi');
+        document.querySelectorAll('.searchable').forEach(el => {
+            if (!originalTexts.has(el)) originalTexts.set(el, el.innerHTML);
+            el.innerHTML = el.innerHTML.replace(regex, (match) => `<mark>${match}</mark>`);
+        });
+        document.querySelectorAll('.searchable-node').forEach(input => {
+            const nodeEl = input.closest('.node');
+            if (input.value.toLowerCase().includes(term.toLowerCase())) nodeEl.classList.add('highlight');
+        });
+    }
+    searchBar.addEventListener('input', (e) => performSearch(e.target.value));
+
+    // --- WEB SEARCH MODAL ---
+    const webSearchModal = document.getElementById('web-search-modal');
+    const webSearchBtn = document.getElementById('web-search-btn');
+    const closeSearchModalBtn = document.getElementById('close-search-modal');
+    const searchResultsContent = document.getElementById('search-results-content');
+    
+    webSearchBtn.addEventListener('click', () => {
+        const term = searchBar.value;
+        if (!term) {
+            searchResultsContent.innerHTML = '<p class="text-text-secondary">Please enter a term in the search bar first.</p>';
+        } else {
+            searchResultsContent.innerHTML = `<p class="text-text-secondary mb-4">Simulating web search for: <strong class="text-text-primary">${term}</strong></p>
+                <div class="space-y-4">
+                    <div class="border-b pb-2">
+                        <a href="#" class="text-lg text-blue-600 hover:underline">Top 10 Skills for Robotics Engineers in 2025 - TechCrunch</a>
+                        <p class="text-sm text-green-700">https://techcrunch.com/...</p>
+                        <p class="text-sm text-text-secondary">A deep dive into the most in-demand skills for robotics, including advanced proficiency in <strong>${term}</strong>, Python, and C++.</p>
+                    </div>
+                    <div class="border-b pb-2">
+                        <a href="#" class="text-lg text-blue-600 hover:underline">Official ROS 2 Documentation</a>
+                        <p class="text-sm text-green-700">https://docs.ros.org/...</p>
+                        <p class="text-sm text-text-secondary">The official documentation and tutorials for Robot Operating System 2 (ROS 2), a key framework for <strong>${term}</strong> development.</p>
+                    </div>
+                    <div class="border-b pb-2">
+                        <a href="#" class="text-lg text-blue-600 hover:underline">Boston Dynamics Careers Page</a>
+                        <p class="text-sm text-green-700">https://www.bostondynamics.com/careers</p>
+                        <p class="text-sm text-text-secondary">Explore career opportunities at Boston Dynamics. We are hiring for roles requiring expertise in <strong>${term}</strong> and autonomous systems.</p>
+                    </div>
+                </div>`;
+        }
+        webSearchModal.style.display = 'flex';
+    });
+    closeSearchModalBtn.addEventListener('click', () => webSearchModal.style.display = 'none');
+    webSearchModal.addEventListener('click', (e) => { if (e.target === webSearchModal) webSearchModal.style.display = 'none'; });
 
     // --- INITIALIZATION ---
+    renderFeed();
     document.querySelector('.nav-item.active').click();
 });
 </script>
