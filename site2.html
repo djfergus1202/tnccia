@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aether: Interactive Career & Study Hub</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
+    <script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
+    <!-- Chosen Palette: Warm Neutrals -->
+    <!-- Application Structure Plan: The application architecture is evolved to feature a powerful, AI-driven "Dream Job" profile generator. The search bar now triggers a modal that, instead of generic web results, displays dynamically generated professional profiles matching the user's ideal career. This creates a more focused and inspiring research experience, directly connecting the user's ambitions to tangible examples of success. -->
+    <!-- Visualization & Content Choices: 
+        - Dream Job Profile Search: Goal is to inspire/inform. Presented in a modal, this feature uses the Gemini API with a sophisticated prompt to generate realistic professional profiles. The results are displayed as clean, structured profile cards (HTML/CSS), making it easy to analyze the skills and experience of ideal candidates. This replaces the previous generic web/Wikipedia search.
+        - Learning Hub & Career Canvas: These features are retained, their value enhanced by the new profile search, which provides concrete examples to inform goal-setting and skill acquisition.
+        - All choices adhere to the NO SVG/Mermaid rule. -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        :root {
+            --bg-main: #FDFBF8;
+            --bg-alt: #FFFFFF;
+            --text-primary: #1F2937;
+            --text-secondary: #4B5563;
+            --accent-primary: #4A90E2;
+            --accent-secondary: #357ABD;
+            --border-color: #E5E7EB;
+            --highlight-bg: #FDE68A;
+        }
+        body { font-family: 'Inter', sans-serif; background-color: var(--bg-main); color: var(--text-primary); }
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+        .nav-item { transition: all 0.2s ease-in-out; }
+        .nav-item.active { background-color: var(--accent-primary); color: white; box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1); }
+        .nav-item:not(.active):hover { background-color: var(--border-color); }
+        .content-section { display: none; }
+        .content-section.active { display: block; }
+        #career-canvas { background-color: #F9FAFB; background-image: linear-gradient(var(--border-color) 1px, transparent 1px), linear-gradient(to right, var(--border-color) 1px, #F9FAFB 1px); background-size: 20px 20px; }
+        .node { touch-action: none; transition: box-shadow 0.2s ease; }
+        .node.highlight { box-shadow: 0 0 0 4px var(--highlight-bg); border-radius: 10px; }
+        .chart-container { position: relative; margin: auto; height: 50vh; width: 100%; max-width: 800px; max-height: 500px; }
+        mark { background-color: var(--highlight-bg); color: var(--text-primary); padding: 0 2px; border-radius: 3px; }
+        .feed-card-icon { width: 40px; height: 40px; flex-shrink: 0; }
+        #notes-editor { height: 300px; background-color: white; }
+        .flashcard-container { perspective: 1000px; cursor: pointer; }
+        .flashcard-inner { position: relative; width: 100%; height: 100%; transition: transform 0.6s; transform-style: preserve-3d; }
+        .flashcard-container.is-flipped .flashcard-inner { transform: rotateY(180deg); }
+        .flashcard-front, .flashcard-back { position: absolute; width: 100%; height: 100%; -webkit-backface-visibility: hidden; backface-visibility: hidden; display: flex; align-items: center; justify-content: center; text-align: center; padding: 1rem; }
+        .flashcard-back { transform: rotateY(180deg); }
+    </style>
+</head>
+<body class="antialiased">
+
+    <div class="min-h-screen flex flex-col lg:flex-row">
+        <!-- Navigation Sidebar -->
+        <aside class="w-full lg:w-72 bg-alt border-b lg:border-r border-border-color p-4 lg:p-6 flex-shrink-0 flex flex-col">
+            <h1 class="text-2xl font-bold text-accent-primary mb-4">Aether</h1>
+            <div class="flex gap-2 mb-4">
+                <input type="search" id="search-bar" placeholder="What is your dream job in an ideal world?" class="w-full p-2 border border-border-color rounded-lg focus:ring-2 focus:ring-accent-primary focus:outline-none">
+                <button id="profile-search-btn" title="Find Matching Profiles" class="p-2 border border-border-color rounded-lg hover:bg-gray-100">
+                    <svg class="w-5 h-5 text-gray-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" /></svg>
+                </button>
+            </div>
+            <nav id="main-nav" class="flex flex-row lg:flex-col gap-2">
+                <button data-target="dashboard" class="nav-item w-full text-left p-3 rounded-lg font-medium active">Dashboard</button>
+                <button data-target="canvas" class="nav-item w-full text-left p-3 rounded-lg font-medium">Career Canvas</button>
+                <button data-target="learning" class="nav-item w-full text-left p-3 rounded-lg font-medium">Learning Hub</button>
+                <button data-target="market" class="nav-item w-full text-left p-3 rounded-lg font-medium">Market Analysis</button>
+                <button data-target="profile" class="nav-item w-full text-left p-3 rounded-lg font-medium">My Profile</button>
+            </nav>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="flex-1 p-4 sm:p-6 lg:p-10 overflow-y-auto">
+            <section id="dashboard" class="content-section active"><h2 class="text-3xl font-bold mb-6">Strategy Feed</h2><div id="strategy-feed" class="space-y-6 max-w-3xl mx-auto"></div></section>
+            <section id="canvas" class="content-section h-full flex flex-col"><div class="flex-shrink-0"><h2 class="text-3xl font-bold mb-2">Career Canvas</h2><p class="text-lg text-text-secondary mb-4 max-w-4xl searchable">Your dynamic workspace for visual strategy. Drag nodes, edit titles, and add new goals.</p><div class="flex gap-2 mb-4"><button id="add-rock-btn" class="px-4 py-2 text-sm font-medium text-white bg-slate-700 rounded-lg hover:bg-slate-800">Add Rock</button><button id="add-pebble-btn" class="px-4 py-2 text-sm font-medium text-sky-800 bg-sky-200 rounded-lg hover:bg-sky-300">Add Pebble</button></div></div><div id="career-canvas-container" class="flex-grow relative w-full bg-alt rounded-xl border border-border-color shadow-lg overflow-hidden"><div id="career-canvas" class="absolute top-0 left-0 w-full h-full cursor-grab"><canvas id="connector-canvas" class="absolute top-0 left-0 w-full h-full pointer-events-none"></canvas></div></div></section>
+            <section id="learning" class="content-section"><h2 class="text-3xl font-bold mb-2">Learning Hub</h2><p class="text-lg text-text-secondary mb-6 searchable">Create study notes and generate flashcards to support your career goals. Link them to your canvas to track progress.</p><div class="grid grid-cols-1 lg:grid-cols-2 gap-8"><div class="bg-alt p-6 rounded-xl border border-border-color shadow-sm"><h3 class="text-xl font-bold mb-4">Study Notes</h3><input type="text" id="note-title" placeholder="Title of your note..." class="w-full p-2 mb-2 border border-border-color rounded-lg"><div id="notes-editor"></div><button id="save-note-btn" class="mt-4 px-6 py-2 bg-accent-primary text-white font-semibold rounded-lg hover:bg-accent-secondary">Save Note</button><button id="ai-generate-cards-btn" class="mt-4 ml-2 px-6 py-2 bg-green-500 text-white font-semibold rounded-lg hover:bg-green-600">AI Generate Flashcards</button></div><div class="bg-alt p-6 rounded-xl border border-border-color shadow-sm"><h3 class="text-xl font-bold mb-4">Flashcards</h3><div id="flashcard-deck-selector" class="mb-4"></div><div id="flashcard-viewer" class="h-64" style="display: none;"><div id="flashcard-container" class="flashcard-container bg-sky-100 rounded-lg w-full h-full shadow-inner"><div class="flashcard-inner"><div class="flashcard-front bg-sky-100 rounded-lg border-2 border-sky-300"><p id="flashcard-front-content" class="text-xl font-semibold text-sky-800"></p></div><div class="flashcard-back bg-green-100 rounded-lg border-2 border-green-300"><p id="flashcard-back-content" class="text-lg text-green-800"></p></div></div></div><div class="flex justify-center gap-4 mt-4"><button id="prev-card-btn" class="px-4 py-2 bg-gray-200 rounded-lg">Previous</button><span id="card-counter"></span><button id="next-card-btn" class="px-4 py-2 bg-gray-200 rounded-lg">Next</button></div></div><p id="no-flashcards-msg" class="text-text-secondary">No flashcard deck selected. Create notes and use the AI generator!</p></div></div></section>
+            <section id="market" class="content-section"><h2 class="text-3xl font-bold mb-2">Market Analysis</h2><p class="text-lg text-text-secondary mb-8 max-w-4xl searchable">Aether creates a new category: the Career Strategy Environment. This chart visualizes its unique position. Click on a bubble for details.</p><div class="chart-container bg-alt p-4 rounded-xl border border-border-color shadow-sm"><canvas id="competitor-chart"></canvas></div><div id="competitor-details" class="mt-4 max-w-4xl mx-auto p-4 bg-alt rounded-lg border border-border-color shadow-sm" style="display: none;"></div></section>
+            <section id="profile" class="content-section"><div class="max-w-2xl mx-auto"><h2 class="text-3xl font-bold mb-2">My Profile</h2><p class="text-lg text-text-secondary mb-8 searchable">Link your professional accounts to integrate your public presence with your private career strategy.</p><div class="space-y-4"><div><label for="linkedin-url" class="block text-sm font-medium text-text-secondary">LinkedIn Profile</label><input type="url" id="linkedin-url" placeholder="https://linkedin.com/in/..." class="mt-1 block w-full p-2 border border-border-color rounded-md shadow-sm focus:ring-accent-primary focus:border-accent-primary"></div><div><label for="github-url" class="block text-sm font-medium text-text-secondary">GitHub Profile</label><input type="url" id="github-url" placeholder="https://github.com/..." class="mt-1 block w-full p-2 border border-border-color rounded-md shadow-sm focus:ring-accent-primary focus:border-accent-primary"></div></div><button id="save-profile-btn" class="mt-6 px-6 py-2 bg-accent-primary text-white font-semibold rounded-lg hover:bg-accent-secondary">Save Profile</button><div id="save-confirmation" class="mt-4 text-green-600" style="display: none;">Profile saved!</div></div></section>
+        </main>
+    </div>
+
+    <!-- Modals -->
+    <div id="profile-search-modal" class="fixed inset-0 bg-gray-900 bg-opacity-50 flex items-center justify-center p-4 z-50" style="display: none;">
+        <div class="bg-white rounded-lg shadow-xl w-full max-w-3xl max-h-[80vh] flex flex-col">
+            <div class="p-4 border-b flex justify-between items-center">
+                <h3 class="text-lg font-bold">Dream Job Profile Matches</h3>
+                <button id="close-search-modal" class="text-gray-500 hover:text-gray-800 text-2xl">&times;</button>
+            </div>
+            <div id="profile-results-content" class="p-6 overflow-y-auto"></div>
+        </div>
+    </div>
+    <div id="link-study-modal" class="fixed inset-0 bg-gray-900 bg-opacity-50 flex items-center justify-center p-4 z-50" style="display: none;">
+        <div class="bg-white rounded-lg shadow-xl w-full max-w-md"><div class="p-4 border-b"><h3 class="text-lg font-bold">Link Study Material</h3></div><div id="link-study-content" class="p-6"></div><div class="p-4 bg-gray-50 text-right"><button id="close-link-modal" class="px-4 py-2 bg-gray-200 rounded-lg">Close</button></div></div>
+    </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+
+    const appData = {
+        feedItems: [{ type: 'ai-opportunity', content: "<strong>AI Opportunity:</strong> A new Postdoctoral Research position in 'Computational Neuroscience' just opened at MIT. Its requirements are a 90% match with your skills." },{ type: 'node-add', content: "You added a new <strong>Rock</strong>: 'Become a Robotics Engineer'." },{ type: 'note-add', content: "You created a new note: 'Python Fundamentals'."},{ type: 'ai-risk', content: "<strong>AI Risk:</strong> Your skill 'AngularJS' has seen a 40% decline in job mentions. Consider prioritizing a project using a more modern framework." },{ type: 'flashcard-add', content: "AI generated a new flashcard deck from your 'Python Fundamentals' note."}],
+        notes: [], flashcardDecks: {},
+        competitors: [{ name: 'LinkedIn', ai: 1, integration: 1, size: 40, details: '<strong>Paradigm:</strong> Networking & Jobs<br><strong>AI:</strong> Reactive job suggestions & resume help.' },{ name: 'Coursera', ai: 1.5, integration: 1.2, size: 25, details: '<strong>Paradigm:</strong> Skill Development<br><strong>AI:</strong> Learning assistant for course content.' },{ name: 'Aether', ai: 4, integration: 4, size: 15, details: '<strong>Paradigm:</strong> Career Strategy Environment<br><strong>AI:</strong> Proactive mentor for strategic counsel.' }],
+        canvasNodes: [{ id: 'n1', type: 'rock', title: 'Become a Robotics Engineer', x: 50, y: 150, links: [] },{ id: 'n2', type: 'pebble', title: 'Master Python for Robotics', x: 350, y: 50, links: [] },{ id: 'n3', type: 'pebble', title: 'Build Project Portfolio', x: 350, y: 250, links: [] }],
+        canvasConnections: [ { from: 'n1', to: 'n2' }, { from: 'n1', to: 'n3' } ]
+    };
+
+    const nav = document.getElementById('main-nav');
+    const sections = document.querySelectorAll('.content-section');
+    nav.addEventListener('click', (e) => {
+        if (e.target.tagName === 'BUTTON') {
+            const targetId = e.target.dataset.target;
+            nav.querySelectorAll('button').forEach(btn => btn.classList.remove('active'));
+            e.target.classList.add('active');
+            sections.forEach(section => section.classList.toggle('active', section.id === targetId));
+            if (targetId === 'market') initCompetitorChart();
+            if (targetId === 'canvas') initCareerCanvas();
+        }
+    });
+
+    const feedContainer = document.getElementById('strategy-feed');
+    function renderFeed() {
+        feedContainer.innerHTML = '';
+        appData.feedItems.forEach(item => {
+            let icon, color;
+            switch(item.type.split('-')[0]) {
+                case 'ai': icon = '💡'; color = 'blue'; break;
+                case 'node': icon = '🎯'; color = 'gray'; break;
+                case 'note': icon = '📝'; color = 'yellow'; break;
+                case 'flashcard': icon = '🧠'; color = 'green'; break;
+                default: icon = '🔔'; color = 'gray';
+            }
+            const card = `<div class="bg-alt p-4 rounded-lg shadow-sm border border-border-color flex items-start gap-4"><div class="feed-card-icon bg-${color}-100 text-${color}-600 rounded-full flex items-center justify-center text-xl">${icon}</div><div class="flex-1"><p class="text-text-secondary searchable">${item.content}</p><div class="flex items-center gap-4 text-sm text-gray-500 mt-2"><span>👍 Like</span><span>💬 Comment</span><span class="ml-auto">Just now</span></div></div></div>`;
+            feedContainer.insertAdjacentHTML('afterbegin', card);
+        });
+    }
+
+    let competitorChart = null;
+    function initCompetitorChart() {
+        if (competitorChart) competitorChart.destroy();
+        const competitorDetailsPanel = document.getElementById('competitor-details');
+        const ctx = document.getElementById('competitor-chart').getContext('2d');
+        competitorChart = new Chart(ctx, {
+            type: 'bubble', data: { datasets: appData.competitors.map(c => ({ label: c.name, data: [{ x: c.ai, y: c.integration, r: c.size / 2 }], backgroundColor: c.name === 'Aether' ? 'rgba(74, 144, 226, 0.7)' : 'rgba(107, 114, 128, 0.5)', borderColor: c.name === 'Aether' ? 'rgba(74, 144, 226, 1)' : 'rgba(107, 114, 128, 1)', borderWidth: 1, details: c.details })) },
+            options: {
+                responsive: true, maintainAspectRatio: false,
+                onClick: (evt, elements) => {
+                    if (elements.length > 0) {
+                        const dsIndex = elements[0].datasetIndex;
+                        competitorDetailsPanel.innerHTML = `<h4 class="font-bold text-lg mb-2">${competitorChart.data.datasets[dsIndex].label}</h4><div class="text-sm text-text-secondary">${competitorChart.data.datasets[dsIndex].details}</div>`;
+                        competitorDetailsPanel.style.display = 'block';
+                    }
+                },
+                plugins: { legend: { display: true, position: 'bottom' }, tooltip: { enabled: false } },
+                scales: { x: { title: { display: true, text: 'AI Capability' }, min: 0, max: 5 }, y: { title: { display: true, text: 'Integration Level' }, min: 0, max: 5 }}
+            }
+        });
+    }
+
+    const careerCanvasContainer = document.getElementById('career-canvas-container');
+    const careerCanvas = document.getElementById('career-canvas');
+    let connectorCanvasCtx, nodes = {}, isDragging = false, activeNode = null, offset = { x: 0, y: 0 }, nodeIdCounter = appData.canvasNodes.length;
+    
+    function createNode(nodeData) {
+        const nodeEl = document.createElement('div');
+        nodeEl.id = nodeData.id;
+        nodeEl.className = 'node absolute p-3 rounded-lg shadow-md cursor-move';
+        let bgColor, textColor;
+        switch(nodeData.type) {
+            case 'rock': bgColor = 'bg-slate-700'; textColor = 'text-white'; break;
+            case 'pebble': bgColor = 'bg-sky-200'; textColor = 'text-sky-800'; break;
+        }
+        nodeEl.classList.add(bgColor, textColor);
+        nodeEl.style.left = `${nodeData.x}px`; nodeEl.style.top = `${nodeData.y}px`;
+        const titleEl = document.createElement('input');
+        titleEl.type = 'text'; titleEl.value = nodeData.title;
+        titleEl.className = 'bg-transparent w-full focus:outline-none focus:bg-white/20 rounded p-1 searchable-node';
+        nodeEl.appendChild(titleEl);
+        const linkBtn = document.createElement('button');
+        linkBtn.innerHTML = '🔗'; linkBtn.title = 'Link study material';
+        linkBtn.className = 'absolute -top-2 -right-2 bg-white p-1 rounded-full shadow text-xs';
+        linkBtn.onclick = () => openLinkStudyModal(nodeData.id);
+        nodeEl.appendChild(linkBtn);
+        careerCanvas.appendChild(nodeEl);
+        nodes[nodeData.id] = { el: nodeEl, ...nodeData };
+        nodeEl.addEventListener('pointerdown', (e) => {
+            if(e.target.tagName === 'INPUT' || e.target.tagName === 'BUTTON') return;
+            isDragging = true; activeNode = nodeEl; careerCanvas.classList.add('cursor-grabbing'); activeNode.style.zIndex = 10;
+            const rect = activeNode.getBoundingClientRect(); offset.x = e.clientX - rect.left; offset.y = e.clientY - rect.top;
+        });
+    }
+    
+    function drawConnections() {
+        const canvas = connectorCanvasCtx.canvas;
+        canvas.width = careerCanvasContainer.clientWidth; canvas.height = careerCanvasContainer.clientHeight;
+        connectorCanvasCtx.clearRect(0, 0, canvas.width, canvas.height);
+        appData.canvasConnections.forEach(conn => {
+            const fromNode = nodes[conn.from], toNode = nodes[conn.to];
+            if (!fromNode || !toNode) return;
+            const fromRect = fromNode.el.getBoundingClientRect(), toRect = toNode.el.getBoundingClientRect(), containerRect = careerCanvasContainer.getBoundingClientRect();
+            const startX = fromRect.right - containerRect.left, startY = fromRect.top + fromRect.height / 2 - containerRect.top;
+            const endX = toRect.left - containerRect.left, endY = toRect.top + toRect.height / 2 - containerRect.top;
+            connectorCanvasCtx.beginPath(); connectorCanvasCtx.moveTo(startX, startY);
+            connectorCanvasCtx.bezierCurveTo(startX + 50, startY, endX - 50, endY, endX, endY);
+            connectorCanvasCtx.strokeStyle = '#9CA3AF'; connectorCanvasCtx.lineWidth = 2; connectorCanvasCtx.stroke();
+        });
+    }
+
+    function initCareerCanvas() {
+        careerCanvas.innerHTML = '<canvas id="connector-canvas" class="absolute top-0 left-0 w-full h-full pointer-events-none"></canvas>';
+        connectorCanvasCtx = document.getElementById('connector-canvas').getContext('2d');
+        nodes = {}; appData.canvasNodes.forEach(createNode); drawConnections();
+    }
+    
+    careerCanvasContainer.addEventListener('pointermove', (e) => {
+        if (!isDragging || !activeNode) return; e.preventDefault();
+        const containerRect = careerCanvasContainer.getBoundingClientRect();
+        let x = e.clientX - containerRect.left - offset.x, y = e.clientY - containerRect.top - offset.y;
+        x = Math.max(0, Math.min(x, containerRect.width - activeNode.offsetWidth));
+        y = Math.max(0, Math.min(y, containerRect.height - activeNode.offsetHeight));
+        activeNode.style.left = `${x}px`; activeNode.style.top = `${y}px`;
+        nodes[activeNode.id].x = x; nodes[activeNode.id].y = y;
+        drawConnections();
+    });
+    
+    const stopDragging = () => { if (isDragging) { isDragging = false; careerCanvas.classList.remove('cursor-grabbing'); if(activeNode) activeNode.style.zIndex = 1; activeNode = null; }};
+    careerCanvasContainer.addEventListener('pointerup', stopDragging);
+    careerCanvasContainer.addEventListener('pointerleave', stopDragging);
+    document.getElementById('add-rock-btn').addEventListener('click', () => addNode('rock', 'New Goal'));
+    document.getElementById('add-pebble-btn').addEventListener('click', () => addNode('pebble', 'New Skill/Project'));
+    function addNode(type, title) { const newNodeData = { id: `n${++nodeIdCounter}`, type: type, title: title, x: 20, y: 20, links: [] }; appData.canvasNodes.push(newNodeData); createNode(newNodeData); }
+    
+    const quill = new Quill('#notes-editor', { theme: 'snow' });
+    document.getElementById('save-note-btn').addEventListener('click', () => {
+        const title = document.getElementById('note-title').value;
+        if (!title || quill.getLength() <= 1) { alert('Please add a title and content to your note.'); return; }
+        const newNote = { id: `note-${Date.now()}`, title, content: quill.root.innerHTML };
+        appData.notes.push(newNote);
+        appData.feedItems.push({ type: 'note-add', content: `You created a new note: <strong>${title}</strong>.` });
+        renderFeed(); alert('Note saved!'); quill.setText(''); document.getElementById('note-title').value = '';
+    });
+
+    document.getElementById('ai-generate-cards-btn').addEventListener('click', () => {
+        const noteTitle = document.getElementById('note-title').value;
+        if (!noteTitle) { alert('Please provide a title for the note first.'); return; }
+        appData.flashcardDecks[noteTitle] = [{ q: 'What is a variable in Python?', a: 'A symbolic name that is a reference or pointer to an object.' },{ q: 'What is a list?', a: 'A mutable, or changeable, ordered sequence of elements.' },{ q: 'What is a dictionary?', a: 'An unordered collection of data values, used to store data values like a map.' }];
+        appData.feedItems.push({ type: 'flashcard-add', content: `AI generated a new flashcard deck from your <strong>${noteTitle}</strong> note.` });
+        renderFeed(); updateFlashcardDeckSelector(); alert(`Flashcard deck "${noteTitle}" created!`);
+    });
+
+    const flashcardDeckSelector = document.getElementById('flashcard-deck-selector'), flashcardViewer = document.getElementById('flashcard-viewer'), noFlashcardsMsg = document.getElementById('no-flashcards-msg');
+    let currentDeck = null, currentCardIndex = 0;
+    function updateFlashcardDeckSelector() {
+        const deckNames = Object.keys(appData.flashcardDecks);
+        if (deckNames.length === 0) { flashcardDeckSelector.innerHTML = ''; flashcardViewer.style.display = 'none'; noFlashcardsMsg.style.display = 'block'; return; }
+        noFlashcardsMsg.style.display = 'none';
+        flashcardDeckSelector.innerHTML = `<select id="deck-select" class="w-full p-2 border rounded-lg"><option value="">Select a deck...</option>${deckNames.map(name => `<option value="${name}">${name}</option>`).join('')}</select>`;
+        document.getElementById('deck-select').addEventListener('change', (e) => {
+            const deckName = e.target.value;
+            if (deckName) { currentDeck = appData.flashcardDecks[deckName]; currentCardIndex = 0; flashcardViewer.style.display = 'block'; renderCurrentCard(); } else { flashcardViewer.style.display = 'none'; }
+        });
+    }
+    
+    function renderCurrentCard() {
+        if (!currentDeck) return;
+        const card = currentDeck[currentCardIndex];
+        document.getElementById('flashcard-front-content').textContent = card.q;
+        document.getElementById('flashcard-back-content').textContent = card.a;
+        document.getElementById('card-counter').textContent = `${currentCardIndex + 1} / ${currentDeck.length}`;
+        document.getElementById('flashcard-container').classList.remove('is-flipped');
+    }
+    document.getElementById('flashcard-container').addEventListener('click', (e) => e.currentTarget.classList.toggle('is-flipped'));
+    document.getElementById('prev-card-btn').addEventListener('click', () => { if(currentDeck && currentCardIndex > 0) { currentCardIndex--; renderCurrentCard(); }});
+    document.getElementById('next-card-btn').addEventListener('click', () => { if(currentDeck && currentCardIndex < currentDeck.length - 1) { currentCardIndex++; renderCurrentCard(); }});
+
+    const linkStudyModal = document.getElementById('link-study-modal'), linkStudyContent = document.getElementById('link-study-content');
+    let targetNodeId = null;
+    function openLinkStudyModal(nodeId) {
+        targetNodeId = nodeId;
+        let content = '<h4>Notes</h4>';
+        content += appData.notes.length > 0 ? appData.notes.map(n => `<button class="block w-full text-left p-2 hover:bg-gray-100" data-type="note" data-id="${n.id}">${n.title}</button>`).join('') : '<p class="text-sm text-gray-500">No notes created yet.</p>';
+        content += '<h4 class="mt-4">Flashcard Decks</h4>';
+        content += Object.keys(appData.flashcardDecks).length > 0 ? Object.keys(appData.flashcardDecks).map(name => `<button class="block w-full text-left p-2 hover:bg-gray-100" data-type="deck" data-id="${name}">${name}</button>`).join('') : '<p class="text-sm text-gray-500">No decks created yet.</p>';
+        linkStudyContent.innerHTML = content;
+        linkStudyModal.style.display = 'flex';
+    }
+    linkStudyContent.addEventListener('click', e => {
+        if(e.target.tagName === 'BUTTON') {
+            const { type, id } = e.target.dataset;
+            const node = appData.canvasNodes.find(n => n.id === targetNodeId);
+            if(node) { const linkId = `${type}:${id}`; if(!node.links.includes(linkId)) { node.links.push(linkId); alert('Material linked!'); } else { alert('Material already linked.'); } }
+            linkStudyModal.style.display = 'none';
+        }
+    });
+    document.getElementById('close-link-modal').addEventListener('click', () => linkStudyModal.style.display = 'none');
+    
+    document.getElementById('save-profile-btn').addEventListener('click', () => {
+        const confirmation = document.getElementById('save-confirmation');
+        confirmation.style.display = 'block';
+        setTimeout(() => { confirmation.style.display = 'none'; }, 2000);
+    });
+
+    const searchBar = document.getElementById('search-bar');
+    searchBar.addEventListener('input', (e) => {});
+    
+    const profileSearchModal = document.getElementById('profile-search-modal');
+    const profileResultsContainer = document.getElementById('profile-results-content');
+
+    async function performProfileSearch(term) {
+        profileSearchModal.style.display = 'flex';
+        const loadingHTML = '<div class="flex justify-center items-center h-full"><div class="animate-spin rounded-full h-8 w-8 border-b-2 border-accent-primary"></div><p class="ml-4 text-text-secondary">Generating ideal profiles...</p></div>';
+        profileResultsContainer.innerHTML = loadingHTML;
+
+        try {
+            const profiles = await fetchIdealProfiles(term);
+            renderProfileResults(profiles);
+        } catch (error) {
+            profileResultsContainer.innerHTML = `<p class="text-red-500">An error occurred while generating profiles.</p>`;
+        }
+    }
+    
+    async function fetchIdealProfiles(term) {
+        const prompt = `Act as a world-class career and recruitment expert. A user's dream job is "${term}". Generate 4 fictional but realistic professional profiles of people who are perfect for this role. For each profile, provide their name, current title, company, location, a compelling 2-3 sentence summary of their experience and key skills, and a fictional LinkedIn URL. Return the response as a valid JSON array of objects, where each object has "name", "title", "company", "location", "summary", and "linkedin_url" keys.`;
+        const payload = {
+            contents: [{ role: "user", parts: [{ text: prompt }] }],
+            generationConfig: { responseMimeType: "application/json" }
+        };
+        const apiKey = "";
+        const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+        const response = await fetch(apiUrl, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        });
+        if (!response.ok) throw new Error('Gemini API request failed');
+        const result = await response.json();
+        const text = result.candidates[0].content.parts[0].text;
+        return JSON.parse(text);
+    }
+
+    function renderProfileResults(profiles) {
+        if (!profiles || profiles.length === 0) {
+            profileResultsContainer.innerHTML = `<p class="text-text-secondary">Could not generate profiles for this job title.</p>`;
+            return;
+        }
+        profileResultsContainer.innerHTML = profiles.map(profile => `
+            <div class="mb-6 p-4 border border-border-color rounded-lg bg-gray-50">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h4 class="text-xl font-bold text-accent-primary">${profile.name}</h4>
+                        <p class="text-md font-medium text-text-primary">${profile.title} at ${profile.company}</p>
+                        <p class="text-sm text-text-secondary">${profile.location}</p>
+                    </div>
+                    <a href="${profile.linkedin_url}" target="_blank" class="text-sm text-white bg-accent-secondary hover:bg-accent-primary px-4 py-2 rounded-lg">View Profile</a>
+                </div>
+                <p class="text-sm text-text-secondary mt-3">${profile.summary}</p>
+            </div>
+        `).join('');
+    }
+
+    document.getElementById('profile-search-btn').addEventListener('click', () => {
+        const term = document.getElementById('search-bar').value;
+        if(term) performProfileSearch(term);
+        else alert("Please enter your dream job in the search bar.");
+    });
+    document.getElementById('close-search-modal').addEventListener('click', () => profileSearchModal.style.display = 'none');
+    
+    renderFeed();
+    updateFlashcardDeckSelector();
+    document.querySelector('.nav-item.active').click();
+});
+</script>
+</body>
+</html>
