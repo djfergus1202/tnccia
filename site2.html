@@ -58,6 +58,8 @@
         .disclaimer { font-size: 0.8em; color: #555; margin-top: 8px; }
         .accordion-content { max-height: 0; overflow: hidden; transition: max-height 0.3s ease-out; }
         #goal-map-3d { width: 100%; height: 60vh; background-color: #000; border-radius: 0.75rem; }
+        .search-tab { border-bottom: 2px solid transparent; }
+        .search-tab.active { border-bottom-color: var(--accent-primary); color: var(--accent-primary); }
     </style>
 </head>
 <body class="antialiased">
@@ -91,6 +93,7 @@
                     </div>
                 </div>
                 <button type="submit" class="mt-6 w-full px-6 py-3 bg-red-600 text-white font-bold rounded-lg hover:bg-red-700 transition-colors">Create Profile & Enter</button>
+                <p class="text-center mt-4 text-sm text-gray-600">Already have an account? <a href="#" id="show-signin" class="font-medium text-red-600 hover:text-red-500">Sign In</a></p>
                 <p class="disclaimer">By signing up you agree to be a part of this research study on optimizing student career achievement for better career and economic outcomes for the student. We maintain the claim that the data will solely be used for research purposes and de-identified before use in analysis.</p>
             </form>
         </div>
@@ -106,7 +109,7 @@
                     <div id="main-nav" class="hidden md:flex items-center space-x-6">
                         <button data-target="dashboard" class="nav-item font-semibold text-gray-600 active">Dashboard</button>
                         <button data-target="strategy" class="nav-item font-semibold text-gray-600">My Strategy</button>
-                        <button data-target="canvas" class="nav-item font-semibold text-gray-600">Career Canvas</button>
+                        <button data-target="canvas" class="nav-item font-semibold text-gray-600">3D Goal Map</button>
                         <button data-target="learning" class="nav-item font-semibold text-gray-600">Learning Hub</button>
                         <button data-target="collaboration" class="nav-item font-semibold text-gray-600">Collaborate</button>
                     </div>
@@ -115,11 +118,14 @@
                     <input type="search" id="search-bar" placeholder="What is your dream job in an ideal world?" class="w-full px-4 py-2 rounded-full border border-gray-300 focus:outline-none focus:ring-2 focus:ring-red-500 bg-gray-50"/>
                 </div>
                 <div class="flex items-center space-x-4">
-                    <button id="profile-search-btn" title="Find Matching Profiles" class="p-2 rounded-full hover:bg-gray-100">
+                    <button id="search-btn" title="Search" class="p-2 rounded-full hover:bg-gray-100">
                         <svg class="w-6 h-6 text-gray-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" /></svg>
                     </button>
                     <button data-target="profile" id="profile-nav-btn" title="My Profile" class="nav-item p-2 rounded-full hover:bg-gray-100">
                         <img id="nav-avatar" src="https://i.pravatar.cc/32" alt="Profile" class="w-8 h-8 rounded-full"/>
+                    </button>
+                    <button id="sign-out-btn" title="Sign Out" class="p-2 rounded-full hover:bg-gray-100">
+                        <svg class="w-6 h-6 text-gray-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15m3 0l3-3m0 0l-3-3m3 3H9" /></svg>
                     </button>
                 </div>
             </div>
@@ -161,6 +167,17 @@
     <div id="link-study-modal" class="fixed inset-0 bg-gray-900 bg-opacity-50 flex items-center justify-center p-4 z-50" style="display: none;">
         <div class="bg-white rounded-lg shadow-xl w-full max-w-md"><div class="p-4 border-b"><h3 class="text-lg font-bold">Add External Link</h3></div><div class="p-6"><label for="link-url" class="block text-sm font-medium text-gray-700">Quizlet URL</label><div class="mt-1"><input type="url" id="link-url" class="w-full border border-gray-300 p-2 rounded-md" placeholder="https://quizlet.com/..."></div></div><div class="p-4 bg-gray-50 flex justify-end gap-2"><button id="cancel-link-modal" class="px-4 py-2 bg-gray-200 rounded-lg">Cancel</button><button id="save-link-btn" class="px-4 py-2 bg-accent-primary text-white rounded-lg">Save Link</button></div></div>
     </div>
+    <div id="signin-modal" class="fixed inset-0 bg-gray-900 bg-opacity-50 flex items-center justify-center p-4 z-50" style="display: none;">
+        <div class="bg-white rounded-lg shadow-xl w-full max-w-md p-8">
+            <h2 class="text-2xl font-bold text-center mb-6">Sign In</h2>
+            <form id="signin-form">
+                <div class="space-y-4">
+                    <input type="email" id="signin-email" placeholder="Email" required class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-red-500">
+                    <button type="submit" class="w-full px-6 py-3 bg-red-600 text-white font-bold rounded-lg hover:bg-red-700">Sign In</button>
+                </div>
+            </form>
+        </div>
+    </div>
 
 <script>
 document.addEventListener('DOMContentLoaded', () => {
@@ -177,9 +194,13 @@ document.addEventListener('DOMContentLoaded', () => {
     const mainApp = document.getElementById('main-app');
     const landingPage = document.getElementById('registration-page');
     const regForm = document.getElementById('regForm');
+    const signinModal = document.getElementById('signin-modal');
+    const showSigninBtn = document.getElementById('show-signin');
+    const signinForm = document.getElementById('signin-form');
 
     function showApp(userData) {
         landingPage.style.display = 'none';
+        signinModal.style.display = 'none';
         mainApp.style.display = 'block';
         initializeMainApp(userData);
     }
@@ -196,6 +217,33 @@ document.addEventListener('DOMContentLoaded', () => {
         localStorage.setItem('aetherUserProfile', JSON.stringify(userData));
         showApp(userData);
     });
+
+    showSigninBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        signinModal.style.display = 'flex';
+    });
+
+    signinModal.addEventListener('click', (e) => {
+        if(e.target === signinModal) {
+            signinModal.style.display = 'none';
+        }
+    });
+
+    signinForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const storedUser = localStorage.getItem('aetherUserProfile');
+        if (storedUser) {
+            const userData = JSON.parse(storedUser);
+            if (userData.email === document.getElementById('signin-email').value) {
+                showApp(userData);
+            } else {
+                alert('No account found with that email. Please register.');
+            }
+        } else {
+            alert('No account found. Please register.');
+        }
+    });
+
 
     window.addEventListener('DOMContentLoaded', () => {
         const storedUser = localStorage.getItem('aetherUserProfile');
@@ -229,6 +277,12 @@ document.addEventListener('DOMContentLoaded', () => {
             if (button) navigateTo(button.dataset.target);
         });
         profileNavBtn.addEventListener('click', () => navigateTo('profile'));
+
+        document.getElementById('sign-out-btn').addEventListener('click', () => {
+            localStorage.removeItem('aetherUserProfile');
+            mainApp.style.display = 'none';
+            landingPage.style.display = 'flex';
+        });
 
         const feedContainer = document.getElementById('strategy-feed');
         function renderFeed() {
