@@ -1,681 +1,651 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width,initial-scale=1"/>
-  <title>Aether: Career & Study Hub</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script src="https://cdn.jsdelivr.net/npm/interactjs/dist/interact.min.js"></script>
-  <style>
-    :root {
-      --bg-main: #f3f2ef;
-      --bg-alt: #ffffff;
-      --text-primary: #1f2937;
-      --text-secondary: #4b5563;
-      --accent-primary: #0a66c2;
-      --accent-secondary: #004182;
-      --border-color: #e0e0e0;
-    }
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body {
-      font-family: system-ui, sans-serif;
-      background: var(--bg-main);
-      color: var(--text-primary);
-    }
-    /* Header */
-    header {
-      background: var(--bg-alt);
-      box-shadow: 0 1px 4px rgba(0,0,0,0.1);
-      position: fixed; top: 0; width: 100%; z-index: 50;
-    }
-    header .container {
-      max-width: 1200px; margin: auto;
-      display: flex; justify-content: space-between; align-items: center;
-      padding: .75rem 1rem;
-    }
-    header .logo {
-      color: var(--accent-primary);
-      font-weight: 700;
-      font-size: 1.5rem;
-      cursor: pointer;
-    }
-    /* Sidebar */
-    #sidebar {
-      background: var(--bg-alt);
-      border-right: 1px solid var(--border-color);
-      padding: 1rem;
-      height: 100vh;
-      position: sticky;
-      top: 0;
-      flex-shrink: 0;
-    }
-    #sidebar .profile-card {
-      text-align: center;
-      margin-bottom: 2rem;
-    }
-    #sidebar .profile-card img {
-      width: 4rem; height: 4rem; border-radius: 50%;
-    }
-    #sidebar .profile-card h2 {
-      margin: .5rem 0 0; font-weight: 600;
-    }
-    #sidebar .profile-card p {
-      margin: .25rem 0; font-size: .875rem; color: var(--text-secondary);
-    }
-    #sidebar .menu button {
-      width: 100%; text-align: left;
-      padding: .75rem; border: none; background: transparent;
-      cursor: pointer; transition: background .2s;
-      margin-bottom: .25rem;
-    }
-    #sidebar .menu button:hover {
-      background: rgba(0,0,0,0.03);
-    }
-    .nav-button.active {
-      color: var(--accent-primary);
-      font-weight: 600;
-    }
-    /* Main content */
-    #content-area {
-      padding: 1rem;
-      margin-top: 4rem;
-      flex: 1;
-    }
-    .content-section {
-      display: none;
-      animation: fadeIn .3s ease-in-out;
-    }
-    .content-section.active {
-      display: block;
-    }
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(10px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-    .card {
-      background: var(--bg-alt);
-      border: 1px solid var(--border-color);
-      border-radius: .75rem;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.05);
-      padding: 1rem;
-      margin-bottom: 1.5rem;
-    }
-    .card h3 {
-      font-weight: 600; margin-bottom: .5rem;
-    }
-    .card p {
-      color: var(--text-secondary); line-height: 1.4;
-    }
-    /* Loader */
-    #loading-overlay {
-      position: fixed; inset: 0;
-      display: flex; align-items: center; justify-content: center;
-      background: rgba(255,255,255,0.75);
-      z-index: 100;
-      visibility: hidden;
-    }
-    .loader {
-      border: 4px solid #f3f3f3;
-      border-top: 4px solid var(--accent-primary);
-      border-radius: 50%;
-      width: 40px; height: 40px;
-      animation: spin 1s linear infinite;
-    }
-    @keyframes spin {
-      from { transform: rotate(0deg); }
-      to { transform: rotate(360deg); }
-    }
-    /* Single Auth Modal */
-    #auth-page {
-      position: fixed; inset: 0;
-      display: flex; align-items: center; justify-content: center;
-      background: rgba(0,0,0,0.05);
-      z-index: 200;
-    }
-    .auth-container {
-      background: var(--bg-alt);
-      max-width: 400px; width: 100%;
-      padding: 2rem; border-radius: 1rem;
-      box-shadow: 0 10px 25px rgba(0,0,0,0.1);
-    }
-    .auth-tabs {
-      display: flex; margin-bottom: 1rem;
-    }
-    .auth-tabs button {
-      flex: 1; padding: .75rem;
-      font-size: 1.125rem; border: none;
-      background: transparent; cursor: pointer;
-      transition: background .2s;
-    }
-    .auth-tabs button.active {
-      border-bottom: 3px solid var(--accent-primary);
-      font-weight: 600;
-    }
-    .auth-form input {
-      width: 100%; padding: .75rem;
-      border: 1px solid var(--border-color);
-      border-radius: .5rem; margin-bottom: .5rem;
-      outline: none; transition: border .2s;
-    }
-    .auth-form input:focus {
-      border-color: var(--accent-primary);
-    }
-    .auth-form .btn {
-      width: 100%; padding: .75rem;
-      border: none; border-radius: .5rem;
-      background: var(--accent-primary);
-      color: #fff; font-weight: 600; cursor: pointer;
-      transition: background .2s;
-    }
-    .auth-form .btn:hover {
-      background: var(--accent-secondary);
-    }
-    .auth-error {
-      color: #dc2626; font-size: .875rem;
-      text-align: center; margin-top: .5rem;
-    }
-    /* Mind Map Modal */
-    #mind-map-modal {
-      position: fixed; inset: 0; display: flex;
-      align-items: center; justify-content: center;
-      background: rgba(0,0,0,0.7); backdrop-filter: blur(5px);
-      z-index: 150; visibility: hidden;
-    }
-    #mind-map-modal.active {
-      visibility: visible;
-    }
-    #mind-map-modal .modal-container {
-      background: var(--bg-alt); border-radius: 1rem;
-      width: 90%; max-width: 1000px; height: 85vh;
-      display: flex; flex-direction: column; overflow: hidden;
-    }
-    #mind-map-modal .modal-header {
-      display: flex; justify-content: space-between;
-      align-items: center; padding: .75rem 1rem;
-      border-bottom: 1px solid var(--border-color);
-    }
-    #mind-map-modal .close-btn {
-      background: transparent; border: none;
-      font-size: 1.5rem; cursor: pointer;
-    }
-    #mind-map-container {
-      flex: 1; position: relative;
-      background: #1e293b;
-      background-image: radial-gradient(rgba(255,255,255,0.1) 1px, transparent 1px);
-      background-size: 20px 20px; cursor: grab;
-    }
-    .puzzle-node {
-      position: absolute; width: 140px; height: 100px;
-      display: flex; align-items: center; justify-content: center;
-      text-align: center; padding: .5rem;
-      font-weight: 600; color: #fff; cursor: grab;
-      user-select: none;
-      border: 2px solid rgba(255,255,255,0.5);
-      border-radius: .75rem;
-      box-shadow: 0 5px 15px rgba(0,0,0,0.4);
-      transition: transform .2s, box-shadow .2s, background-color .3s;
-    }
-    .puzzle-node:hover {
-      transform: scale(1.05);
-      box-shadow: 0 8px 20px rgba(0,0,0,0.5);
-    }
-    .puzzle-node.selected {
-      outline: 3px solid #facc15;
-      box-shadow: 0 0 20px #facc15;
-      z-index: 100;
-    }
-    #node-editor {
-      position: absolute; top: 10px; right: 10px;
-      background: var(--bg-alt); padding: 1rem;
-      border-radius: .5rem; box-shadow: 0 4px 20px rgba(0,0,0,0.25);
-      z-index: 200; display: none; width: 280px;
-    }
-    #mind-map-svg {
-      position: absolute; top: 0; left: 0;
-      width: 100%; height: 100%;
-      pointer-events: none; z-index: 10;
-    }
-    #mind-map-svg line {
-      stroke: rgba(255,255,255,0.4); stroke-width: 3;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aether: Interactive Career & Study Hub</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
+    <script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
+    <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://unpkg.com/jspdf@latest/dist/jspdf.umd.min.js"></script>
+    <script src="https://unpkg.com/docx@7.1.0/build/index.js"></script>
+    <style>
+        :root {
+            --bg-main: #F4F4F5;
+            --bg-alt: #FFFFFF;
+            --text-primary: #1F2937;
+            --text-secondary: #4B5563;
+            --accent-primary: #DC2626; /* Fusion Red */
+            --accent-secondary: #B91C1C;
+            --border-color: #E5E7EB;
+        }
+        body { font-family: 'Inter', sans-serif; background-color: var(--bg-main); color: var(--text-primary); }
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+        .nav-item { transition: all 0.2s ease-in-out; border-bottom: 3px solid transparent; }
+        .nav-item.active { border-bottom-color: var(--accent-primary); color: var(--accent-primary); }
+        .nav-item:not(.active):hover { color: var(--accent-primary); }
+        .content-section { display: none; }
+        .content-section.active { display: block; }
+        .chart-container { position: relative; margin: auto; height: 50vh; width: 100%; max-width: 800px; max-height: 500px; }
+        .feed-card-icon { width: 40px; height: 40px; flex-shrink: 0; }
+        #notes-editor { height: 300px; background-color: white; }
+        .flashcard-container { perspective: 1000px; cursor: pointer; }
+        .flashcard-inner { position: relative; width: 100%; height: 100%; transition: transform 0.6s; transform-style: preserve-3d; }
+        .flashcard-container.is-flipped .flashcard-inner { transform: rotateY(180deg); }
+        .flashcard-front, .flashcard-back { position: absolute; width: 100%; height: 100%; -webkit-backface-visibility: hidden; backface-visibility: hidden; display: flex; align-items: center; justify-content: center; text-align: center; padding: 1rem; }
+        .flashcard-back { transform: rotateY(180deg); }
+        .carousel::-webkit-scrollbar { height: 6px; }
+        .carousel::-webkit-scrollbar-thumb { background-color: rgba(100, 100, 100, 0.5); border-radius: 3px; }
+        .drag-drop-zone { border: 2px dashed var(--border-color); border-radius: 0.5rem; padding: 1rem; text-align: center; cursor: pointer; transition: background-color 0.2s; }
+        .drag-drop-zone.drag-over { background: #fee2e2; border-color: var(--accent-primary); }
+        .required { color: var(--accent-primary); }
+        .disclaimer { font-size: 0.8em; color: #555; margin-top: 8px; }
+        #goal-map-3d { width: 100%; height: 60vh; background-color: #000; border-radius: 0.75rem; }
+        .timeline-container { max-height: 400px; overflow-y: auto; }
+        .timeline-avatar { width: 40px; height: 40px; border-radius: 50%; margin-right: 12px; object-fit: cover; }
+    </style>
 </head>
-<body class="antialiased flex">
+<body class="antialiased">
 
-  <!-- Loading -->
-  <div id="loading-overlay"><div class="loader"></div></div>
-
-  <!-- Single Auth Modal -->
-  <div id="auth-page">
-    <div class="auth-container">
-      <h1 class="text-2xl font-bold text-center text-accent-primary mb-4">Aether</h1>
-      <div class="auth-tabs">
-        <button id="tab-login" class="active">Login</button>
-        <button id="tab-signup">Sign Up</button>
-      </div>
-      <form id="form-login" class="auth-form">
-        <input type="email" id="login-email" placeholder="Email" required>
-        <input type="password" id="login-password" placeholder="Password" required>
-        <button type="submit" class="btn">Log In</button>
-        <p id="error-login" class="auth-error"></p>
-      </form>
-      <form id="form-signup" class="auth-form hidden">
-        <input type="text" id="signup-name" placeholder="Full Name" required>
-        <input type="text" id="signup-headline" placeholder="Professional Headline" required>
-        <input type="email" id="signup-email" placeholder="Email" required>
-        <input type="password" id="signup-password" placeholder="Password" required>
-        <button type="submit" class="btn">Create Account</button>
-        <p id="error-signup" class="auth-error"></p>
-      </form>
+    <div id="registration-page" class="flex items-center justify-center min-h-screen bg-gray-100">
+        <div class="text-center p-8 bg-white rounded-xl shadow-2xl max-w-lg mx-auto w-full">
+            <h1 class="text-5xl font-black text-red-600 mb-4">Aether</h1>
+            <p class="text-xl text-text-secondary mb-8">Create your profile to begin your integrated career and learning journey.</p>
+            <form id="regForm" class="text-left" novalidate>
+                <div class="space-y-4">
+                    <div>
+                        <label for="fullName" class="block text-sm font-medium text-gray-700">Full Name<span class="required">*</span></label>
+                        <input type="text" id="fullName" name="fullName" required class="mt-1 w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-red-500">
+                    </div>
+                    <div>
+                        <label for="email" class="block text-sm font-medium text-gray-700">Email<span class="required">*</span></label>
+                        <input type="email" id="email" name="email" required class="mt-1 w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-red-500">
+                    </div>
+                    <div>
+                        <label for="headline" class="block text-sm font-medium text-gray-700">Headline</label>
+                        <input type="text" id="headline" name="headline" placeholder="e.g. Aspiring AI Researcher" class="mt-1 w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-red-500">
+                    </div>
+                    <div>
+                        <label for="bioReg" class="block text-sm font-medium text-gray-700">Bio</label>
+                        <textarea id="bioReg" name="bioReg" rows="3" placeholder="Tell us about your goals and interests..." class="mt-1 w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-red-500"></textarea>
+                    </div>
+                    <div>
+                        <label for="avatarReg" class="block text-sm font-medium text-gray-700">Avatar URL</label>
+                        <input type="url" id="avatarReg" name="avatarReg" placeholder="Link to your photo" class="mt-1 w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-red-500">
+                    </div>
+                </div>
+                <button type="submit" class="mt-6 w-full px-6 py-3 bg-red-600 text-white font-bold rounded-lg hover:bg-red-700 transition-colors">Create Profile & Enter</button>
+                <p class="text-center mt-4 text-sm text-gray-600">Already have an account? <a href="#" id="show-signin" class="font-medium text-red-600 hover:text-red-500">Sign In</a></p>
+                <p class="disclaimer">By signing up you agree to be a part of this research study on optimizing student career achievement for better career and economic outcomes for the student. We maintain the claim that the data will solely be used for research purposes and de-identified before use in analysis.</p>
+            </form>
+        </div>
     </div>
-  </div>
 
-  <!-- Main App Container -->
-  <div id="main-app" class="hidden flex w-full">
-    <!-- Sidebar -->
-    <aside id="sidebar" class="w-64 flex-shrink-0">
-      <div class="profile-card">
-        <img id="profile-avatar" src="https://i.pravatar.cc/80" alt="Avatar">
-        <h2 id="profile-name">Name</h2>
-        <p id="profile-headline">Headline</p>
-      </div>
-      <div class="menu">
-        <button class="nav-button active" data-target="feed">Feed</button>
-        <button class="nav-button" data-target="mindmap">Mind Map</button>
-        <button class="nav-button" data-target="learning">Learning Hub</button>
-        <button id="admin-btn" class="nav-button hidden" data-target="admin">Admin Panel</button>
-        <button id="sign-out-btn" class="mt-4 w-full text-left text-sm text-text-secondary hover:text-accent-primary">Sign Out</button>
-      </div>
-    </aside>
+    <div id="main-app" class="hidden">
+        <nav class="bg-white shadow-md fixed w-full z-20">
+            <div class="container mx-auto px-4 py-3 flex items-center justify-between">
+                <div class="flex items-center space-x-8">
+                    <span class="text-red-600 font-black text-2xl">Aether</span>
+                    <div id="main-nav" class="hidden md:flex items-center space-x-6">
+                        <button data-target="dashboard" class="nav-item font-semibold text-gray-600 active">Dashboard</button>
+                        <button data-target="strategy" class="nav-item font-semibold text-gray-600">My Strategy</button>
+                        <button data-target="canvas" class="nav-item font-semibold text-gray-600">3D Goal Map</button>
+                        <button data-target="learning" class="nav-item font-semibold text-gray-600">Learning Hub</button>
+                        <button data-target="collaboration" class="nav-item font-semibold text-gray-600">Collaborate</button>
+                        <button data-target="admin" class="nav-item font-semibold text-gray-600">Admin</button>
+                    </div>
+                </div>
+                <div class="flex-1 mx-6 max-w-lg">
+                    <input type="search" id="search-bar" placeholder="What is your dream job in an ideal world?" class="w-full px-4 py-2 rounded-full border border-gray-300 focus:outline-none focus:ring-2 focus:ring-red-500 bg-gray-50"/>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <button id="search-btn" title="Search" class="p-2 rounded-full hover:bg-gray-100">
+                        <svg class="w-6 h-6 text-gray-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" /></svg>
+                    </button>
+                    <button data-target="profile" id="profile-nav-btn" title="My Profile" class="nav-item p-2 rounded-full hover:bg-gray-100">
+                        <img id="nav-avatar" src="https://i.pravatar.cc/32" alt="Profile" class="w-8 h-8 rounded-full"/>
+                    </button>
+                    <button id="sign-out-btn" title="Sign Out" class="p-2 rounded-full hover:bg-gray-100">
+                        <svg class="w-6 h-6 text-gray-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15m3 0l3-3m0 0l-3-3m3 3H9" /></svg>
+                    </button>
+                </div>
+            </div>
+        </nav>
 
-    <!-- Content Area -->
-    <main id="content-area" class="flex-1">
-      <!-- Feed Section -->
-      <section id="feed" class="content-section active">
-        <div class="card">
-          <h3>Add to your strategy</h3>
-          <div class="flex space-x-2 mt-2">
-            <button id="add-note-btn" class="btn">📝 Note</button>
-            <button id="add-goal-btn" class="btn">🎯 Goal</button>
-          </div>
-        </div>
-        <div id="strategy-feed"></div>
-      </section>
+        <main class="pt-20">
+            <div class="container mx-auto px-4 py-6">
+                <section id="dashboard" class="content-section active">
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                        <div class="lg:col-span-2 space-y-8">
+                            <section>
+                                <h2 class="text-xl font-bold mb-3 text-text-primary">Strategy Feed</h2>
+                                <div id="strategy-feed" class="space-y-6"></div>
+                            </section>
+                            <section role="region" aria-labelledby="podcastTitle">
+                                <div class="bg-white p-6 rounded-xl border shadow-sm">
+                                    <h2 id="podcastTitle" class="text-xl font-bold mb-4">🎙️ Podcast Hub</h2>
+                                    <div class="flex gap-2 mb-4">
+                                        <input id="feedUrl" type="url" placeholder="Enter podcast RSS feed URL..." class="w-full p-2 border border-border-color rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500">
+                                        <button id="fetchFeed" class="px-4 py-2 bg-accent-primary text-white font-bold rounded-lg hover:bg-accent-secondary flex-shrink-0">Load</button>
+                                    </div>
+                                    <ul id="episodeFeed" class="space-y-4 max-h-64 overflow-y-auto"></ul>
+                                </div>
+                            </section>
+                        </div>
+                        <aside class="space-y-8">
+                            <section role="region" aria-labelledby="timelineTitle">
+                                 <h2 id="timelineTitle" class="text-xl font-bold text-text-primary mb-3">⏳ Connections Timeline</h2>
+                                 <div class="bg-white rounded-lg shadow p-4 timeline-container">
+                                    <ul id="timelineList" class="space-y-3"></ul>
+                                 </div>
+                            </section>
+                            <div>
+                                <h2 class="text-xl font-bold text-text-primary mb-3">Trending Career Paths</h2>
+                                <div class="carousel flex space-x-4 overflow-x-auto pb-2">
+                                    <div class="min-w-[140px] h-[210px] bg-gray-200 rounded-lg flex-shrink-0 overflow-hidden relative"><img src="https://source.unsplash.com/featured/140x210?ai" alt="AI Specialist" class="w-full h-full object-cover"/><div class="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent"></div><p class="absolute bottom-2 left-2 text-white font-bold">AI Specialist</p></div>
+                                    <div class="min-w-[140px] h-[210px] bg-gray-200 rounded-lg flex-shrink-0 overflow-hidden relative"><img src="https://source.unsplash.com/featured/140x210?biotech" alt="Biotech Researcher" class="w-full h-full object-cover"/><div class="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent"></div><p class="absolute bottom-2 left-2 text-white font-bold">Biotech Researcher</p></div>
+                                </div>
+                            </div>
+                        </aside>
+                    </div>
+                </section>
+                
+                <section id="strategy" class="content-section">
+                    <h2 class="text-3xl font-bold mb-2">My Strategy</h2>
+                    <p class="text-lg text-text-secondary mb-6">Define your goals, skills, and study plans.</p>
+                    <div class="space-y-4" id="strategy-accordions"></div>
+                </section>
 
-      <!-- Mind Map Section -->
-      <section id="mindmap" class="content-section">
-        <div class="card">
-          <h3>Uncertainty-Aware Mind Map</h3>
-          <p class="text-sm text-text-secondary">Double-click to add a node. Shift-click two nodes to connect them.</p>
-          <button id="open-map-btn" class="btn mt-3">Open Mind Map</button>
-        </div>
-      </section>
+                <section id="canvas" class="content-section h-full flex flex-col">
+                    <div class="flex-shrink-0"><h2 class="text-3xl font-bold mb-2">3D Goal Map</h2><p class="text-lg text-text-secondary mb-4 max-w-4xl">An immersive, three-dimensional web to visualize the connections between your goals.</p></div>
+                    <div id="goal-map-3d-container" class="flex-grow relative w-full bg-alt rounded-xl border border-border-color shadow-lg overflow-hidden"><canvas id="goal-map-3d"></canvas></div>
+                </section>
+                
+                <section id="learning" class="content-section">
+                    <h2 class="text-3xl font-bold mb-2">Learning Hub & CV Generator</h2>
+                    <p class="text-lg text-text-secondary mb-6">Create study materials and generate your professional CV.</p>
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                        <div class="bg-alt p-6 rounded-xl border border-border-color shadow-sm"><h3 class="text-xl font-bold mb-4">CV / Resume Generator</h3><div class="space-y-2"><input type="text" id="cv-name" placeholder="Full Name" class="w-full p-2 border rounded"><input type="text" id="cv-email" placeholder="Email" class="w-full p-2 border rounded"><input type="text" id="cv-phone" placeholder="Phone" class="w-full p-2 border rounded"><textarea id="cv-experience" placeholder="Work Experience (use bullet points)" class="w-full p-2 border rounded" rows="4"></textarea><textarea id="cv-education" placeholder="Education" class="w-full p-2 border rounded" rows="3"></textarea><textarea id="cv-skills" placeholder="Skills (comma-separated)" class="w-full p-2 border rounded" rows="2"></textarea></div><div class="flex gap-4 mt-4"><button id="cv-word-btn" class="flex-1 px-4 py-2 bg-blue-600 text-white font-semibold rounded-lg">Download as Word</button><button id="cv-pdf-btn" class="flex-1 px-4 py-2 bg-red-600 text-white font-semibold rounded-lg">Download as PDF</button></div></div>
+                        <div class="bg-alt p-6 rounded-xl border border-border-color shadow-sm"><h3 class="text-xl font-bold mb-4">Flashcards</h3><div id="flashcard-deck-selector" class="mb-4"></div><div id="flashcard-viewer" class="h-64" style="display: none;"><div id="flashcard-container" class="flashcard-container bg-sky-100 rounded-lg w-full h-full shadow-inner"><div class="flashcard-inner"><div class="flashcard-front bg-sky-100 rounded-lg border-2 border-sky-300"><p id="flashcard-front-content" class="text-xl font-semibold text-sky-800"></p></div><div class="flashcard-back bg-green-100 rounded-lg border-2 border-green-300"><p id="flashcard-back-content" class="text-lg text-green-800"></p></div></div></div><div class="flex justify-center gap-4 mt-4"><button id="prev-card-btn" class="px-4 py-2 bg-gray-200 rounded-lg">Previous</button><span id="card-counter"></span><button id="next-card-btn" class="px-4 py-2 bg-gray-200 rounded-lg">Next</button></div></div><p id="no-flashcards-msg" class="text-text-secondary">No flashcard deck selected. Create notes and use the AI generator!</p></div>
+                    </div>
+                </section>
 
-      <!-- Learning Hub (stub) -->
-      <section id="learning" class="content-section">
-        <div class="card">
-          <h3>Learning Hub</h3>
-          <p>Flashcards, quizzes, CV generator (coming soon!).</p>
-        </div>
-      </section>
+                <section id="collaboration" class="content-section">
+                    <h2 class="text-3xl font-bold mb-2">Collaborate & Network</h2>
+                    <p class="text-lg text-text-secondary mb-6">Create shared projects, chat with your team, and manage publishing rights.</p>
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                        <div class="space-y-6">
+                            <div class="bg-white p-6 rounded-xl border shadow-sm">
+                                <h3 class="text-xl font-bold mb-4">New Project</h3>
+                                <form id="projectForm" class="space-y-4" novalidate>
+                                    <input type="text" id="projName" placeholder="Project Title" class="w-full p-2 border border-border-color rounded-lg" required>
+                                    <textarea id="projInfo" placeholder="Describe your project..." class="w-full p-2 border border-border-color rounded-lg" rows="3"></textarea>
+                                    <div id="dropZone" class="drag-drop-zone">
+                                        <label for="projAssets" class="text-sm font-medium text-gray-700">Upload Assets</label>
+                                        <input type="file" id="projAssets" multiple class="hidden">
+                                        <p class="text-xs text-gray-500 mt-1">Drag & drop files here or click to select</p>
+                                        <ul id="fileList" class="text-left text-sm mt-2"></ul>
+                                    </div>
+                                    <button type="submit" id="initProject" class="w-full px-6 py-2 bg-accent-primary text-white font-bold rounded-lg hover:bg-accent-secondary">Create Project</button>
+                                </form>
+                            </div>
+                            <div class="bg-white p-6 rounded-xl border shadow-sm">
+                                <h3 class="text-xl font-bold mb-4">Active Projects</h3>
+                                <ul id="projectsList" class="space-y-2"></ul>
+                            </div>
+                        </div>
+                        <div class="space-y-6">
+                            <div id="chatSection" class="bg-white p-6 rounded-xl border shadow-sm" style="display:none;">
+                                <h3 class="text-xl font-bold mb-4">Project Chat</h3>
+                                <div id="chatBox" class="h-64 overflow-y-auto bg-gray-50 p-3 border rounded-lg mb-4"></div>
+                                <form id="msgForm" class="flex gap-2">
+                                    <input type="text" id="msgInput" placeholder="Type a message..." autocomplete="off" class="w-full p-2 border border-border-color rounded-lg">
+                                    <button type="submit" class="px-4 py-2 bg-accent-primary text-white font-bold rounded-lg hover:bg-accent-secondary">Send</button>
+                                </form>
+                            </div>
+                             <div id="publishSection" class="bg-white p-6 rounded-xl border shadow-sm" style="display:none;">
+                                <h3 class="text-xl font-bold mb-4">Publish Content</h3>
+                                <p class="text-sm text-text-secondary mb-4">Check below to consent to publicize this project's work:</p>
+                                <div class="space-y-2">
+                                    <label class="flex items-center"><input type="checkbox" class="consentChk h-4 w-4 text-red-600 border-gray-300 rounded focus:ring-red-500 mr-2"> I agree to publish</label>
+                                    <label class="flex items-center"><input type="checkbox" class="consentChk h-4 w-4 text-red-600 border-gray-300 rounded focus:ring-red-500 mr-2"> Collaborator agrees</label>
+                                </div>
+                                <button id="goPublic" disabled class="w-full mt-4 px-6 py-2 bg-gray-300 text-gray-500 font-bold rounded-lg cursor-not-allowed">Publish</button>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+                
+                <section id="admin" class="content-section">
+                    <h2 class="text-3xl font-bold mb-2">🔒 Admin Dashboard</h2>
+                     <div class="max-w-2xl mx-auto">
+                        <div id="adminLoginForm" class="bg-white p-8 rounded-lg shadow-md text-center">
+                            <label for="adminCode" class="block text-lg font-medium text-gray-700 mb-2">Enter Admin PIN</label>
+                            <input type="password" id="adminCode" class="w-full max-w-xs mx-auto px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-red-500">
+                            <button id="adminLoginBtn" class="mt-4 px-6 py-2 bg-accent-primary text-white font-bold rounded-lg hover:bg-accent-secondary">Login</button>
+                        </div>
+                        <div id="adminDashboard" class="hidden bg-white p-8 rounded-lg shadow-md space-y-4">
+                            <h3 class="text-xl font-bold">Platform Analytics</h3>
+                             <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-center">
+                                 <div class="bg-gray-100 p-4 rounded-lg">
+                                     <p class="text-2xl font-bold text-accent-primary" id="totalRegs">0</p>
+                                     <p class="text-sm text-text-secondary">Total Registrations</p>
+                                 </div>
+                                 <div class="bg-gray-100 p-4 rounded-lg">
+                                     <p class="text-2xl font-bold text-accent-primary" id="totalProjects">0</p>
+                                     <p class="text-sm text-text-secondary">Total Projects</p>
+                                 </div>
+                                 <div class="bg-gray-100 p-4 rounded-lg">
+                                     <p class="text-2xl font-bold text-accent-primary" id="totalConnections">0</p>
+                                     <p class="text-sm text-text-secondary">Total Connections</p>
+                                 </div>
+                             </div>
+                             <button id="exportMaster" class="w-full mt-4 px-6 py-2 bg-gray-700 text-white font-semibold rounded-lg hover:bg-gray-800">Download All Platform Data (.xlsx)</button>
+                        </div>
+                    </div>
+                </section>
 
-      <!-- Admin Panel (local) -->
-      <section id="admin" class="content-section">
-        <div class="card">
-          <h3>Admin Panel</h3>
-          <p>View all local users.</p>
-          <button id="open-admin-btn" class="btn mt-3">Open Admin Panel</button>
-        </div>
-      </section>
-    </main>
-  </div>
-
-  <!-- Mind Map Modal -->
-  <div id="mind-map-modal">
-    <div class="modal-container">
-      <div class="modal-header">
-        <h2>Mind Map</h2>
-        <button class="close-btn" id="close-map-btn">&times;</button>
-      </div>
-      <div id="mind-map-container"></div>
-      <div id="node-editor">
-        <h3 class="font-bold mb-2">Edit Node</h3>
-        <div class="mb-2">
-          <label class="block text-sm">Label</label>
-          <input type="text" id="node-label" class="w-full p-1 border rounded mt-1"/>
-        </div>
-        <div class="mb-2">
-          <label class="block text-sm">Uncertainty: <span id="uncertainty-value">5</span></label>
-          <input type="range" id="node-uncertainty" min="1" max="10" value="5" class="w-full mt-1"/>
-        </div>
-        <div class="flex justify-between mt-4">
-          <button id="delete-node-btn" class="text-sm text-red-600">Delete</button>
-          <button id="close-editor" class="text-sm text-gray-600">Close</button>
-        </div>
-      </div>
+                <section id="profile" class="content-section">
+                    <div class="max-w-2xl mx-auto">
+                        <h2 class="text-3xl font-bold mb-2">My Profile</h2>
+                        <div class="bg-white p-6 rounded-lg shadow">
+                            <div class="flex items-center space-x-4 mb-4">
+                                <img id="profile-avatar" class="w-24 h-24 rounded-full" src="">
+                                <div class="flex-1">
+                                    <h3 id="profile-name" class="text-2xl font-bold"></h3>
+                                    <p id="profile-headline" class="text-text-secondary"></p>
+                                </div>
+                            </div>
+                            <div class="space-y-2">
+                                <div><h4 class="font-semibold">About</h4><p id="profile-bio" class="text-text-secondary text-sm"></p></div>
+                                <div><h4 class="font-semibold">Contact</h4><p id="profile-email" class="text-text-secondary text-sm"></p></div>
+                            </div>
+                             <div class="mt-6 border-t pt-4">
+                                <h4 class="font-semibold mb-2">Account Actions</h4>
+                                <div class="flex gap-4">
+                                    <button id="edit-profile-btn" class="flex-1 px-6 py-2 bg-gray-200 text-text-primary font-semibold rounded-lg hover:bg-gray-300">Edit Profile</button>
+                                    <button id="exportMyData" class="flex-1 px-6 py-2 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700">Export My Data</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </main>
     </div>
-  </div>
 
-  <!-- Admin Modal -->
-  <div id="admin-modal" class="fixed inset-0 hidden items-center justify-center bg-black bg-opacity-50">
-    <div class="auth-container max-w-3xl">
-      <h2 class="text-xl font-semibold mb-4">Admin Panel</h2>
-      <div id="admin-user-list" class="max-h-80 overflow-y-auto space-y-2"></div>
-      <button id="close-admin-btn" class="btn w-full mt-4">Close</button>
+    <div id="profile-search-modal" class="fixed inset-0 bg-gray-900 bg-opacity-50 flex items-center justify-center p-4 z-50" style="display: none;">
+        <div class="bg-white rounded-lg shadow-xl w-full max-w-3xl max-h-[80vh] flex flex-col">
+            <div class="p-4 border-b flex justify-between items-center"><h3 class="text-lg font-bold">Dream Job Profile Matches</h3><button id="close-search-modal" class="text-gray-500 hover:text-gray-800 text-2xl">×</button></div>
+            <div id="profile-results-content" class="p-6 overflow-y-auto"></div>
+        </div>
     </div>
-  </div>
+    <div id="signin-modal" class="fixed inset-0 bg-gray-900 bg-opacity-50 flex items-center justify-center p-4 z-50" style="display: none;">
+        <div class="bg-white rounded-lg shadow-xl w-full max-w-md p-8">
+            <h2 class="text-2xl font-bold text-center mb-6">Sign In</h2>
+            <form id="signin-form">
+                <div class="space-y-4">
+                    <input type="email" id="signin-email" placeholder="Email" required class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-red-500">
+                    <button type="submit" class="w-full px-6 py-3 bg-red-600 text-white font-bold rounded-lg hover:bg-red-700">Sign In</button>
+                </div>
+            </form>
+        </div>
+    </div>
 
-  <script>
-    document.addEventListener('DOMContentLoaded', () => {
-      // --- Helpers for localStorage ---
-      const LS_USERS = 'aetherUsers';
-      const LS_CUR   = 'aetherCurrent';
-      function loadUsers(){ return JSON.parse(localStorage.getItem(LS_USERS)||'[]'); }
-      function saveUsers(u){ localStorage.setItem(LS_USERS,JSON.stringify(u)); }
-      function getCurrent(){ return localStorage.getItem(LS_CUR); }
-      function setCurrent(e){ localStorage.setItem(LS_CUR,e); }
-      function clearCurrent(){ localStorage.removeItem(LS_CUR); }
+<script>
+document.addEventListener('DOMContentLoaded', () => {
 
-      // --- UI References ---
-      const authPage   = document.getElementById('auth-page');
-      const mainApp    = document.getElementById('main-app');
-      const tabLogin   = document.getElementById('tab-login');
-      const tabSignup  = document.getElementById('tab-signup');
-      const formLogin  = document.getElementById('form-login');
-      const formSignup = document.getElementById('form-signup');
-      const errLogin   = document.getElementById('error-login');
-      const errSignup  = document.getElementById('error-signup');
-      const profileAvatar   = document.getElementById('profile-avatar');
-      const profileName     = document.getElementById('profile-name');
-      const profileHeadline = document.getElementById('profile-headline');
-      const addNoteBtn  = document.getElementById('add-note-btn');
-      const addGoalBtn  = document.getElementById('add-goal-btn');
-      const strategyFeed= document.getElementById('strategy-feed');
-      const openMapBtn  = document.getElementById('open-map-btn');
-      const mapModal    = document.getElementById('mind-map-modal');
-      const closeMapBtn = document.getElementById('close-map-btn');
-      const mapContainer= document.getElementById('mind-map-container');
-      const adminModal  = document.getElementById('admin-modal');
-      const openAdminBtn = document.getElementById('open-admin-btn');
-      const closeAdminBtn= document.getElementById('close-admin-btn');
-      const adminList    = document.getElementById('admin-user-list');
-      const signOutBtn   = document.getElementById('sign-out-btn');
-      const sidebarBtns  = document.querySelectorAll('#sidebar .menu button');
-      const sections     = document.querySelectorAll('.content-section');
-      const lblInput     = document.getElementById('node-label');
-      const rngInput     = document.getElementById('node-uncertainty');
-      const rngValue     = document.getElementById('uncertainty-value');
-      const deleteBtn    = document.getElementById('delete-node-btn');
-      const closeEditor  = document.getElementById('close-editor');
+    const ADMIN_PIN = '373202';
 
-      // --- Auth tab switching ---
-      function showLogin() {
-        tabLogin.classList.add('active');
-        tabSignup.classList.remove('active');
-        formLogin.classList.remove('hidden');
-        formSignup.classList.add('hidden');
-        errLogin.textContent = '';
-      }
-      function showSignup() {
-        tabSignup.classList.add('active');
-        tabLogin.classList.remove('active');
-        formSignup.classList.remove('hidden');
-        formLogin.classList.add('hidden');
-        errSignup.textContent = '';
-      }
-      tabLogin.addEventListener('click', showLogin);
-      tabSignup.addEventListener('click', showSignup);
+    // Central Data Store
+    const appData = {
+        feedItems: [{ type: 'ai-opportunity', content: "<strong>AI Opportunity:</strong> A new 'Computational Neuroscience' position just opened on Indeed. Its requirements are a 90% match with your skills.", insights: [] },{ type: 'node-add', content: "You added a new goal: 'Become a Robotics Engineer'.", insights: [] }],
+        notes: [],
+        flashcardDecks: {},
+        projects: JSON.parse(localStorage.getItem('aetherProjects') || '[]'),
+        competitors: [
+            { name: 'LinkedIn', ai: 1, integration: 1, size: 40, details: '<strong>Paradigm:</strong> Networking & Jobs<br><strong>AI:</strong> Reactive job suggestions & resume help.' },
+            { name: 'Coursera', ai: 1.5, integration: 1.2, size: 25, details: '<strong>Paradigm:</strong> Skill Development<br><strong>AI:</strong> Learning assistant for course content.' },
+            { name: 'Aether', ai: 4, integration: 4, size: 15, details: '<strong>Paradigm:</strong> Career Strategy Environment<br><strong>AI:</strong> Proactive mentor for strategic counsel.' }
+        ],
+        canvasNodes: [
+            { id: 'n1', type: 'rock', title: 'Become a Robotics Engineer', x: 50, y: 150, links: [] },
+            { id: 'n2', type: 'pebble', title: 'Master Python for Robotics', x: 350, y: 50, links: [] }
+        ],
+        canvasConnections: [{ from: 'n1', to: 'n2' }]
+    };
 
-      // --- Sign Up Handler ---
-      formSignup.addEventListener('submit', e => {
+    const mainApp = document.getElementById('main-app');
+    const landingPage = document.getElementById('registration-page');
+    const regForm = document.getElementById('regForm');
+    const signinModal = document.getElementById('signin-modal');
+    const showSigninBtn = document.getElementById('show-signin');
+    const signinForm = document.getElementById('signin-form');
+
+    // --- Authentication & Initialization ---
+    function showApp(userData) {
+        landingPage.style.display = 'none';
+        signinModal.style.display = 'none';
+        mainApp.style.display = 'block';
+        initializeMainApp(userData);
+    }
+
+    regForm.addEventListener('submit', (e) => {
         e.preventDefault();
-        const fullName = document.getElementById('signup-name').value.trim();
-        const headline = document.getElementById('signup-headline').value.trim();
-        const email    = document.getElementById('signup-email').value.trim();
-        const password = document.getElementById('signup-password').value;
-        let users = loadUsers();
-        if (users.find(u => u.email === email)) {
-          errSignup.textContent = 'Email already registered.';
-          return;
-        }
-        const user = {
-          fullName, headline,
-          email, password,
-          avatarUrl: `https://i.pravatar.cc/150?u=${email}`,
-          feed: [], mindMap: { nodes: [], connections: [] }
+        const userData = {
+            fullName: regForm.fullName.value,
+            email: regForm.email.value,
+            headline: regForm.headline.value,
+            bio: regForm.bioReg.value,
+            avatarUrl: regForm.avatarReg.value || `https://i.pravatar.cc/150?u=${regForm.email.value}`
         };
-        users.push(user);
-        saveUsers(users);
-        setCurrent(email);
-        showApp(user);
-      });
+        localStorage.setItem('aetherCurrentUser', JSON.stringify(userData));
+        
+        // Add to master registration list & create timeline event
+        const allRegistrations = JSON.parse(localStorage.getItem('aetherAllRegistrations') || '[]');
+        allRegistrations.push(userData);
+        localStorage.setItem('aetherAllRegistrations', JSON.stringify(allRegistrations));
 
-      // --- Login Handler ---
-      formLogin.addEventListener('submit', e => {
-        e.preventDefault();
-        const email    = document.getElementById('login-email').value.trim();
-        const password = document.getElementById('login-password').value;
-        let users = loadUsers();
-        const user = users.find(u => u.email === email && u.password === password);
-        if (!user) {
-          errLogin.textContent = 'Invalid email or password.';
-          return;
-        }
-        setCurrent(email);
-        showApp(user);
-      });
+        const connections = JSON.parse(localStorage.getItem('aetherConnections') || '[]');
+        connections.unshift({ name: userData.fullName, avatarUrl: userData.avatarUrl, connectedAt: new Date().toISOString() });
+        localStorage.setItem('aetherConnections', JSON.stringify(connections.slice(0, 100)));
 
-      // --- Show App After Auth ---
-      function showApp(user) {
-        authPage.classList.add('hidden');
-        mainApp.classList.remove('hidden');
-        profileAvatar.src     = user.avatarUrl;
-        profileName.textContent     = user.fullName;
-        profileHeadline.textContent = user.headline;
-        renderFeed(user);
-        setupFeedActions(user);
-        setupMindMap(user);
-        setupAdmin();
-      }
-
-      // --- Strategy Feed ---
-      function renderFeed(user) {
-        strategyFeed.innerHTML = user.feed.map(item =>
-          `<div class="card">
-             <p>${item.content}</p>
-             <p class="text-xs text-text-secondary mt-1">${new Date(item.timestamp).toLocaleString()}</p>
-           </div>`
-        ).join('');
-      }
-      function setupFeedActions(user) {
-        addNoteBtn.onclick = () => {
-          const text = prompt('Enter note:');
-          if (!text) return;
-          user.feed.unshift({ content: text, timestamp: Date.now() });
-          saveUser(user);
-          renderFeed(user);
-        };
-        addGoalBtn.onclick = () => {
-          const text = prompt('Enter goal:');
-          if (!text) return;
-          user.feed.unshift({ content: `🎯 ${text}`, timestamp: Date.now() });
-          saveUser(user);
-          renderFeed(user);
-        };
-      }
-      function saveUser(user) {
-        let users = loadUsers();
-        const i = users.findIndex(u => u.email === user.email);
-        users[i] = user;
-        saveUsers(users);
-      }
-
-      // --- Mind Map Setup ---
-      function setupMindMap(user) {
-        openMapBtn.onclick = () => mapModal.classList.add('active');
-        closeMapBtn.onclick= () => mapModal.classList.remove('active');
-        renderMindMap(user);
-      }
-      function renderMindMap(user) {
-        mapContainer.innerHTML = '';
-        const svg = document.createElementNS('http://www.w3.org/2000/svg','svg');
-        svg.id = 'mind-map-svg';
-        mapContainer.appendChild(svg);
-
-        const editor = document.getElementById('node-editor');
-        mapContainer.appendChild(editor);
-
-        let nodes = user.mindMap.nodes || [];
-        let conns = user.mindMap.connections || [];
-        let activeNode = null;
-
-        function saveMap() {
-          user.mindMap = { nodes, connections: conns };
-          saveUser(user);
-        }
-        function drawConnections() {
-          svg.innerHTML = '';
-          conns.forEach(c => {
-            const fn = nodes.find(n=>n.id===c.from);
-            const tn = nodes.find(n=>n.id===c.to);
-            if(!fn||!tn) return;
-            const line = document.createElementNS('http://www.w3.org/2000/svg','line');
-            const r1 = fn.el.getBoundingClientRect(), r2 = tn.el.getBoundingClientRect();
-            const p = mapContainer.getBoundingClientRect();
-            line.setAttribute('x1', r1.left-p.left+r1.width/2);
-            line.setAttribute('y1', r1.top-p.top+r1.height/2);
-            line.setAttribute('x2', r2.left-p.left+r2.width/2);
-            line.setAttribute('y2', r2.top-p.top+r2.height/2);
-            svg.appendChild(line);
-          });
-        }
-        function updateNodeVisual(n) {
-          const u = n.data.uncertainty;
-          const r = Math.floor(240-140*(u/10)),
-                g = Math.floor(150-50*(u/10)),
-                b = Math.floor(250-200*(u/10));
-          n.el.style.backgroundColor = `rgb(${r},${g},${b})`;
-        }
-        function openEditor(n) {
-          if(activeNode) activeNode.el.classList.remove('selected');
-          activeNode = n; n.el.classList.add('selected');
-          editor.style.display = 'block';
-          lblInput.value = n.data.label;
-          rngInput.value = n.data.uncertainty;
-          rngValue.textContent = n.data.uncertainty;
-        }
-        lblInput.oninput = () => {
-          if(!activeNode) return;
-          activeNode.data.label = lblInput.value;
-          activeNode.el.textContent = lblInput.value;
-          saveMap();
-        };
-        rngInput.oninput = () => {
-          if(!activeNode) return;
-          const u = parseInt(rngInput.value);
-          activeNode.data.uncertainty = u;
-          rngValue.textContent = u;
-          updateNodeVisual(activeNode);
-          saveMap();
-        };
-        closeEditor.onclick = () => {
-          if(activeNode) activeNode.el.classList.remove('selected');
-          editor.style.display = 'none';
-          activeNode = null;
-        };
-        deleteBtn.onclick = () => {
-          if(!activeNode) return;
-          mapContainer.removeChild(activeNode.el);
-          nodes = nodes.filter(n=>n!==activeNode);
-          conns = conns.filter(c=>c.from!==activeNode.data.id && c.to!==activeNode.data.id);
-          editor.style.display = 'none'; activeNode = null;
-          saveMap(); drawConnections();
-        };
-        mapContainer.ondblclick = e => {
-          if(e.target!==mapContainer) return;
-          const rect = mapContainer.getBoundingClientRect();
-          const x = e.clientX-rect.left-70;
-          const y = e.clientY-rect.top-50;
-          const label = prompt('Enter node label:');
-          if(!label) return;
-          const d = { x,y,label,uncertainty:5,id:Date.now() };
-          createNode(d); nodes.push(d);
-          saveMap(); drawConnections();
-        };
-        function createNode(data) {
-          const div = document.createElement('div');
-          div.className = 'puzzle-node';
-          div.textContent = data.label;
-          div.style.transform = `translate(${data.x}px,${data.y}px)`;
-          div.dataset.id = data.id;
-          mapContainer.appendChild(div);
-          const node = { el:div, data };
-          updateNodeVisual(node);
-          div.addEventListener('click', ev => {
-            ev.stopPropagation();
-            if(ev.shiftKey && activeNode && activeNode!==node) {
-              conns.push({ from: activeNode.data.id, to: node.data.id });
-              saveMap(); drawConnections();
-            } else openEditor(node);
-          });
-          return node;
-        }
-        nodes.forEach(d=>createNode(d));
-        drawConnections();
-        interact('.puzzle-node').draggable({
-          listeners: {
-            move(ev) {
-              const id=ev.target.dataset.id;
-              const n = nodes.find(x=>x.data.id==id);
-              n.data.x += ev.dx; n.data.y += ev.dy;
-              ev.target.style.transform = `translate(${n.data.x}px,${n.data.y}px)`;
-              drawConnections();
-            },
-            end(){ saveMap(); }
-          }
-        });
-      }
-
-      // --- Admin Panel ---
-      openAdminBtn.onclick = () => {
-        adminModal.classList.remove('hidden');
-        const users = loadUsers();
-        adminList.innerHTML = users.map(u =>
-          `<div class="card p-2">
-             <p class="font-semibold">${u.fullName}</p>
-             <p class="text-sm">${u.email}</p>
-           </div>`
-        ).join('');
-      };
-      closeAdminBtn.onclick = () => adminModal.classList.add('hidden');
-
-      // --- Navigation ---
-      sidebarBtns.forEach(btn=>{
-        btn.addEventListener('click',()=>{
-          sidebarBtns.forEach(b=>b.classList.remove('active'));
-          btn.classList.add('active');
-          const tgt = btn.dataset.target;
-          sections.forEach(s=>{
-            s.id === tgt ? s.classList.add('active') : s.classList.remove('active');
-          });
-        });
-      });
-
-      // --- Sign Out ---
-      signOutBtn.onclick = () => {
-        clearCurrent();
-        location.reload();
-      };
-
-      // --- Initialize on load ---
-      const curr = getCurrent();
-      if(curr) {
-        const user = loadUsers().find(u=>u.email===curr);
-        if(user) showApp(user);
-        else clearCurrent();
-      }
-      else showLogin();
+        showApp(userData);
     });
-  </script>
+
+    showSigninBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        signinModal.style.display = 'flex';
+    });
+    signinModal.addEventListener('click', (e) => { if (e.target === signinModal) signinModal.style.display = 'none'; });
+
+    signinForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const storedUser = localStorage.getItem('aetherCurrentUser');
+        if (storedUser) {
+            const userData = JSON.parse(storedUser);
+            if (userData.email === document.getElementById('signin-email').value) {
+                showApp(userData);
+            } else {
+                alert('No account found with that email. Please register.');
+            }
+        } else {
+            alert('No account found. Please register.');
+        }
+    });
+
+    // Check for logged-in user on page load
+    const storedUser = localStorage.getItem('aetherCurrentUser');
+    if (storedUser) {
+        showApp(JSON.parse(storedUser));
+    } else {
+        landingPage.style.display = 'flex';
+    }
+
+    function initializeMainApp(userData) {
+        document.getElementById('nav-avatar').src = userData.avatarUrl;
+        
+        const nav = document.getElementById('main-nav');
+        const profileNavBtn = document.getElementById('profile-nav-btn');
+        const sections = document.querySelectorAll('.content-section');
+        
+        function navigateTo(targetId) {
+            nav.querySelectorAll('button').forEach(btn => btn.classList.toggle('active', btn.dataset.target === targetId));
+            profileNavBtn.classList.toggle('active', 'profile' === targetId);
+            sections.forEach(section => section.classList.toggle('active', section.id === targetId));
+            
+            if (targetId === 'canvas') init3DGoalMap();
+            if (targetId === 'profile') renderProfilePage();
+            if (targetId === 'collaboration') initCollaborationPage();
+            if (targetId === 'strategy') initStrategyPage();
+            if (targetId === 'admin') initAdminPage();
+            if (targetId === 'dashboard') loadTimeline();
+        }
+
+        nav.addEventListener('click', (e) => {
+            const button = e.target.closest('button');
+            if (button && button.dataset.target) {
+                if (button.dataset.target === 'admin') {
+                    initAdminPage();
+                }
+                navigateTo(button.dataset.target);
+            }
+        });
+        profileNavBtn.addEventListener('click', () => navigateTo('profile'));
+
+        document.getElementById('sign-out-btn').addEventListener('click', () => {
+            localStorage.removeItem('aetherCurrentUser');
+            mainApp.style.display = 'none';
+            landingPage.style.display = 'flex';
+        });
+        
+        // --- Dashboard Widgets ---
+        function renderFeed() {
+            const feedContainer = document.getElementById('strategy-feed');
+            feedContainer.innerHTML = '';
+            appData.feedItems.forEach(item => {
+                let icon, color;
+                const type = item.type.split('-')[0];
+                switch(type) {
+                    case 'ai':      icon = '💡'; color = 'blue'; break;
+                    case 'node':    icon = '🎯'; color = 'gray'; break;
+                    default:        icon = '🔔'; color = 'gray';
+                }
+                const card = `<article class="flex bg-white rounded-lg overflow-hidden shadow-sm border border-border-color"><div class="p-4 flex-1"><div class="flex items-start gap-4"><div class="feed-card-icon bg-${color}-100 text-${color}-600 rounded-full flex items-center justify-center text-xl">${icon}</div><p class="text-text-secondary searchable flex-1">${item.content}</p></div></div></article>`;
+                feedContainer.insertAdjacentHTML('afterbegin', card);
+            });
+        }
+        
+        // --- Timeline Widget ---
+        function loadTimeline() {
+             const list = document.getElementById('timelineList');
+             list.innerHTML = '';
+             const connections = JSON.parse(localStorage.getItem('aetherConnections')||'[]');
+             if (connections.length === 0) {
+                 list.innerHTML = `<li class="text-sm text-gray-500">No connections yet. New user registrations will appear here.</li>`;
+                 return;
+             }
+             connections.slice(0, 10).forEach(conn => {
+                 const li = document.createElement('li');
+                 li.className = "flex items-center";
+                 li.innerHTML = `<img src="${conn.avatarUrl||'https://i.pravatar.cc/40'}" class="timeline-avatar"><div class="flex-1"><div class="font-medium text-sm">${conn.name}</div><div class="text-xs text-gray-500">joined ${new Date(conn.connectedAt).toLocaleDateString()}</div></div>`;
+                 list.appendChild(li);
+             });
+        }
+
+        // --- Podcast Widget ---
+        async function loadPodcast(url) {
+            const list = document.getElementById('episodeFeed');
+            if (!url) {
+                alert('Please enter a valid RSS feed URL.');
+                return;
+            }
+            list.innerHTML = `<li class="text-sm text-gray-500">Loading feed...</li>`;
+            try {
+                const res = await fetch(`https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(url)}`);
+                if (!res.ok) throw new Error('Failed to fetch feed');
+                const data = await res.json();
+                
+                if (data.status !== 'ok') {
+                     list.innerHTML = `<li class="text-sm text-red-500">Error: ${data.message}</li>`;
+                     return;
+                }
+
+                list.innerHTML = '';
+                data.items.slice(0, 5).forEach(item => {
+                    const li = document.createElement('li');
+                    li.className = "border-t border-gray-200 pt-3";
+                    li.innerHTML = `<p class="font-semibold text-sm mb-2">${item.title}</p><audio controls class="w-full h-8" src="${item.enclosure.link}"></audio>`;
+                    list.appendChild(li);
+                });
+            } catch (err) {
+                list.innerHTML = `<li class="text-sm text-red-500">Could not load feed. Check the URL and try again.</li>`;
+                console.error("Podcast Error:", err);
+            }
+        }
+        document.getElementById('fetchFeed').onclick = () => loadPodcast(document.getElementById('feedUrl').value);
+
+
+        // --- Profile Page & Data Export ---
+        function renderProfilePage() {
+            const user = JSON.parse(localStorage.getItem('aetherCurrentUser'));
+            document.getElementById('profile-avatar').src = user.avatarUrl;
+            document.getElementById('profile-name').textContent = user.fullName;
+            document.getElementById('profile-headline').textContent = user.headline;
+            document.getElementById('profile-bio').textContent = user.bio;
+            document.getElementById('profile-email').textContent = user.email;
+        }
+
+        document.getElementById('edit-profile-btn').addEventListener('click', () => {
+             const user = JSON.parse(localStorage.getItem('aetherCurrentUser'));
+             regForm.fullName.value = user.fullName;
+             regForm.email.value = user.email;
+             regForm.headline.value = user.headline;
+             regForm.bioReg.value = user.bio;
+             regForm.avatarReg.value = user.avatarUrl;
+             mainApp.style.display = 'none';
+             landingPage.style.display = 'flex';
+        });
+
+        document.getElementById('exportMyData').onclick = () => {
+             const user = JSON.parse(localStorage.getItem('aetherCurrentUser'));
+             if (!user) return alert('No user data to export');
+             const ws = XLSX.utils.json_to_sheet([user]);
+             const wb = XLSX.utils.book_new();
+             XLSX.utils.book_append_sheet(wb, ws, 'My Data');
+             XLSX.writeFile(wb, `aether_my_data_${Date.now()}.xlsx`);
+        };
+
+
+        // --- Collaboration Page ---
+        function initCollaborationPage() {
+            const projectForm = document.getElementById('projectForm');
+            const dropZone = document.getElementById('dropZone');
+            const fileInput = document.getElementById('projAssets');
+            const fileList = document.getElementById('fileList');
+
+            projectForm.onsubmit = e => {
+                e.preventDefault();
+                if (!e.target.checkValidity()) return e.target.reportValidity();
+                const id = Date.now().toString();
+                const title = document.getElementById('projName').value;
+                appData.projects.push({ id, title });
+                localStorage.setItem('aetherProjects', JSON.stringify(appData.projects));
+                renderProjects();
+                projectForm.reset();
+                fileList.innerHTML = '';
+            };
+            
+            dropZone.onclick = () => fileInput.click();
+            dropZone.ondragover = e => { e.preventDefault(); dropZone.classList.add('drag-over'); };
+            dropZone.ondragleave = () => dropZone.classList.remove('drag-over');
+            dropZone.ondrop = e => {
+                e.preventDefault();
+                dropZone.classList.remove('drag-over');
+                fileInput.files = e.dataTransfer.files;
+                updateFileList();
+            };
+            fileInput.onchange = updateFileList;
+            
+            function updateFileList() {
+                fileList.innerHTML = '';
+                if (fileInput.files.length > 0) {
+                     [...fileInput.files].forEach(file => {
+                         const li = document.createElement('li');
+                         li.textContent = `${file.name} (${(file.size / 1024).toFixed(1)} KB)`;
+                         fileList.appendChild(li);
+                     });
+                }
+            }
+            renderProjects();
+        }
+
+        function renderProjects() {
+            const ul = document.getElementById('projectsList');
+            ul.innerHTML = appData.projects.map(p => `
+                <li data-id="${p.id}" class="flex justify-between items-center p-2 hover:bg-gray-50 rounded">
+                    <strong class="text-text-primary">${p.title}</strong>
+                    <button class="joinProject text-sm bg-green-600 text-white px-3 py-1 rounded-full hover:bg-green-700">Join Chat</button>
+                </li>
+            `).join('');
+            document.querySelectorAll('.joinProject').forEach(btn => {
+                btn.onclick = () => startCollaboration(btn.closest('li').dataset.id);
+            });
+        }
+        
+        let socket;
+        function startCollaboration(projId) {
+            document.getElementById('chatSection').style.display = 'block';
+            document.getElementById('publishSection').style.display = 'block';
+            if (!socket) {
+                 const msgBox = document.getElementById('chatBox');
+                 msgBox.innerHTML = `<p class="text-sm text-gray-500 italic">Chat connected for project ${projId}. (This is a demo)</p>`;
+                 socket = { send: (message) => { const p = document.createElement('p'); p.textContent = "You: " + message; msgBox.appendChild(p); msgBox.scrollTop = msgBox.scrollHeight; } };
+            }
+            document.getElementById('msgForm').onsubmit = e => {
+                 e.preventDefault();
+                 const input = document.getElementById('msgInput');
+                 if (input.value) { socket.send(input.value); input.value = ''; }
+            };
+        }
+        
+        const checkboxes = document.querySelectorAll('.consentChk');
+        checkboxes.forEach(c => c.addEventListener('change', () => {
+            const allChecked = [...checkboxes].every(cb => cb.checked);
+            const publishBtn = document.getElementById('goPublic');
+            publishBtn.disabled = !allChecked;
+            publishBtn.classList.toggle('bg-gray-300', !allChecked);
+            publishBtn.classList.toggle('cursor-not-allowed', !allChecked);
+            publishBtn.classList.toggle('bg-accent-primary', allChecked);
+        }));
+
+
+        // --- Admin Page ---
+        function initAdminPage() {
+            const loginForm = document.getElementById('adminLoginForm');
+            const dashboard = document.getElementById('adminDashboard');
+            
+            document.getElementById('adminLoginBtn').onclick = () => {
+                 const code = document.getElementById('adminCode').value;
+                 if (code === ADMIN_PIN) {
+                     loginForm.style.display = 'none';
+                     dashboard.style.display = 'block';
+                     const allRegs = JSON.parse(localStorage.getItem('aetherAllRegistrations')||'[]');
+                     const allProjs = JSON.parse(localStorage.getItem('aetherProjects')||'[]');
+                     const allConns = JSON.parse(localStorage.getItem('aetherConnections')||'[]');
+                     document.getElementById('totalRegs').textContent = allRegs.length;
+                     document.getElementById('totalProjects').textContent = allProjs.length;
+                     document.getElementById('totalConnections').textContent = allConns.length;
+                 } else alert('Invalid admin PIN');
+            };
+            
+            document.getElementById('exportMaster').onclick = () => {
+                 const allRegs = JSON.parse(localStorage.getItem('aetherAllRegistrations')||'[]');
+                 const allProjs = JSON.parse(localStorage.getItem('aetherProjects')||'[]');
+                 const allConns = JSON.parse(localStorage.getItem('aetherConnections')||'[]');
+                 
+                 const wb = XLSX.utils.book_new();
+                 XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(allRegs), 'Registrations');
+                 XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(allProjs), 'Projects');
+                 XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(allConns), 'Connections');
+                 XLSX.writeFile(wb, `aether_master_data_${Date.now()}.xlsx`);
+            };
+        }
+
+        // --- Dummy/Placeholder Functions for other sections ---
+        function init3DGoalMap() { /* 3D map logic would go here */ }
+        function initStrategyPage() { /* Accordion strategy logic would go here */ }
+
+
+        // --- Initial Renders ---
+        renderFeed();
+        loadTimeline();
+        navigateTo('dashboard');
+    }
+});
+</script>
 </body>
 </html>
