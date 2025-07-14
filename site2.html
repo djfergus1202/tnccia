@@ -1,587 +1,189 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Aether: Interactive Career & Study Hub</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/interactjs/dist/interact.min.js"></script>
-    <style>
-        :root {
-            --bg-main: #f3f2ef;
-            --bg-alt: #ffffff;
-            --text-primary: #1f2937;
-            --text-secondary: #4b5563;
-            --accent-primary: #0a66c2;
-            --accent-secondary: #004182;
-            --border-color: #e0e0e0;
-        }
-        body { font-family: -apple-system, system-ui, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', 'Fira Sans', Ubuntu, Oxygen, 'Oxygen Sans', Cantarell, 'Droid Sans', 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Lucida Grande', Helvetica, Arial, sans-serif; background-color: var(--bg-main); color: var(--text-primary); }
-        .nav-button.active { color: var(--accent-primary); font-weight: 600; }
-        .content-section { display: none; }
-        .content-section.active { display: block; }
-        
-        #mind-map-modal {
-            background-color: rgba(0, 0, 0, 0.7);
-            backdrop-filter: blur(5px);
-        }
-        #mind-map-container { 
-            position: relative; 
-            width: 100%; 
-            height: 100%; 
-            background-color: #1e293b;
-            background-image: radial-gradient(rgba(255,255,255,0.1) 1px, transparent 1px);
-            background-size: 20px 20px;
-            border-radius: .75rem; 
-            overflow: hidden; 
-        }
-        .puzzle-node {
-            position: absolute;
-            width: 140px;
-            height: 100px;
-            color: white;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            text-align: center;
-            padding: 0.5rem;
-            font-weight: 600;
-            cursor: grab;
-            user-select: none;
-            border: 2px solid rgba(255, 255, 255, 0.5);
-            border-radius: 0.75rem;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.4);
-            transition: transform 0.2s, box-shadow 0.2s, background-color 0.3s;
-            touch-action: none;
-        }
-        .puzzle-node.selected {
-            outline: 3px solid #facc15;
-            box-shadow: 0 0 20px #facc15;
-            z-index: 100;
-        }
-        #node-editor {
-            position: absolute;
-            background: var(--bg-alt);
-            padding: 1rem;
-            border-radius: 0.5rem;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.25);
-            z-index: 101;
-            display: none;
-            width: 280px;
-        }
-        #mind-map-svg {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
-            z-index: 10;
-        }
-        #mind-map-svg line {
-            stroke: rgba(255, 255, 255, 0.4);
-            stroke-width: 3;
-        }
-        .loader {
-            border: 4px solid #f3f3f3;
-            border-top: 4px solid var(--accent-primary);
-            border-radius: 50%;
-            width: 40px;
-            height: 40px;
-            animation: spin 1s linear infinite;
-        }
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Aether: Interactive Career & Study Hub</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/interactjs/dist/interact.min.js"></script>
+  <style>
+    :root {
+      --bg-main: #f3f2ef;
+      --bg-alt: #ffffff;
+      --text-primary: #1f2937;
+      --text-secondary: #4b5563;
+      --accent-primary: #0a66c2;
+      --accent-secondary: #004182;
+      --border-color: #e0e0e0;
+    }
+    body {
+      font-family: -apple-system, system-ui, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', 'Fira Sans', Ubuntu;
+      background-color: var(--bg-main);
+      color: var(--text-primary);
+    }
+    .tab-btn {
+      flex: 1;
+      text-align: center;
+      padding: .75rem 0;
+      font-weight: 600;
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      transition: border-color .2s, color .2s;
+    }
+    .tab-btn.active {
+      border-color: var(--accent-primary);
+      color: var(--accent-primary);
+    }
+    .form-container {
+      margin-top: 1rem;
+    }
+    .loader {
+      border: 4px solid #f3f3f3;
+      border-top: 4px solid var(--accent-primary);
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      animation: spin 1s linear infinite;
+    }
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+  </style>
 </head>
 <body class="antialiased">
-
-    <!-- Auth Page -->
-    <div id="auth-page" class="flex items-center justify-center min-h-screen bg-gray-100">
-        <div class="p-8 bg-white rounded-xl shadow-2xl max-w-md w-full">
-            <h1 class="text-4xl font-black text-accent-primary mb-2 text-center">Aether</h1>
-            <p class="text-center text-text-secondary mb-6">Your strategic career co-pilot.</p>
-            
-            <!-- Sign In Form -->
-            <form id="signin-form" class="space-y-4">
-                <input type="email" id="signin-email" placeholder="Email" required class="w-full px-4 py-3 rounded-lg border focus:outline-none focus:ring-2 focus:ring-accent-primary">
-                <input type="password" id="signin-password" placeholder="Password" required class="w-full px-4 py-3 rounded-lg border focus:outline-none focus:ring-2 focus:ring-accent-primary">
-                <button type="submit" class="w-full py-3 bg-accent-primary text-white font-bold rounded-full hover:bg-accent-secondary transition-colors">Sign In</button>
-                <p class="text-center text-sm">New to Aether? <a href="#" id="show-register" class="font-semibold text-accent-primary hover:underline">Create an account</a></p>
-            </form>
-
-            <!-- Registration Form -->
-            <form id="register-form" class="hidden space-y-4">
-                <input type="text" id="register-name" placeholder="Full Name" required class="w-full px-4 py-3 rounded-lg border focus:outline-none focus:ring-2 focus:ring-accent-primary">
-                <input type="email" id="register-email" placeholder="Email" required class="w-full px-4 py-3 rounded-lg border focus:outline-none focus:ring-2 focus:ring-accent-primary">
-                <input type="password" id="register-password" placeholder="Password (min. 6 characters)" required class="w-full px-4 py-3 rounded-lg border focus:outline-none focus:ring-2 focus:ring-accent-primary">
-                <input type="text" id="register-headline" placeholder="Professional Headline" class="w-full px-4 py-3 rounded-lg border focus:outline-none focus:ring-2 focus:ring-accent-primary">
-                <button type="submit" class="w-full py-3 bg-accent-primary text-white font-bold rounded-full hover:bg-accent-secondary transition-colors">Create Account</button>
-                <p class="text-center text-sm">Already have an account? <a href="#" id="show-signin" class="font-semibold text-accent-primary hover:underline">Sign in</a></p>
-            </form>
-            <p id="auth-error" class="text-red-500 text-sm mt-4 text-center"></p>
-        </div>
+  <!-- Auth Page -->
+  <div id="auth-page" class="flex items-center justify-center min-h-screen bg-gray-100">
+    <div class="bg-white rounded-xl shadow-2xl max-w-md w-full">
+      <h1 class="text-4xl font-black text-center text-accent-primary mt-8">Aether</h1>
+      <div class="flex mt-6 border-b border-border-color">
+        <div id="tab-login" class="tab-btn active">Login</div>
+        <div id="tab-register" class="tab-btn">Sign Up</div>
+      </div>
+      <div class="form-container px-8 pb-8">
+        <!-- Login Form -->
+        <form id="signin-form" class="space-y-4">
+          <input type="email" id="signin-email" placeholder="Email" required class="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-accent-primary">
+          <input type="password" id="signin-password" placeholder="Password" required class="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-accent-primary">
+          <button type="submit" class="w-full py-3 bg-accent-primary text-white font-bold rounded-lg hover:bg-accent-secondary transition">Login</button>
+        </form>
+        <!-- Registration Form -->
+        <form id="register-form" class="space-y-4 hidden">
+          <input type="text" id="register-name" placeholder="Full Name" required class="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-accent-primary">
+          <input type="email" id="register-email" placeholder="Email" required class="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-accent-primary">
+          <input type="password" id="register-password" placeholder="Password (min 6 chars)" required class="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-accent-primary">
+          <input type="text" id="register-headline" placeholder="Professional Headline" class="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-accent-primary">
+          <button type="submit" class="w-full py-3 bg-accent-primary text-white font-bold rounded-lg hover:bg-accent-secondary transition">Create Account</button>
+        </form>
+        <p id="auth-error" class="text-red-500 text-center text-sm mt-4"></p>
+      </div>
     </div>
+  </div>
 
-    <!-- Main App Container -->
-    <div id="main-app" class="hidden">
-        <header class="bg-white shadow-sm fixed w-full z-30">
-            <div class="max-w-6xl mx-auto px-4 py-2 flex items-center justify-between">
-                <h1 class="text-2xl font-bold text-accent-primary">Aether</h1>
-                <button id="sign-out-btn" class="text-sm text-text-secondary hover:text-accent-primary">Sign Out</button>
-            </div>
-        </header>
-
-        <main class="max-w-6xl mx-auto pt-20 grid grid-cols-1 md:grid-cols-4 gap-6 px-4">
-            <!-- Left Panel -->
-            <aside class="md:col-span-1 space-y-6">
-                <div class="bg-white p-4 rounded-lg border border-border-color text-center">
-                    <img id="nav-avatar" src="https://i.pravatar.cc/80" class="w-20 h-20 rounded-full mx-auto mb-2"/>
-                    <h2 id="profile-name" class="font-bold text-lg"></h2>
-                    <p id="profile-headline" class="text-sm text-text-secondary"></p>
-                </div>
-                <div class="bg-white p-4 rounded-lg border border-border-color space-y-2">
-                    <button id="open-mind-map-btn" class="w-full text-left font-semibold text-text-primary hover:bg-gray-100 p-2 rounded">Mind Map</button>
-                    <button id="admin-panel-btn" class="hidden w-full text-left font-semibold text-text-primary hover:bg-gray-100 p-2 rounded">Admin Panel</button>
-                </div>
-            </aside>
-
-            <!-- Center Feed -->
-            <div id="center-feed" class="md:col-span-2 space-y-6">
-                <div class="bg-white p-4 rounded-lg border border-border-color">
-                    <h3 class="font-semibold mb-2">Add to your strategy...</h3>
-                    <textarea id="feed-input" class="w-full p-2 border rounded-lg" placeholder="What's on your mind?"></textarea>
-                    <button id="add-feed-btn" class="mt-2 w-full py-2 bg-accent-primary text-white font-bold rounded-full hover:bg-accent-secondary">Post</button>
-                </div>
-                <div id="strategy-feed" class="space-y-4"></div>
-            </div>
-
-            <!-- Right Panel -->
-            <aside class="md:col-span-1 space-y-6">
-                <div class="bg-white p-4 rounded-lg border border-border-color">
-                    <h3 class="font-bold mb-2">Opportunities</h3>
-                    <div id="opportunities-panel" class="space-y-3">
-                        <p class="text-sm text-text-secondary">AI-suggested roles based on your profile will appear here.</p>
-                    </div>
-                </div>
-            </aside>
-        </main>
-    </div>
-
-    <!-- Modals -->
-    <div id="mind-map-modal" class="fixed inset-0 z-40 hidden items-center justify-center p-4">
-        <div class="w-full h-full max-w-5xl max-h-[85vh] relative">
-            <button id="close-mind-map-btn" class="absolute -top-2 -right-2 z-50 bg-white rounded-full w-8 h-8 flex items-center justify-center text-xl font-bold">&times;</button>
-            <div id="mind-map-container">
-                <div id="node-editor">
-                    <h3 class="font-bold mb-2">Edit Goal</h3>
-                    <div class="mb-2">
-                        <label for="node-label" class="block text-sm font-medium text-gray-700">Goal Name</label>
-                        <input type="text" id="node-label" class="w-full p-1 border rounded mt-1">
-                    </div>
-                    <div class="mb-2">
-                        <label for="node-uncertainty" class="block text-sm font-medium text-gray-700">Uncertainty: <span id="uncertainty-value">5</span></label>
-                        <input type="range" id="node-uncertainty" min="1" max="10" value="5" class="w-full mt-1">
-                    </div>
-                    <div class="flex justify-between items-center mt-4">
-                        <button id="delete-node-btn" class="text-sm text-red-600 hover:underline">Delete</button>
-                        <button id="close-editor" class="text-sm text-gray-600 hover:underline">Close</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-    <div id="admin-modal" class="fixed inset-0 z-40 hidden items-center justify-center p-4 bg-black bg-opacity-50">
-        <div class="bg-white rounded-lg shadow-xl w-full max-w-2xl p-6">
-            <h2 class="text-2xl font-bold mb-4">Admin Panel: All Users</h2>
-            <div id="admin-user-list" class="max-h-96 overflow-y-auto"></div>
-            <button id="close-admin-modal-btn" class="mt-4 w-full py-2 bg-gray-200 rounded-lg">Close</button>
-        </div>
-    </div>
-    <div id="loading-overlay" class="fixed inset-0 z-50 flex items-center justify-center bg-white bg-opacity-75">
-        <div class="loader"></div>
-    </div>
+  <!-- Main App -->
+  <div id="main-app" class="hidden">
+    <!-- existing main-app content -->
+  </div>
 
 <script type="module">
-    // Firebase Imports
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-    import { 
-        getAuth, 
-        onAuthStateChanged, 
-        createUserWithEmailAndPassword, 
-        signInWithEmailAndPassword, 
-        signOut 
-    } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-    import { 
-        getFirestore, 
-        doc, 
-        setDoc, 
-        getDoc, 
-        collection,
-        onSnapshot,
-        updateDoc,
-        getDocs
-    } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+  import { getAuth, onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+  import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-    // --- App State and Config ---
-    const appState = {
-        currentUser: null,
-        mindMap: { nodes: [], connections: [] },
-        feed: [],
-        unsubscribeMindMap: null,
-        unsubscribeFeed: null,
-    };
-    const ADMIN_UID = "YOUR_ADMIN_UID_HERE"; // Replace with your actual Firebase Admin UID
-
-    // --- Firebase Initialization ---
+  document.addEventListener('DOMContentLoaded', () => {
+    // ===== Replace with your Firebase project config =====
     const firebaseConfig = {
-        apiKey: "YOUR_API_KEY",
-        authDomain: "YOUR_AUTH_DOMAIN",
-        projectId: "YOUR_PROJECT_ID",
-        storageBucket: "YOUR_STORAGE_BUCKET",
-        messagingSenderId: "YOUR_SENDER_ID",
-        appId: "YOUR_APP_ID"
+      apiKey: "YOUR_API_KEY",           // <--- Insert your API key
+      authDomain: "YOUR_PROJECT.firebaseapp.com",
+      projectId: "YOUR_PROJECT_ID",
+      storageBucket: "YOUR_PROJECT.appspot.com",
+      messagingSenderId: "YOUR_SENDER_ID",
+      appId: "YOUR_APP_ID"
     };
+    if (!firebaseConfig.apiKey || firebaseConfig.apiKey.startsWith('YOUR_')) {
+      document.getElementById('auth-error').textContent = '🚨 Missing or invalid Firebase API key in firebaseConfig.';
+      console.error('Invalid Firebase API key', firebaseConfig.apiKey);
+      return;
+    }
+
+    // Initialize Firebase
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
     const db = getFirestore(app);
 
-    // --- UI Elements ---
-    const mainApp = document.getElementById('main-app');
-    const authPage = document.getElementById('auth-page');
-    const loadingOverlay = document.getElementById('loading-overlay');
-    const signinForm = document.getElementById('signin-form');
+    const authPage     = document.getElementById('auth-page');
+    const mainApp      = document.getElementById('main-app');
+    const signinForm   = document.getElementById('signin-form');
     const registerForm = document.getElementById('register-form');
-    const authError = document.getElementById('auth-error');
+    const tabLogin     = document.getElementById('tab-login');
+    const tabRegister  = document.getElementById('tab-register');
+    const authError    = document.getElementById('auth-error');
 
-    // --- Auth UI Logic ---
-    document.getElementById('show-register').addEventListener('click', (e) => {
-        e.preventDefault();
-        signinForm.classList.add('hidden');
-        registerForm.classList.remove('hidden');
+    // Tab switching
+    tabLogin.addEventListener('click', () => {
+      tabLogin.classList.add('active');
+      tabRegister.classList.remove('active');
+      signinForm.classList.remove('hidden');
+      registerForm.classList.add('hidden');
+      authError.textContent = '';
     });
-    document.getElementById('show-signin').addEventListener('click', (e) => {
-        e.preventDefault();
-        registerForm.classList.add('hidden');
-        signinForm.classList.remove('hidden');
-    });
-
-    // --- Firebase Auth Handlers ---
-    registerForm.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const name = document.getElementById('register-name').value;
-        const email = document.getElementById('register-email').value;
-        const password = document.getElementById('register-password').value;
-        const headline = document.getElementById('register-headline').value;
-        
-        try {
-            const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-            const user = userCredential.user;
-            
-            await setDoc(doc(db, "users", user.uid), {
-                fullName: name,
-                email: email,
-                headline: headline,
-                avatarUrl: `https://i.pravatar.cc/150?u=${user.uid}`
-            });
-            await setDoc(doc(db, "users", user.uid, "data", "mindMap"), { nodes: [], connections: [] });
-            await setDoc(doc(db, "users", user.uid, "data", "feed"), { items: [] });
-
-        } catch (error) {
-            authError.textContent = error.message;
-        }
+    tabRegister.addEventListener('click', () => {
+      tabRegister.classList.add('active');
+      tabLogin.classList.remove('active');
+      registerForm.classList.remove('hidden');
+      signinForm.classList.add('hidden');
+      authError.textContent = '';
     });
 
-    signinForm.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const email = document.getElementById('signin-email').value;
-        const password = document.getElementById('signin-password').value;
-        try {
-            await signInWithEmailAndPassword(auth, email, password);
-        } catch (error) {
-            authError.textContent = error.message;
-        }
+    // Sign in
+    signinForm.addEventListener('submit', async e => {
+      e.preventDefault();
+      authError.textContent = '';
+      const email = document.getElementById('signin-email').value.trim();
+      const pwd   = document.getElementById('signin-password').value;
+      try {
+        await signInWithEmailAndPassword(auth, email, pwd);
+      } catch(err) {
+        authError.textContent = err.message;
+        console.error('Sign-in error:', err);
+      }
     });
 
-    document.getElementById('sign-out-btn').addEventListener('click', () => signOut(auth));
-
-    // --- Auth State Management ---
-    onAuthStateChanged(auth, async (user) => {
-        loadingOverlay.style.display = 'flex';
-        if (appState.unsubscribeMindMap) appState.unsubscribeMindMap();
-        if (appState.unsubscribeFeed) appState.unsubscribeFeed();
-
-        if (user) {
-            const userDocRef = doc(db, "users", user.uid);
-            const userDoc = await getDoc(userDocRef);
-            if (userDoc.exists()) {
-                appState.currentUser = { uid: user.uid, ...userDoc.data() };
-                authPage.style.display = 'none';
-                mainApp.style.display = 'block';
-                initializeMainApp(appState.currentUser);
-            }
-        } else {
-            appState.currentUser = null;
-            mainApp.style.display = 'none';
-            authPage.style.display = 'flex';
-        }
-        loadingOverlay.style.display = 'none';
+    // Register
+    registerForm.addEventListener('submit', async e => {
+      e.preventDefault();
+      authError.textContent = '';
+      const name     = document.getElementById('register-name').value.trim();
+      const email    = document.getElementById('register-email').value.trim();
+      const pwd      = document.getElementById('register-password').value;
+      const headline = document.getElementById('register-headline').value.trim();
+      try {
+        const { user } = await createUserWithEmailAndPassword(auth, email, pwd);
+        await setDoc(doc(db, 'users', user.uid), { fullName: name, email, headline });
+      } catch(err) {
+        authError.textContent = err.message;
+        console.error('Registration error:', err);
+      }
     });
-    
-    // --- Mind Map and Admin Panel Functions (defined outside for clarity) ---
-    function initMindMap() {
-        const container = document.getElementById('mind-map-container');
-        container.innerHTML = '';
 
-        const editor = document.getElementById('node-editor');
-        container.appendChild(editor);
+    // Auth state observer
+    onAuthStateChanged(auth, async user => {
+      if (user) {
+        authPage.classList.add('hidden');
+        mainApp.classList.remove('hidden');
+        const userDoc = await getDoc(doc(db, 'users', user.uid));
+        initializeMainApp({ uid: user.uid, ...userDoc.data() });
+      } else {
+        mainApp.classList.add('hidden');
+        authPage.classList.remove('hidden');
+      }
+    });
+  });
 
-        const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-        svg.id = 'mind-map-svg';
-        container.appendChild(svg);
-
-        let nodes = [];
-        let connections = appState.mindMap.connections;
-        let selectedForConnection = [];
-        let activeNode = null;
-
-        const labelInput = document.getElementById('node-label');
-        const uncertaintySlider = document.getElementById('node-uncertainty');
-        const uncertaintyValue = document.getElementById('uncertainty-value');
-        
-        const mindMapDocRef = doc(db, "users", appState.currentUser.uid, "data", "mindMap");
-
-        function saveMindMap() {
-            const nodesData = nodes.map(n => n.data);
-            updateDoc(mindMapDocRef, { nodes: nodesData, connections: connections });
-        }
-
-        function updateNodeVisuals(node) {
-            const u = node.data.uncertainty;
-            const r = Math.floor(240 - 140 * (u / 10));
-            const g = Math.floor(150 - 50 * (u / 10));
-            const b = Math.floor(250 - 200 * (u / 10));
-            node.el.style.backgroundColor = `rgb(${r}, ${g}, ${b})`;
-        }
-        
-        function openEditor(node) {
-            if (activeNode) activeNode.el.classList.remove('selected');
-            activeNode = node;
-            node.el.classList.add('selected');
-            
-            editor.style.display = 'block';
-            labelInput.value = node.data.label;
-            uncertaintySlider.value = node.data.uncertainty;
-            uncertaintyValue.textContent = node.data.uncertainty;
-        }
-
-        labelInput.oninput = () => { if (activeNode) { activeNode.data.label = activeNode.el.textContent = labelInput.value; saveMindMap(); }};
-        uncertaintySlider.oninput = () => {
-            if (activeNode) {
-                activeNode.data.uncertainty = parseInt(uncertaintySlider.value);
-                uncertaintyValue.textContent = uncertaintySlider.value;
-                updateNodeVisuals(activeNode);
-                saveMindMap();
-            }
-        };
-        document.getElementById('close-editor').onclick = () => {
-            if (activeNode) activeNode.el.classList.remove('selected');
-            editor.style.display = 'none';
-            activeNode = null;
-        };
-        document.getElementById('delete-node-btn').onclick = () => {
-            if(activeNode) {
-                container.removeChild(activeNode.el);
-                nodes = nodes.filter(n => n.id !== activeNode.id);
-                connections = connections.filter(c => c.from !== activeNode.id && c.to !== activeNode.id);
-                editor.style.display = 'none';
-                activeNode = null;
-                drawConnections();
-                saveMindMap();
-            }
-        };
-
-        container.ondblclick = e => {
-            if (e.target !== container) return;
-            const rect = container.getBoundingClientRect();
-            const x = e.clientX - rect.left - 70;
-            const y = e.clientY - rect.top - 50;
-            const label = prompt('Enter goal name:');
-            if (label) {
-                const data = { x, y, label, uncertainty: 5, id: Date.now() };
-                createNodeElement(data);
-                saveMindMap();
-            }
-        };
-
-        function createNodeElement(data) {
-            const div = document.createElement('div');
-            div.className = 'puzzle-node';
-            div.textContent = data.label;
-            div.style.transform = `translate(${data.x}px, ${data.y}px)`;
-            div.dataset.id = data.id;
-            container.appendChild(div);
-
-            const node = { el: div, data: data, id: data.id };
-            nodes.push(node);
-            updateNodeVisuals(node);
-
-            div.addEventListener('click', (e) => {
-                e.stopPropagation();
-                if (e.shiftKey) selectForConnection(node);
-                else openEditor(node);
-            });
-            return node;
-        }
-        
-        function selectForConnection(node) {
-            if (selectedForConnection.includes(node)) return;
-            node.el.classList.add('selected');
-            selectedForConnection.push(node);
-
-            if (selectedForConnection.length === 2) {
-                connections.push({ from: selectedForConnection[0].id, to: selectedForConnection[1].id });
-                selectedForConnection.forEach(n => n.el.classList.remove('selected'));
-                selectedForConnection = [];
-                drawConnections();
-                saveMindMap();
-            }
-        }
-
-        function drawConnections() {
-            svg.innerHTML = '';
-            connections.forEach(conn => {
-                const fromNode = nodes.find(n => n.id === conn.from);
-                const toNode = nodes.find(n => n.id === conn.to);
-                if (!fromNode || !toNode) return;
-
-                const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
-                const fromRect = fromNode.el.getBoundingClientRect();
-                const toRect = toNode.el.getBoundingClientRect();
-                const containerRect = container.getBoundingClientRect();
-
-                line.setAttribute('x1', fromRect.left - containerRect.left + fromRect.width / 2);
-                line.setAttribute('y1', fromRect.top - containerRect.top + fromRect.height / 2);
-                line.setAttribute('x2', toRect.left - containerRect.left + toRect.width / 2);
-                line.setAttribute('y2', toRect.top - containerRect.top + toRect.height / 2);
-                svg.appendChild(line);
-            });
-        }
-        
-        nodes = appState.mindMap.nodes.map(createNodeElement);
-        drawConnections();
-
-        interact('.puzzle-node').draggable({
-            listeners: {
-                move(event) {
-                    const node = nodes.find(n => n.id == event.target.dataset.id);
-                    if (node) {
-                        node.data.x += event.dx;
-                        node.data.y += event.dy;
-                        event.target.style.transform = `translate(${node.data.x}px, ${node.data.y}px)`;
-                        drawConnections();
-                    }
-                },
-                end() {
-                    saveMindMap();
-                }
-            }
-        });
-    }
-
-    async function openAdminPanel() {
-        const adminModal = document.getElementById('admin-modal');
-        const userList = document.getElementById('admin-user-list');
-        userList.innerHTML = `<div class="loader mx-auto"></div>`;
-        adminModal.style.display = 'flex';
-
-        const usersCollection = collection(db, "users");
-        const userSnapshot = await getDocs(usersCollection);
-        const users = userSnapshot.docs.map(doc => doc.data());
-
-        userList.innerHTML = users.map(user => `
-            <div class="p-2 border-b">
-                <p class="font-semibold">${user.fullName}</p>
-                <p class="text-sm text-text-secondary">${user.email}</p>
-            </div>
-        `).join('');
-    }
-
-    // --- Main App Initialization ---
-    function initializeMainApp(userData) {
-        document.getElementById('nav-avatar').src = userData.avatarUrl;
-        document.getElementById('profile-name').textContent = userData.fullName;
-        document.getElementById('profile-headline').textContent = userData.headline;
-        
-        const adminBtn = document.getElementById('admin-panel-btn');
-        if (userData.uid === ADMIN_UID) {
-            adminBtn.classList.remove('hidden');
-            adminBtn.onclick = () => openAdminPanel();
-        } else {
-            adminBtn.classList.add('hidden');
-        }
-
-        const feedContainer = document.getElementById('strategy-feed');
-        const feedInput = document.getElementById('feed-input');
-
-        const feedDocRef = doc(db, "users", userData.uid, "data", "feed");
-        appState.unsubscribeFeed = onSnapshot(feedDocRef, (doc) => {
-            appState.feed = doc.data()?.items || [];
-            renderFeed();
-        });
-        
-        const mindMapDocRef = doc(db, "users", userData.uid, "data", "mindMap");
-        appState.unsubscribeMindMap = onSnapshot(mindMapDocRef, (doc) => {
-            appState.mindMap = doc.data() || { nodes: [], connections: [] };
-        });
-
-        function renderFeed() {
-            feedContainer.innerHTML = appState.feed.map(item => `
-                <div class="bg-white p-4 rounded-lg border border-border-color">
-                    <p class="text-sm">${item.content}</p>
-                    <p class="text-xs text-text-secondary mt-1">${new Date(item.timestamp).toLocaleString()}</p>
-                </div>
-            `).join('');
-        }
-        
-        document.getElementById('add-feed-btn').addEventListener('click', async () => {
-            if (feedInput.value.trim()) {
-                const newFeed = [{ content: feedInput.value, timestamp: Date.now() }, ...appState.feed];
-                await updateDoc(feedDocRef, { items: newFeed });
-                feedInput.value = '';
-            }
-        });
-        
-        const mindMapModal = document.getElementById('mind-map-modal');
-        document.getElementById('open-mind-map-btn').addEventListener('click', () => {
-            mindMapModal.style.display = 'flex';
-            initMindMap();
-        });
-        document.getElementById('close-mind-map-btn').addEventListener('click', () => {
-            mindMapModal.style.display = 'none';
-        });
-        document.getElementById('close-admin-modal-btn').onclick = () => {
-            document.getElementById('admin-modal').style.display = 'none';
-        };
-
-        async function fetchOpportunities(headline) {
-            const opportunitiesPanel = document.getElementById('opportunities-panel');
-            opportunitiesPanel.innerHTML = `<p class="text-sm text-text-secondary animate-pulse">Generating relevant roles...</p>`;
-            setTimeout(() => {
-                const keywords = headline.toLowerCase().split(' ');
-                let roles = ['Software Engineer', 'Product Manager', 'UX Designer', 'Data Scientist', 'Marketing Lead'];
-                if(keywords.includes('ai') || keywords.includes('researcher')) {
-                    roles = ['AI Research Scientist', 'Machine Learning Engineer', 'Data Analyst', 'Robotics Engineer'];
-                }
-                opportunitiesPanel.innerHTML = roles.map(role => `<div class="p-2 bg-gray-100 rounded text-sm font-semibold">${role}</div>`).join('');
-            }, 1500);
-        }
-
-        fetchOpportunities(userData.headline);
-    }
-
+  function initializeMainApp(userData) {
+    // Populate your main-app UI here...
+    console.log('Logged in user:', userData);
+  }
 </script>
 </body>
 </html>
