@@ -38,6 +38,7 @@
             border-radius: 0.5rem;
             border: 1px solid var(--border-color);
         }
+        #career-path-canvas.linking-mode { cursor: crosshair; }
         #career-path-canvas:active { cursor: grabbing; }
         #notes-editor { height: 250px; background-color: white; }
         .flashcard-container { perspective: 1000px; cursor: pointer; }
@@ -52,10 +53,12 @@
         .disclaimer { font-size: 0.8em; color: #555; margin-top: 8px; }
         .timeline-container { max-height: 400px; overflow-y: auto; }
         .timeline-avatar { width: 40px; height: 40px; border-radius: 50%; margin-right: 12px; object-fit: cover; }
+        .toggle-button.active { background-color: var(--accent-primary); color: white; }
     </style>
 </head>
 <body class="antialiased">
 
+    <!-- Landing/Registration Page -->
     <div id="registration-page" class="flex items-center justify-center min-h-screen bg-gray-100 p-4">
         <div class="text-center p-8 bg-white rounded-xl shadow-2xl max-w-lg mx-auto w-full">
             <h1 class="text-5xl font-black text-red-600 mb-4">Aether</h1>
@@ -90,6 +93,7 @@
         </div>
     </div>
 
+    <!-- Main App Container -->
     <div id="main-app" class="hidden">
         <nav class="bg-white shadow-md fixed w-full z-20">
             <div class="container mx-auto px-4 py-3 flex items-center justify-between">
@@ -104,13 +108,16 @@
                         <button data-target="admin" class="nav-item font-semibold text-gray-600">Admin</button>
                     </div>
                 </div>
-                <div class="flex-1 mx-6 max-w-lg">
-                    <input type="search" id="search-bar" placeholder="Dream Job? Get AI-Generated Profiles..." class="w-full px-4 py-2 rounded-full border border-gray-300 focus:outline-none focus:ring-2 focus:ring-red-500 bg-gray-50"/>
-                </div>
-                <div class="flex items-center space-x-4">
-                    <button id="search-btn" title="Search" class="p-2 rounded-full hover:bg-gray-100">
+                <div class="flex-1 mx-6 max-w-lg flex items-center gap-2">
+                    <input type="search" id="search-bar" placeholder="Search for jobs online..." class="w-full px-4 py-2 rounded-full border border-gray-300 focus:outline-none focus:ring-2 focus:ring-red-500 bg-gray-50"/>
+                    <button id="search-jobs-btn" title="Search for jobs on Google" class="p-2 rounded-full hover:bg-gray-100 flex-shrink-0">
                         <svg class="w-6 h-6 text-gray-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" /></svg>
                     </button>
+                     <button id="search-ai-btn" title="Generate AI career profiles" class="p-2 rounded-full hover:bg-gray-100 flex-shrink-0">
+                        <svg class="w-6 h-6 text-purple-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 00-2.456 2.456zM16.898 20.625L16.5 21.75l-.398-1.125a3.375 3.375 0 00-2.455-2.456L12.75 18l1.125-.398a3.375 3.375 0 002.455-2.456L16.5 14.25l.398 1.125a3.375 3.375 0 002.456 2.456L20.25 18l-1.125.398a3.375 3.375 0 00-2.456 2.456z" /></svg>
+                    </button>
+                </div>
+                <div class="flex items-center space-x-4">
                     <button data-target="profile" id="profile-nav-btn" title="My Profile" class="nav-item p-2 rounded-full hover:bg-gray-100">
                         <img id="nav-avatar" src="https://i.pravatar.cc/32" alt="Profile" class="w-8 h-8 rounded-full"/>
                     </button>
@@ -167,10 +174,10 @@
 
                 <section id="canvas" class="content-section">
                     <h2 class="text-3xl font-bold mb-2">My Career Path</h2>
-                    <p class="text-lg text-text-secondary mb-4 max-w-4xl">Visually plot your professional journey. Add goals and drag them to build your map.</p>
+                    <p class="text-lg text-text-secondary mb-4 max-w-4xl">Visually plot your professional journey. Add goals, drag them to build your map, and draw connections.</p>
                     <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
-                        <div class="md:col-span-1 bg-white p-4 rounded-lg border shadow-sm">
-                            <h3 class="font-bold text-lg mb-4">Goal Controls</h3>
+                        <div class="md:col-span-1 bg-white p-4 rounded-lg border shadow-sm h-fit">
+                            <h3 class="font-bold text-lg mb-4">Map Controls</h3>
                             <form id="add-node-form" class="space-y-4">
                                 <div>
                                     <label for="node-title" class="block text-sm font-medium text-gray-700">Goal Title</label>
@@ -184,15 +191,10 @@
                                         <option value="study">Study Topic</option>
                                     </select>
                                 </div>
-                                <button type="submit" class="w-full px-4 py-2 bg-accent-primary text-white font-bold rounded-lg hover:bg-accent-secondary">Add to Map</button>
+                                <button type="submit" class="w-full px-4 py-2 bg-accent-primary text-white font-bold rounded-lg hover:bg-accent-secondary">Add Goal</button>
                             </form>
-                            <div class="mt-6 pt-4 border-t">
-                                <h4 class="font-semibold text-sm mb-2">Legend</h4>
-                                <ul class="text-sm space-y-1">
-                                    <li class="flex items-center"><span class="w-3 h-3 rounded-full mr-2" style="background-color: #DC2626;"></span>Major Goal</li>
-                                    <li class="flex items-center"><span class="w-3 h-3 rounded-full mr-2" style="background-color: #3B82F6;"></span>Milestone</li>
-                                    <li class="flex items-center"><span class="w-3 h-3 rounded-full mr-2" style="background-color: #10B981;"></span>Study Topic</li>
-                                </ul>
+                            <div class="mt-4 pt-4 border-t">
+                                <button id="connect-mode-btn" class="w-full px-4 py-2 bg-gray-200 text-text-primary font-semibold rounded-lg hover:bg-gray-300 toggle-button">Connect Goals</button>
                             </div>
                         </div>
                         <div class="md:col-span-3">
@@ -204,7 +206,7 @@
                 </section>
                 
                 <section id="learning" class="content-section">
-                    <h2 class="text-3xl font-bold mb-2">Learning Hub</h2>
+                     <h2 class="text-3xl font-bold mb-2">Learning Hub</h2>
                     <p class="text-lg text-text-secondary mb-6">Take notes, generate flashcards, and build your CV.</p>
                     <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
                         <div class="bg-alt p-6 rounded-xl border border-border-color shadow-sm space-y-4">
@@ -255,7 +257,7 @@
                 </section>
 
                 <section id="collaboration" class="content-section">
-                    <h2 class="text-3xl font-bold mb-2">Collaborate & Network</h2>
+                     <h2 class="text-3xl font-bold mb-2">Collaborate & Network</h2>
                     <p class="text-lg text-text-secondary mb-6">Create shared projects, chat with your team, and manage publishing rights.</p>
                     <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
                         <div class="space-y-6">
@@ -301,7 +303,7 @@
                 </section>
                 
                 <section id="admin" class="content-section">
-                    <h2 class="text-3xl font-bold mb-2">🔒 Admin Dashboard</h2>
+                     <h2 class="text-3xl font-bold mb-2">🔒 Admin Dashboard</h2>
                      <div class="max-w-2xl mx-auto">
                         <div id="adminLoginForm" class="bg-white p-8 rounded-lg shadow-md text-center">
                             <label for="adminCode" class="block text-lg font-medium text-gray-700 mb-2">Enter Admin PIN</label>
@@ -358,8 +360,9 @@
         </main>
     </div>
 
+    <!-- Modals -->
     <div id="profile-search-modal" class="fixed inset-0 bg-gray-900 bg-opacity-50 flex items-center justify-center p-4 z-50" style="display: none;">
-        <div class="bg-white rounded-lg shadow-xl w-full max-w-3xl max-h-[80vh] flex flex-col">
+         <div class="bg-white rounded-lg shadow-xl w-full max-w-3xl max-h-[80vh] flex flex-col">
             <div class="p-4 border-b flex justify-between items-center"><h3 class="text-lg font-bold">AI-Generated Dream Job Profiles</h3><button id="close-search-modal" class="text-gray-500 hover:text-gray-800 text-2xl">&times;</button></div>
             <div id="profile-results-content" class="p-6 overflow-y-auto"></div>
         </div>
@@ -397,11 +400,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const mainApp = document.getElementById('main-app');
     const landingPage = document.getElementById('registration-page');
-    const regForm = document.getElementById('regForm');
-    const signinModal = document.getElementById('signin-modal');
-    const showSigninBtn = document.getElementById('show-signin');
-    const signinForm = document.getElementById('signin-form');
-
+    
     // --- Page Initialization State ---
     const pageInitialized = {
         dashboard: false, strategy: false, canvas: false, learning: false, collaboration: false, admin: false, profile: false
@@ -410,19 +409,16 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- Authentication & Initialization ---
     function showApp(userData) {
         landingPage.style.display = 'none';
-        signinModal.style.display = 'none';
         mainApp.style.display = 'block';
         initializeMainApp(userData);
     }
 
-    regForm.addEventListener('submit', (e) => {
+    document.getElementById('regForm').addEventListener('submit', (e) => {
         e.preventDefault();
+        const regForm = e.target;
         const userData = {
-            fullName: regForm.fullName.value,
-            email: regForm.email.value,
-            headline: regForm.headline.value,
-            bio: regForm.bioReg.value,
-            avatarUrl: regForm.avatarReg.value || `https://i.pravatar.cc/150?u=${regForm.email.value}`
+            fullName: regForm.fullName.value, email: regForm.email.value, headline: regForm.headline.value,
+            bio: regForm.bioReg.value, avatarUrl: regForm.avatarReg.value || `https://i.pravatar.cc/150?u=${regForm.email.value}`
         };
         localStorage.setItem('aetherCurrentUser', JSON.stringify(userData));
         const allRegistrations = JSON.parse(localStorage.getItem('aetherAllRegistrations') || '[]');
@@ -434,11 +430,10 @@ document.addEventListener('DOMContentLoaded', () => {
         showApp(userData);
     });
 
-    showSigninBtn.addEventListener('click', (e) => { e.preventDefault(); signinModal.style.display = 'flex'; });
-    signinModal.addEventListener('click', (e) => { if (e.target === signinModal) signinModal.style.display = 'none'; });
-    signinForm.addEventListener('submit', (e) => {
+    document.getElementById('show-signin').addEventListener('click', (e) => { e.preventDefault(); document.getElementById('signin-modal').style.display = 'flex'; });
+    document.getElementById('signin-modal').addEventListener('click', (e) => { if (e.target.id === 'signin-modal') e.target.style.display = 'none'; });
+    document.getElementById('signin-form').addEventListener('submit', (e) => {
         e.preventDefault();
-        // Simplified sign-in for demo
         const storedUser = JSON.parse(localStorage.getItem('aetherCurrentUser'));
         if (storedUser && storedUser.email === document.getElementById('signin-email').value) {
             showApp(storedUser);
@@ -447,7 +442,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // Check for logged-in user on page load
     const storedUser = localStorage.getItem('aetherCurrentUser');
     if (storedUser) {
         showApp(JSON.parse(storedUser));
@@ -469,17 +463,12 @@ document.addEventListener('DOMContentLoaded', () => {
             profileNavBtn.classList.toggle('active', 'profile' === targetId);
             sections.forEach(section => section.classList.toggle('active', section.id === targetId));
             
-            // Lazy-load page-specific JS
             if (!pageInitialized[targetId]) {
-                switch(targetId) {
-                    case 'dashboard': initDashboard(); break;
-                    case 'strategy': initStrategyPage(); break;
-                    case 'canvas': initCareerMap(); break;
-                    case 'learning': initLearningHub(); break;
-                    case 'collaboration': initCollaborationPage(); break;
-                    case 'admin': initAdminPage(); break;
-                    case 'profile': initProfilePage(); break;
-                }
+                const initFunctions = {
+                    dashboard: initDashboard, strategy: initStrategyPage, canvas: initCareerMap,
+                    learning: initLearningHub, collaboration: initCollaborationPage, admin: initAdminPage, profile: initProfilePage
+                };
+                if (initFunctions[targetId]) initFunctions[targetId](userData);
                 pageInitialized[targetId] = true;
             }
         }
@@ -489,451 +478,524 @@ document.addEventListener('DOMContentLoaded', () => {
             if (button) navigateTo(button.dataset.target);
         });
         profileNavBtn.addEventListener('click', () => navigateTo('profile'));
-        document.getElementById('search-btn').addEventListener('click', () => {
-             const term = document.getElementById('search-bar').value;
-             if(term) performProfileSearch(term);
-             else alert("Please enter your dream job in the search bar.");
+
+        const searchBar = document.getElementById('search-bar');
+        document.getElementById('search-jobs-btn').addEventListener('click', () => {
+            const query = searchBar.value;
+            if (query) {
+                const googleJobsUrl = `https://www.google.com/search?q=${encodeURIComponent(query)}&ibp=htl;jobs`;
+                window.open(googleJobsUrl, '_blank');
+            } else {
+                alert("Please enter a job title to search.");
+            }
         });
+        document.getElementById('search-ai-btn').addEventListener('click', () => {
+             const term = searchBar.value;
+             if(term) performProfileSearch(term);
+             else alert("Please enter a job title to generate AI profiles.");
+        });
+
         document.getElementById('sign-out-btn').addEventListener('click', () => {
             localStorage.removeItem('aetherCurrentUser');
             window.location.reload();
         });
 
-        // --- SECTION INITIALIZERS ---
-
-        function initDashboard() {
-            function renderFeed() {
-                const feedContainer = document.getElementById('strategy-feed');
-                feedContainer.innerHTML = '';
-                appData.feedItems.forEach(item => {
-                    let icon, color;
-                    const type = item.type.split('-')[0];
-                    switch(type) {
-                        case 'ai':      icon = '💡'; color = 'blue'; break;
-                        case 'node':    icon = '🎯'; color = 'gray'; break;
-                        default:        icon = '🔔'; color = 'gray';
-                    }
-                    feedContainer.insertAdjacentHTML('afterbegin', `<article class="flex bg-white rounded-lg overflow-hidden shadow-sm border border-border-color"><div class="p-4 flex-1"><div class="flex items-start gap-4"><div class="feed-card-icon bg-${color}-100 text-${color}-600 rounded-full flex items-center justify-center text-xl">${icon}</div><p class="text-text-secondary searchable flex-1">${item.content}</p></div></div></article>`);
-                });
-            }
-            
-            function loadTimeline() {
-                 const list = document.getElementById('timelineList');
-                 list.innerHTML = '';
-                 const connections = JSON.parse(localStorage.getItem('aetherConnections')||'[]');
-                 if (connections.length === 0) {
-                     list.innerHTML = `<li class="text-sm text-gray-500">No connections yet.</li>`;
-                     return;
-                 }
-                 connections.slice(0, 10).forEach(conn => {
-                     const li = document.createElement('li');
-                     li.className = "flex items-center";
-                     li.innerHTML = `<img src="${conn.avatarUrl||'https://i.pravatar.cc/40'}" class="timeline-avatar"><div class="flex-1"><div class="font-medium text-sm">${conn.name}</div><div class="text-xs text-gray-500">joined ${new Date(conn.connectedAt).toLocaleDateString()}</div></div>`;
-                     list.appendChild(li);
-                 });
-            }
-
-            async function loadPodcast(url) {
-                const list = document.getElementById('episodeFeed');
-                if (!url) { alert('Please enter a valid RSS feed URL.'); return; }
-                list.innerHTML = `<li class="text-sm text-gray-500">Loading feed...</li>`;
-                try {
-                    const res = await fetch(`https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(url)}`);
-                    if (!res.ok) throw new Error('Failed to fetch feed');
-                    const data = await res.json();
-                    
-                    if (data.status !== 'ok') { list.innerHTML = `<li class="text-sm text-red-500">Error: ${data.message}</li>`; return; }
-
-                    list.innerHTML = '';
-                    data.items.slice(0, 5).forEach(item => {
-                        const li = document.createElement('li');
-                        li.className = "border-t border-gray-200 pt-3";
-                        li.innerHTML = `<p class="font-semibold text-sm mb-2">${item.title}</p><audio controls class="w-full h-8" src="${item.enclosure.link}"></audio>`;
-                        list.appendChild(li);
-                    });
-                } catch (err) {
-                    list.innerHTML = `<li class="text-sm text-red-500">Could not load feed. Check the URL.</li>`;
-                }
-            }
-            document.getElementById('fetchFeed').onclick = () => loadPodcast(document.getElementById('feedUrl').value);
-            
-            renderFeed();
-            loadTimeline();
-        }
-        
-        function initStrategyPage() {
-            const container = document.getElementById('strategy-accordions');
-            const sections = [
-                { id: 'careerGoals', title: '🎯 Career Goals' },
-                { id: 'projectsSkills', title: '🛠️ Projects & Skills' },
-                { id: 'studyGoals', title: '📚 Study Goals' }
-            ];
-            container.innerHTML = sections.map(s => `
-                <div class="bg-white rounded-lg shadow-sm border">
-                    <button class="accordion-toggle w-full text-left p-4 font-bold text-lg flex justify-between items-center">
-                        <span>${s.title}</span>
-                        <svg class="w-5 h-5 transform transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
-                    </button>
-                    <div class="accordion-content px-4 pb-4">
-                        <textarea id="${s.id}" class="w-full h-32 p-2 border rounded" placeholder="List your ${s.title.toLowerCase()} here, one per line..."></textarea>
-                    </div>
-                </div>
-            `).join('');
-
-            document.querySelectorAll('.accordion-toggle').forEach(button => {
-                button.addEventListener('click', () => {
-                    const content = button.nextElementSibling;
-                    const icon = button.querySelector('svg');
-                    const isExpanded = content.style.maxHeight;
-                    content.style.maxHeight = isExpanded ? null : content.scrollHeight + "px";
-                    icon.style.transform = isExpanded ? 'rotate(0deg)' : 'rotate(180deg)';
-                });
-            });
-        }
-        
-        function initCareerMap() {
-            const canvas = document.getElementById('career-path-canvas');
-            const container = document.getElementById('canvas-container');
-            const ctx = canvas.getContext('2d');
-            let isDragging = false, selectedNode = null, dragOffsetX, dragOffsetY;
-            const nodeWidth = 180, nodeHeight = 50;
-            const nodeColors = { rock: '#DC2626', pebble: '#3B82F6', study: '#10B981', text: '#FFFFFF' };
-
-            function resizeCanvas() {
-                canvas.width = container.clientWidth;
-                canvas.height = container.clientHeight;
-                drawMap();
-            }
-
-            function drawMap() {
-                ctx.clearRect(0, 0, canvas.width, canvas.height);
-                ctx.strokeStyle = '#9CA3AF';
-                ctx.lineWidth = 2;
-                appData.canvasConnections.forEach(conn => {
-                    const fromNode = appData.canvasNodes.find(n => n.id === conn.from);
-                    const toNode = appData.canvasNodes.find(n => n.id === conn.to);
-                    if (fromNode && toNode) {
-                        ctx.beginPath();
-                        ctx.moveTo(fromNode.x + nodeWidth / 2, fromNode.y + nodeHeight / 2);
-                        ctx.lineTo(toNode.x + nodeWidth / 2, toNode.y + nodeHeight / 2);
-                        ctx.stroke();
-                    }
-                });
-                appData.canvasNodes.forEach(node => {
-                    ctx.fillStyle = nodeColors[node.type] || '#6B7280';
-                    ctx.roundRect(node.x, node.y, nodeWidth, nodeHeight, 8);
-                    ctx.fill();
-                    ctx.fillStyle = nodeColors.text;
-                    ctx.font = '14px "Inter", sans-serif';
-                    ctx.textAlign = 'center';
-                    ctx.textBaseline = 'middle';
-                    ctx.fillText(node.title, node.x + nodeWidth / 2, node.y + nodeHeight / 2, nodeWidth - 20);
-                });
-            }
-            
-            canvas.addEventListener('pointerdown', (e) => {
-                const rect = canvas.getBoundingClientRect();
-                const mouseX = e.clientX - rect.left, mouseY = e.clientY - rect.top;
-                for (let i = appData.canvasNodes.length - 1; i >= 0; i--) {
-                    const node = appData.canvasNodes[i];
-                    if (mouseX >= node.x && mouseX <= node.x + nodeWidth && mouseY >= node.y && mouseY <= node.y + nodeHeight) {
-                        selectedNode = node;
-                        isDragging = true;
-                        dragOffsetX = mouseX - node.x;
-                        dragOffsetY = mouseY - node.y;
-                        canvas.style.cursor = 'grabbing';
-                        return;
-                    }
-                }
-            });
-            canvas.addEventListener('pointermove', (e) => {
-                if (!isDragging || !selectedNode) return;
-                const rect = canvas.getBoundingClientRect();
-                selectedNode.x = e.clientX - rect.left - dragOffsetX;
-                selectedNode.y = e.clientY - rect.top - dragOffsetY;
-                drawMap();
-            });
-            const stopDragging = () => {
-                if (isDragging) localStorage.setItem('aetherCanvasNodes', JSON.stringify(appData.canvasNodes));
-                isDragging = false;
-                selectedNode = null;
-                canvas.style.cursor = 'grab';
-            };
-            canvas.addEventListener('pointerup', stopDragging);
-            canvas.addEventListener('pointerleave', stopDragging);
-            
-            document.getElementById('add-node-form').addEventListener('submit', (e) => {
-                e.preventDefault();
-                const titleInput = document.getElementById('node-title');
-                const typeSelect = document.getElementById('node-type');
-                appData.canvasNodes.push({ id: `node-${Date.now()}`, title: titleInput.value, type: typeSelect.value, x: 20, y: 20 });
-                localStorage.setItem('aetherCanvasNodes', JSON.stringify(appData.canvasNodes));
-                drawMap();
-                titleInput.value = '';
-            });
-
-            if (!CanvasRenderingContext2D.prototype.roundRect) {
-                CanvasRenderingContext2D.prototype.roundRect = function (x, y, w, h, r) { this.beginPath(); this.moveTo(x + r, y); this.arcTo(x + w, y, x + w, y + h, r); this.arcTo(x + w, y + h, x, y + h, r); this.arcTo(x, y + h, x, y, r); this.arcTo(x, y, x + w, y, r); this.closePath(); }
-            }
-            window.addEventListener('resize', resizeCanvas);
-            resizeCanvas();
-        }
-        
-        function initLearningHub() {
-            const quill = new Quill('#notes-editor', { theme: 'snow', placeholder: 'Jot down your notes here...' });
-            
-            document.getElementById('save-note-btn').addEventListener('click', () => {
-                const title = document.getElementById('note-title').value;
-                if (!title || quill.getLength() <= 1) { alert('Please add a title and content to your note.'); return; }
-                const newNote = { id: `note-${Date.now()}`, title, content: quill.root.innerHTML };
-                appData.notes.push(newNote);
-                alert('Note saved!'); quill.setText(''); document.getElementById('note-title').value = '';
-            });
-
-            document.getElementById('ai-generate-cards-btn').addEventListener('click', () => {
-                const noteTitle = document.getElementById('note-title').value || "Untitled Deck";
-                appData.flashcardDecks[noteTitle] = [
-                    { q: `What is a key concept from '${noteTitle}'?`, a: 'This is the main idea.' },
-                    { q: `Define a term from '${noteTitle}'.`, a: 'A foundational definition.' },
-                    { q: `What is the significance of '${noteTitle}'?`, a: 'Its importance lies in its application.' }
-                ];
-                updateFlashcardDeckSelector();
-                alert(`Flashcard deck "${noteTitle}" created!`);
-            });
-
-            const flashcardDeckSelector = document.getElementById('flashcard-deck-selector'), flashcardViewer = document.getElementById('flashcard-viewer'), noFlashcardsMsg = document.getElementById('no-flashcards-msg');
-            let currentDeck = null, currentCardIndex = 0;
-            
-            function updateFlashcardDeckSelector() {
-                const deckNames = Object.keys(appData.flashcardDecks);
-                if (deckNames.length === 0) { flashcardViewer.style.display = 'none'; noFlashcardsMsg.style.display = 'flex'; return; }
-                noFlashcardsMsg.style.display = 'none';
-                flashcardDeckSelector.innerHTML = `<select id="deck-select" class="w-full p-2 border rounded-lg"><option value="">Select a deck...</option>${deckNames.map(name => `<option value="${name}">${name}</option>`).join('')}</select>`;
-                document.getElementById('deck-select').addEventListener('change', (e) => {
-                    const deckName = e.target.value;
-                    if (deckName) { currentDeck = appData.flashcardDecks[deckName]; currentCardIndex = 0; flashcardViewer.style.display = 'block'; renderCurrentCard(); } 
-                    else { flashcardViewer.style.display = 'none'; }
-                });
-            }
-            
-            function renderCurrentCard() {
-                if (!currentDeck) return;
-                const card = currentDeck[currentCardIndex];
-                document.getElementById('flashcard-front-content').textContent = card.q;
-                document.getElementById('flashcard-back-content').textContent = card.a;
-                document.getElementById('card-counter').textContent = `${currentCardIndex + 1} / ${currentDeck.length}`;
-                document.getElementById('flashcard-container').classList.remove('is-flipped');
-            }
-            document.getElementById('flashcard-container').addEventListener('click', (e) => e.currentTarget.classList.toggle('is-flipped'));
-            document.getElementById('prev-card-btn').addEventListener('click', () => { if(currentDeck && currentCardIndex > 0) { currentCardIndex--; renderCurrentCard(); }});
-            document.getElementById('next-card-btn').addEventListener('click', () => { if(currentDeck && currentCardIndex < currentDeck.length - 1) { currentCardIndex++; renderCurrentCard(); }});
-            
-            document.getElementById('cv-word-btn').addEventListener('click', generateWordDoc);
-            document.getElementById('cv-pdf-btn').addEventListener('click', generatePdfDoc);
-
-            function getCvData() {
-                return {
-                    name: document.getElementById('cv-name').value || userData.fullName,
-                    email: document.getElementById('cv-email').value || userData.email,
-                    phone: document.getElementById('cv-phone').value,
-                    experience: document.getElementById('cv-experience').value.split('\n').filter(Boolean),
-                    education: document.getElementById('cv-education').value.split('\n').filter(Boolean),
-                    skills: document.getElementById('cv-skills').value.split(',').map(s => s.trim()).filter(Boolean),
-                };
-            }
-
-            function generateWordDoc() {
-                const { Packer, Document, Paragraph, TextRun, HeadingLevel } = docx;
-                const data = getCvData();
-                const doc = new Document({
-                    sections: [{
-                        children: [
-                            new Paragraph({ text: data.name, heading: HeadingLevel.TITLE }),
-                            new Paragraph({ text: `${data.email} | ${data.phone}` }),
-                            new Paragraph({ text: "Experience", heading: HeadingLevel.HEADING_1 }),
-                            ...data.experience.map(exp => new Paragraph({ text: exp, bullet: { level: 0 }})),
-                            new Paragraph({ text: "Education", heading: HeadingLevel.HEADING_1 }),
-                            ...data.education.map(edu => new Paragraph({ text: edu, bullet: { level: 0 }})),
-                            new Paragraph({ text: "Skills", heading: HeadingLevel.HEADING_1 }),
-                            new Paragraph({ children: [new TextRun(data.skills.join(', '))]})
-                        ],
-                    }],
-                });
-                Packer.toBlob(doc).then(blob => {
-                    const url = URL.createObjectURL(blob);
-                    const a = document.createElement('a');
-                    a.href = url;
-                    a.download = 'resume.docx';
-                    a.click();
-                    URL.revokeObjectURL(url);
-                });
-            }
-
-            function generatePdfDoc() {
-                const { jsPDF } = window.jspdf;
-                const doc = new jsPDF();
-                const data = getCvData();
-                let y = 20;
-                doc.setFontSize(22).text(data.name, 20, y); y += 10;
-                doc.setFontSize(12).text(`${data.email} | ${data.phone}`, 20, y); y += 15;
-                doc.setFontSize(16).text('Experience', 20, y); y += 8;
-                data.experience.forEach(exp => { doc.setFontSize(11).text(`• ${exp}`, 25, y); y+= 7; }); y+= 5;
-                doc.setFontSize(16).text('Education', 20, y); y += 8;
-                data.education.forEach(edu => { doc.setFontSize(11).text(`• ${edu}`, 25, y); y+= 7; }); y+= 5;
-                doc.setFontSize(16).text('Skills', 20, y); y += 8;
-                doc.setFontSize(11).text(data.skills.join(', '), 25, y);
-                doc.save('resume.pdf');
-            }
-            updateFlashcardDeckSelector();
-        }
-
-        function initCollaborationPage() {
-            const projectForm = document.getElementById('projectForm'), dropZone = document.getElementById('dropZone'), fileInput = document.getElementById('projAssets'), fileList = document.getElementById('fileList');
-            projectForm.onsubmit = e => {
-                e.preventDefault();
-                if (!e.target.checkValidity()) return e.target.reportValidity();
-                const id = Date.now().toString(), title = document.getElementById('projName').value;
-                appData.projects.push({ id, title });
-                localStorage.setItem('aetherProjects', JSON.stringify(appData.projects));
-                renderProjects();
-                projectForm.reset();
-                fileList.innerHTML = '';
-            };
-            dropZone.onclick = () => fileInput.click();
-            dropZone.ondragover = e => { e.preventDefault(); dropZone.classList.add('drag-over'); };
-            dropZone.ondragleave = () => dropZone.classList.remove('drag-over');
-            dropZone.ondrop = e => { e.preventDefault(); dropZone.classList.remove('drag-over'); fileInput.files = e.dataTransfer.files; updateFileList(); };
-            fileInput.onchange = updateFileList;
-            function updateFileList() {
-                fileList.innerHTML = [...fileInput.files].map(file => `<li>${file.name}</li>`).join('');
-            }
-            function renderProjects() {
-                document.getElementById('projectsList').innerHTML = appData.projects.map(p => `<li data-id="${p.id}" class="flex justify-between items-center p-2 hover:bg-gray-50 rounded"><strong class="text-text-primary">${p.title}</strong><button class="joinProject text-sm bg-green-600 text-white px-3 py-1 rounded-full hover:bg-green-700">Join Chat</button></li>`).join('');
-                document.querySelectorAll('.joinProject').forEach(btn => {
-                    btn.onclick = () => startCollaboration(btn.closest('li').dataset.id);
-                });
-            }
-            let socket;
-            function startCollaboration(projId) {
-                document.getElementById('chatSection').style.display = 'block';
-                document.getElementById('publishSection').style.display = 'block';
-                const msgBox = document.getElementById('chatBox');
-                msgBox.innerHTML = `<p class="text-sm text-gray-500 italic">Chat connected for project ${projId}. (This is a demo)</p>`;
-                socket = { send: (message) => { const p = document.createElement('p'); p.textContent = "You: " + message; msgBox.appendChild(p); msgBox.scrollTop = msgBox.scrollHeight; } };
-                document.getElementById('msgForm').onsubmit = e => { e.preventDefault(); const input = document.getElementById('msgInput'); if (input.value) { socket.send(input.value); input.value = ''; } };
-            }
-            const checkboxes = document.querySelectorAll('.consentChk');
-            checkboxes.forEach(c => c.addEventListener('change', () => {
-                const allChecked = [...checkboxes].every(cb => cb.checked);
-                const publishBtn = document.getElementById('goPublic');
-                publishBtn.disabled = !allChecked;
-                publishBtn.classList.toggle('bg-gray-300', !allChecked);
-                publishBtn.classList.toggle('bg-accent-primary', allChecked);
-            }));
-            renderProjects();
-        }
-
-        function initAdminPage() {
-            const loginForm = document.getElementById('adminLoginForm'), dashboard = document.getElementById('adminDashboard');
-            document.getElementById('adminLoginBtn').onclick = () => {
-                 if (document.getElementById('adminCode').value === ADMIN_PIN) {
-                     loginForm.style.display = 'none';
-                     dashboard.style.display = 'block';
-                     document.getElementById('totalRegs').textContent = (JSON.parse(localStorage.getItem('aetherAllRegistrations')||'[]')).length;
-                     document.getElementById('totalProjects').textContent = (JSON.parse(localStorage.getItem('aetherProjects')||'[]')).length;
-                     document.getElementById('totalConnections').textContent = (JSON.parse(localStorage.getItem('aetherConnections')||'[]')).length;
-                 } else alert('Invalid admin PIN');
-            };
-            document.getElementById('exportMaster').onclick = () => {
-                 const wb = XLSX.utils.book_new();
-                 XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(JSON.parse(localStorage.getItem('aetherAllRegistrations')||'[]')), 'Registrations');
-                 XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(JSON.parse(localStorage.getItem('aetherProjects')||'[]')), 'Projects');
-                 XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(JSON.parse(localStorage.getItem('aetherConnections')||'[]')), 'Connections');
-                 XLSX.writeFile(wb, `aether_master_data_${Date.now()}.xlsx`);
-            };
-        }
-        
-        function initProfilePage() {
-            document.getElementById('profile-avatar').src = userData.avatarUrl;
-            document.getElementById('profile-name').textContent = userData.fullName;
-            document.getElementById('profile-headline').textContent = userData.headline;
-            document.getElementById('profile-bio').textContent = userData.bio;
-            document.getElementById('profile-email').textContent = userData.email;
-            
-            document.getElementById('edit-profile-btn').addEventListener('click', () => {
-                 mainApp.style.display = 'none';
-                 landingPage.style.display = 'flex';
-                 regForm.fullName.value = userData.fullName;
-                 regForm.email.value = userData.email;
-                 regForm.headline.value = userData.headline;
-                 regForm.bioReg.value = userData.bio;
-                 regForm.avatarReg.value = userData.avatarUrl;
-            });
-            document.getElementById('exportMyData').onclick = () => {
-                 const ws = XLSX.utils.json_to_sheet([userData]);
-                 const wb = XLSX.utils.book_new();
-                 XLSX.utils.book_append_sheet(wb, ws, 'My Data');
-                 XLSX.writeFile(wb, `aether_my_data_${Date.now()}.xlsx`);
-            };
-        }
-        
-        // --- AI Search Functionality ---
-        const profileSearchModal = document.getElementById('profile-search-modal');
-        const profileResultsContainer = document.getElementById('profile-results-content');
-        
-        async function performProfileSearch(term) {
-            profileSearchModal.style.display = 'flex';
-            profileResultsContainer.innerHTML = `<div class="flex justify-center items-center h-full"><div class="animate-spin rounded-full h-8 w-8 border-b-2 border-accent-primary"></div><p class="ml-4 text-text-secondary">Generating ideal profiles...</p></div>`;
-            try {
-                const profiles = await fetchIdealProfiles(term);
-                renderProfileResults(profiles);
-            } catch (error) {
-                console.error("Profile Generation Error:", error);
-                profileResultsContainer.innerHTML = `<div class="text-center text-red-500 p-4"><p><strong>Sorry, an error occurred.</strong></p><p class="text-sm text-gray-600 mt-2">This feature requires a valid Gemini API key to be set in the code.</p></div>`;
-            }
-        }
-        
-        async function fetchIdealProfiles(term) {
-            // IMPORTANT: Replace "" with your actual Google AI Gemini API key.
-            const apiKey = ""; 
-            if (!apiKey) { throw new Error("API key is not set."); }
-            
-            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
-            const prompt = `Act as a world-class career and recruitment expert. A user's dream job is "${term}". Generate 3 fictional but realistic professional profiles of people who are perfect for this role. For each profile, provide their name, current title, company, location, a compelling 2-3 sentence summary of their experience and key skills, and a fictional LinkedIn URL. Return the response as a valid JSON array of objects, where each object has "name", "title", "company", "location", "summary", and "linkedin_url" keys.`;
-            const payload = {
-                contents: [{ role: "user", parts: [{ text: prompt }] }],
-                generationConfig: { responseMimeType: "application/json" }
-            };
-            const response = await fetch(apiUrl, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
-            if (!response.ok) throw new Error(`API request failed with status ${response.status}`);
-            const result = await response.json();
-            return JSON.parse(result.candidates[0].content.parts[0].text);
-        }
-
-        function renderProfileResults(profiles) {
-            if (!profiles || !Array.isArray(profiles) || profiles.length === 0) {
-                profileResultsContainer.innerHTML = `<p class="text-text-secondary">Could not generate valid profiles. Please try a different query.</p>`;
-                return;
-            }
-            profileResultsContainer.innerHTML = profiles.map(profile => `
-                <div class="mb-6 p-4 border border-border-color rounded-lg bg-gray-50">
-                    <div class="flex items-start justify-between">
-                        <div>
-                            <h4 class="text-xl font-bold text-accent-primary">${profile.name}</h4>
-                            <p class="text-md font-medium text-text-primary">${profile.title} at ${profile.company}</p>
-                            <p class="text-sm text-text-secondary">${profile.location}</p>
-                        </div>
-                        <a href="${profile.linkedin_url}" target="_blank" class="text-sm text-white bg-accent-secondary hover:bg-accent-primary px-4 py-2 rounded-lg flex-shrink-0 ml-4">View Profile</a>
-                    </div>
-                    <p class="text-sm text-text-secondary mt-3">${profile.summary}</p>
-                </div>
-            `).join('');
-        }
-        document.getElementById('close-search-modal').addEventListener('click', () => profileSearchModal.style.display = 'none');
-
-        // Initial page load
         navigateTo('dashboard');
     }
+
+    // --- SECTION INITIALIZERS ---
+
+    function initDashboard() {
+        function renderFeed() {
+            const feedContainer = document.getElementById('strategy-feed');
+            feedContainer.innerHTML = '';
+            appData.feedItems.forEach(item => {
+                let icon, color;
+                const type = item.type.split('-')[0];
+                switch(type) {
+                    case 'ai':      icon = '💡'; color = 'blue'; break;
+                    case 'node':    icon = '🎯'; color = 'gray'; break;
+                    default:        icon = '🔔'; color = 'gray';
+                }
+                feedContainer.insertAdjacentHTML('afterbegin', `<article class="flex bg-white rounded-lg overflow-hidden shadow-sm border border-border-color"><div class="p-4 flex-1"><div class="flex items-start gap-4"><div class="feed-card-icon bg-${color}-100 text-${color}-600 rounded-full flex items-center justify-center text-xl">${icon}</div><p class="text-text-secondary searchable flex-1">${item.content}</p></div></div></article>`);
+            });
+        }
+        
+        function loadTimeline() {
+             const list = document.getElementById('timelineList');
+             list.innerHTML = '';
+             const connections = JSON.parse(localStorage.getItem('aetherConnections')||'[]');
+             if (connections.length === 0) {
+                 list.innerHTML = `<li class="text-sm text-gray-500">No connections yet.</li>`;
+                 return;
+             }
+             connections.slice(0, 10).forEach(conn => {
+                 const li = document.createElement('li');
+                 li.className = "flex items-center";
+                 li.innerHTML = `<img src="${conn.avatarUrl||'https://i.pravatar.cc/40'}" class="timeline-avatar"><div class="flex-1"><div class="font-medium text-sm">${conn.name}</div><div class="text-xs text-gray-500">joined ${new Date(conn.connectedAt).toLocaleDateString()}</div></div>`;
+                 list.appendChild(li);
+             });
+        }
+
+        async function loadPodcast(url) {
+            const list = document.getElementById('episodeFeed');
+            if (!url) { alert('Please enter a valid RSS feed URL.'); return; }
+            list.innerHTML = `<li class="text-sm text-gray-500">Loading feed...</li>`;
+            try {
+                const res = await fetch(`https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(url)}`);
+                if (!res.ok) throw new Error('Failed to fetch feed');
+                const data = await res.json();
+                
+                if (data.status !== 'ok') { list.innerHTML = `<li class="text-sm text-red-500">Error: ${data.message}</li>`; return; }
+
+                list.innerHTML = '';
+                data.items.slice(0, 5).forEach(item => {
+                    const li = document.createElement('li');
+                    li.className = "border-t border-gray-200 pt-3";
+                    li.innerHTML = `<p class="font-semibold text-sm mb-2">${item.title}</p><audio controls class="w-full h-8" src="${item.enclosure.link}"></audio>`;
+                    list.appendChild(li);
+                });
+            } catch (err) {
+                list.innerHTML = `<li class="text-sm text-red-500">Could not load feed. Check the URL.</li>`;
+            }
+        }
+        document.getElementById('fetchFeed').onclick = () => loadPodcast(document.getElementById('feedUrl').value);
+        
+        renderFeed();
+        loadTimeline();
+    }
+    
+    function initStrategyPage() {
+        const container = document.getElementById('strategy-accordions');
+        const sections = [
+            { id: 'careerGoals', title: '🎯 Career Goals' },
+            { id: 'projectsSkills', title: '🛠️ Projects & Skills' },
+            { id: 'studyGoals', title: '📚 Study Goals' }
+        ];
+        container.innerHTML = sections.map(s => `
+            <div class="bg-white rounded-lg shadow-sm border">
+                <button class="accordion-toggle w-full text-left p-4 font-bold text-lg flex justify-between items-center">
+                    <span>${s.title}</span>
+                    <svg class="w-5 h-5 transform transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                </button>
+                <div class="accordion-content px-4 pb-4">
+                    <textarea id="${s.id}" class="w-full h-32 p-2 border rounded" placeholder="List your ${s.title.toLowerCase()} here, one per line..."></textarea>
+                </div>
+            </div>
+        `).join('');
+
+        document.querySelectorAll('.accordion-toggle').forEach(button => {
+            button.addEventListener('click', () => {
+                const content = button.nextElementSibling;
+                const icon = button.querySelector('svg');
+                const isExpanded = content.style.maxHeight;
+                content.style.maxHeight = isExpanded ? null : content.scrollHeight + "px";
+                icon.style.transform = isExpanded ? 'rotate(0deg)' : 'rotate(180deg)';
+            });
+        });
+    }
+    
+    function initCareerMap() {
+        const canvas = document.getElementById('career-path-canvas');
+        const container = document.getElementById('canvas-container');
+        const connectModeBtn = document.getElementById('connect-mode-btn');
+        const ctx = canvas.getContext('2d');
+
+        let isDragging = false, selectedNode = null, dragOffsetX, dragOffsetY;
+        let isLinkingMode = false, linkingStartNode = null, mouseX = 0, mouseY = 0;
+
+        const nodeWidth = 180, nodeHeight = 50;
+        const nodeColors = { rock: '#DC2626', pebble: '#3B82F6', study: '#10B981', text: '#FFFFFF' };
+
+        function resizeCanvas() {
+            canvas.width = container.clientWidth;
+            canvas.height = container.clientHeight;
+            drawMap();
+        }
+
+        function drawMap() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            if (isLinkingMode && linkingStartNode) {
+                ctx.beginPath();
+                ctx.moveTo(linkingStartNode.x + nodeWidth / 2, linkingStartNode.y + nodeHeight / 2);
+                ctx.lineTo(mouseX, mouseY);
+                ctx.strokeStyle = '#FBBF24';
+                ctx.lineWidth = 3;
+                ctx.setLineDash([5, 5]);
+                ctx.stroke();
+                ctx.setLineDash([]);
+            }
+            
+            ctx.strokeStyle = '#9CA3AF';
+            ctx.lineWidth = 2;
+            appData.canvasConnections.forEach(conn => {
+                const fromNode = appData.canvasNodes.find(n => n.id === conn.from);
+                const toNode = appData.canvasNodes.find(n => n.id === conn.to);
+                if (fromNode && toNode) {
+                    ctx.beginPath();
+                    ctx.moveTo(fromNode.x + nodeWidth / 2, fromNode.y + nodeHeight / 2);
+                    ctx.lineTo(toNode.x + nodeWidth / 2, toNode.y + nodeHeight / 2);
+                    ctx.stroke();
+                }
+            });
+
+            appData.canvasNodes.forEach(node => {
+                ctx.fillStyle = nodeColors[node.type] || '#6B7280';
+                ctx.roundRect(node.x, node.y, nodeWidth, nodeHeight, 8);
+                ctx.fill();
+                
+                if (linkingStartNode && linkingStartNode.id === node.id) {
+                    ctx.strokeStyle = '#FBBF24';
+                    ctx.lineWidth = 4;
+                    ctx.stroke();
+                }
+                
+                ctx.fillStyle = nodeColors.text;
+                ctx.font = 'bold 14px "Inter", sans-serif';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText(node.title, node.x + nodeWidth / 2, node.y + nodeHeight / 2, nodeWidth - 20);
+            });
+        }
+        
+        connectModeBtn.addEventListener('click', () => {
+            isLinkingMode = !isLinkingMode;
+            connectModeBtn.classList.toggle('active', isLinkingMode);
+            canvas.classList.toggle('linking-mode', isLinkingMode);
+            linkingStartNode = null;
+            drawMap();
+        });
+
+        canvas.addEventListener('pointerdown', (e) => {
+            const rect = canvas.getBoundingClientRect();
+            const currentMouseX = e.clientX - rect.left, currentMouseY = e.clientY - rect.top;
+            const nodeUnderCursor = appData.canvasNodes.slice().reverse().find(node => 
+                currentMouseX >= node.x && currentMouseX <= node.x + nodeWidth &&
+                currentMouseY >= node.y && currentMouseY <= node.y + nodeHeight
+            );
+
+            if (isLinkingMode) {
+                if (nodeUnderCursor) {
+                    if (!linkingStartNode) {
+                        linkingStartNode = nodeUnderCursor;
+                    } else {
+                        if (linkingStartNode.id !== nodeUnderCursor.id) {
+                            const exists = appData.canvasConnections.some(c => (c.from === linkingStartNode.id && c.to === nodeUnderCursor.id) || (c.from === nodeUnderCursor.id && c.to === linkingStartNode.id));
+                            if (!exists) {
+                                appData.canvasConnections.push({ from: linkingStartNode.id, to: nodeUnderCursor.id });
+                                localStorage.setItem('aetherCanvasConnections', JSON.stringify(appData.canvasConnections));
+                            }
+                        }
+                        linkingStartNode = null;
+                    }
+                } else {
+                    linkingStartNode = null;
+                }
+                drawMap();
+            } else {
+                if (nodeUnderCursor) {
+                    selectedNode = nodeUnderCursor;
+                    isDragging = true;
+                    dragOffsetX = currentMouseX - selectedNode.x;
+                    dragOffsetY = currentMouseY - selectedNode.y;
+                    canvas.style.cursor = 'grabbing';
+                }
+            }
+        });
+
+        canvas.addEventListener('pointermove', (e) => {
+            const rect = canvas.getBoundingClientRect();
+            mouseX = e.clientX - rect.left;
+            mouseY = e.clientY - rect.top;
+
+            if (isLinkingMode && linkingStartNode) {
+                drawMap();
+            } else if (isDragging && selectedNode) {
+                selectedNode.x = mouseX - dragOffsetX;
+                selectedNode.y = mouseY - dragOffsetY;
+                drawMap();
+            }
+        });
+
+        const stopDragging = () => {
+            if (isDragging) localStorage.setItem('aetherCanvasNodes', JSON.stringify(appData.canvasNodes));
+            isDragging = false;
+            selectedNode = null;
+            canvas.style.cursor = isLinkingMode ? 'crosshair' : 'grab';
+        };
+        canvas.addEventListener('pointerup', stopDragging);
+        canvas.addEventListener('pointerleave', stopDragging);
+        
+        document.getElementById('add-node-form').addEventListener('submit', (e) => {
+             e.preventDefault();
+            const titleInput = document.getElementById('node-title');
+            const typeSelect = document.getElementById('node-type');
+            appData.canvasNodes.push({ id: `node-${Date.now()}`, title: titleInput.value, type: typeSelect.value, x: 20, y: 20 });
+            localStorage.setItem('aetherCanvasNodes', JSON.stringify(appData.canvasNodes));
+            drawMap();
+            titleInput.value = '';
+        });
+
+        if (!CanvasRenderingContext2D.prototype.roundRect) {
+            CanvasRenderingContext2D.prototype.roundRect = function (x, y, w, h, r) { this.beginPath(); this.moveTo(x + r, y); this.arcTo(x + w, y, x + w, y + h, r); this.arcTo(x + w, y + h, x, y + h, r); this.arcTo(x, y + h, x, y, r); this.arcTo(x, y, x + w, y, r); this.closePath(); }
+        }
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+    }
+    
+    function initLearningHub(userData) {
+        const quill = new Quill('#notes-editor', { theme: 'snow', placeholder: 'Jot down your notes here...' });
+        
+        document.getElementById('save-note-btn').addEventListener('click', () => {
+            const title = document.getElementById('note-title').value;
+            if (!title || quill.getLength() <= 1) { alert('Please add a title and content to your note.'); return; }
+            const newNote = { id: `note-${Date.now()}`, title, content: quill.root.innerHTML };
+            appData.notes.push(newNote);
+            alert('Note saved!'); quill.setText(''); document.getElementById('note-title').value = '';
+        });
+
+        document.getElementById('ai-generate-cards-btn').addEventListener('click', () => {
+            const noteTitle = document.getElementById('note-title').value || "Untitled Deck";
+            appData.flashcardDecks[noteTitle] = [
+                { q: `What is a key concept from '${noteTitle}'?`, a: 'This is the main idea.' },
+                { q: `Define a term from '${noteTitle}'.`, a: 'A foundational definition.' },
+                { q: `What is the significance of '${noteTitle}'?`, a: 'Its importance lies in its application.' }
+            ];
+            updateFlashcardDeckSelector();
+            alert(`Flashcard deck "${noteTitle}" created!`);
+        });
+
+        const flashcardDeckSelector = document.getElementById('flashcard-deck-selector'), flashcardViewer = document.getElementById('flashcard-viewer'), noFlashcardsMsg = document.getElementById('no-flashcards-msg');
+        let currentDeck = null, currentCardIndex = 0;
+        
+        function updateFlashcardDeckSelector() {
+            const deckNames = Object.keys(appData.flashcardDecks);
+            if (deckNames.length === 0) { flashcardViewer.style.display = 'none'; noFlashcardsMsg.style.display = 'flex'; return; }
+            noFlashcardsMsg.style.display = 'none';
+            flashcardDeckSelector.innerHTML = `<select id="deck-select" class="w-full p-2 border rounded-lg"><option value="">Select a deck...</option>${deckNames.map(name => `<option value="${name}">${name}</option>`).join('')}</select>`;
+            document.getElementById('deck-select').addEventListener('change', (e) => {
+                const deckName = e.target.value;
+                if (deckName) { currentDeck = appData.flashcardDecks[deckName]; currentCardIndex = 0; flashcardViewer.style.display = 'block'; renderCurrentCard(); } 
+                else { flashcardViewer.style.display = 'none'; }
+            });
+        }
+        
+        function renderCurrentCard() {
+            if (!currentDeck) return;
+            const card = currentDeck[currentCardIndex];
+            document.getElementById('flashcard-front-content').textContent = card.q;
+            document.getElementById('flashcard-back-content').textContent = card.a;
+            document.getElementById('card-counter').textContent = `${currentCardIndex + 1} / ${currentDeck.length}`;
+            document.getElementById('flashcard-container').classList.remove('is-flipped');
+        }
+        document.getElementById('flashcard-container').addEventListener('click', (e) => e.currentTarget.classList.toggle('is-flipped'));
+        document.getElementById('prev-card-btn').addEventListener('click', () => { if(currentDeck && currentCardIndex > 0) { currentCardIndex--; renderCurrentCard(); }});
+        document.getElementById('next-card-btn').addEventListener('click', () => { if(currentDeck && currentCardIndex < currentDeck.length - 1) { currentCardIndex++; renderCurrentCard(); }});
+        
+        document.getElementById('cv-word-btn').addEventListener('click', () => generateWordDoc(userData));
+        document.getElementById('cv-pdf-btn').addEventListener('click', () => generatePdfDoc(userData));
+
+        function getCvData(userData) {
+            return {
+                name: document.getElementById('cv-name').value || userData.fullName,
+                email: document.getElementById('cv-email').value || userData.email,
+                phone: document.getElementById('cv-phone').value,
+                experience: document.getElementById('cv-experience').value.split('\n').filter(Boolean),
+                education: document.getElementById('cv-education').value.split('\n').filter(Boolean),
+                skills: document.getElementById('cv-skills').value.split(',').map(s => s.trim()).filter(Boolean),
+            };
+        }
+
+        function generateWordDoc(userData) {
+            const { Packer, Document, Paragraph, TextRun, HeadingLevel } = docx;
+            const data = getCvData(userData);
+            const doc = new Document({
+                sections: [{
+                    children: [
+                        new Paragraph({ text: data.name, heading: HeadingLevel.TITLE }),
+                        new Paragraph({ text: `${data.email} | ${data.phone}` }),
+                        new Paragraph({ text: "Experience", heading: HeadingLevel.HEADING_1 }),
+                        ...data.experience.map(exp => new Paragraph({ text: exp, bullet: { level: 0 }})),
+                        new Paragraph({ text: "Education", heading: HeadingLevel.HEADING_1 }),
+                        ...data.education.map(edu => new Paragraph({ text: edu, bullet: { level: 0 }})),
+                        new Paragraph({ text: "Skills", heading: HeadingLevel.HEADING_1 }),
+                        new Paragraph({ children: [new TextRun(data.skills.join(', '))]})
+                    ],
+                }],
+            });
+            Packer.toBlob(doc).then(blob => {
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'resume.docx';
+                a.click();
+                URL.revokeObjectURL(url);
+            });
+        }
+
+        function generatePdfDoc(userData) {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            const data = getCvData(userData);
+            let y = 20;
+            doc.setFontSize(22).text(data.name, 20, y); y += 10;
+            doc.setFontSize(12).text(`${data.email} | ${data.phone}`, 20, y); y += 15;
+            doc.setFontSize(16).text('Experience', 20, y); y += 8;
+            data.experience.forEach(exp => { doc.setFontSize(11).text(`• ${exp}`, 25, y); y+= 7; }); y+= 5;
+            doc.setFontSize(16).text('Education', 20, y); y += 8;
+            data.education.forEach(edu => { doc.setFontSize(11).text(`• ${edu}`, 25, y); y+= 7; }); y+= 5;
+            doc.setFontSize(16).text('Skills', 20, y); y += 8;
+            doc.setFontSize(11).text(data.skills.join(', '), 25, y);
+            doc.save('resume.pdf');
+        }
+        updateFlashcardDeckSelector();
+    }
+
+    function initCollaborationPage() {
+        const projectForm = document.getElementById('projectForm'), dropZone = document.getElementById('dropZone'), fileInput = document.getElementById('projAssets'), fileList = document.getElementById('fileList');
+        projectForm.onsubmit = e => {
+            e.preventDefault();
+            if (!e.target.checkValidity()) return e.target.reportValidity();
+            const id = Date.now().toString(), title = document.getElementById('projName').value;
+            appData.projects.push({ id, title });
+            localStorage.setItem('aetherProjects', JSON.stringify(appData.projects));
+            renderProjects();
+            projectForm.reset();
+            fileList.innerHTML = '';
+        };
+        dropZone.onclick = () => fileInput.click();
+        dropZone.ondragover = e => { e.preventDefault(); dropZone.classList.add('drag-over'); };
+        dropZone.ondragleave = () => dropZone.classList.remove('drag-over');
+        dropZone.ondrop = e => { e.preventDefault(); dropZone.classList.remove('drag-over'); fileInput.files = e.dataTransfer.files; updateFileList(); };
+        fileInput.onchange = updateFileList;
+        function updateFileList() {
+            fileList.innerHTML = [...fileInput.files].map(file => `<li>${file.name}</li>`).join('');
+        }
+        function renderProjects() {
+            document.getElementById('projectsList').innerHTML = appData.projects.map(p => `<li data-id="${p.id}" class="flex justify-between items-center p-2 hover:bg-gray-50 rounded"><strong class="text-text-primary">${p.title}</strong><button class="joinProject text-sm bg-green-600 text-white px-3 py-1 rounded-full hover:bg-green-700">Join Chat</button></li>`).join('');
+            document.querySelectorAll('.joinProject').forEach(btn => {
+                btn.onclick = () => startCollaboration(btn.closest('li').dataset.id);
+            });
+        }
+        let socket;
+        function startCollaboration(projId) {
+            document.getElementById('chatSection').style.display = 'block';
+            document.getElementById('publishSection').style.display = 'block';
+            const msgBox = document.getElementById('chatBox');
+            msgBox.innerHTML = `<p class="text-sm text-gray-500 italic">Chat connected for project ${projId}. (This is a demo)</p>`;
+            socket = { send: (message) => { const p = document.createElement('p'); p.textContent = "You: " + message; msgBox.appendChild(p); msgBox.scrollTop = msgBox.scrollHeight; } };
+            document.getElementById('msgForm').onsubmit = e => { e.preventDefault(); const input = document.getElementById('msgInput'); if (input.value) { socket.send(input.value); input.value = ''; } };
+        }
+        const checkboxes = document.querySelectorAll('.consentChk');
+        checkboxes.forEach(c => c.addEventListener('change', () => {
+            const allChecked = [...checkboxes].every(cb => cb.checked);
+            const publishBtn = document.getElementById('goPublic');
+            publishBtn.disabled = !allChecked;
+            publishBtn.classList.toggle('bg-gray-300', !allChecked);
+            publishBtn.classList.toggle('bg-accent-primary', allChecked);
+        }));
+        renderProjects();
+    }
+
+    function initAdminPage() {
+        const loginForm = document.getElementById('adminLoginForm'), dashboard = document.getElementById('adminDashboard');
+        document.getElementById('adminLoginBtn').onclick = () => {
+             if (document.getElementById('adminCode').value === ADMIN_PIN) {
+                 loginForm.style.display = 'none';
+                 dashboard.style.display = 'block';
+                 document.getElementById('totalRegs').textContent = (JSON.parse(localStorage.getItem('aetherAllRegistrations')||'[]')).length;
+                 document.getElementById('totalProjects').textContent = (JSON.parse(localStorage.getItem('aetherProjects')||'[]')).length;
+                 document.getElementById('totalConnections').textContent = (JSON.parse(localStorage.getItem('aetherConnections')||'[]')).length;
+             } else alert('Invalid admin PIN');
+        };
+        document.getElementById('exportMaster').onclick = () => {
+             const wb = XLSX.utils.book_new();
+             XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(JSON.parse(localStorage.getItem('aetherAllRegistrations')||'[]')), 'Registrations');
+             XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(JSON.parse(localStorage.getItem('aetherProjects')||'[]')), 'Projects');
+             XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(JSON.parse(localStorage.getItem('aetherConnections')||'[]')), 'Connections');
+             XLSX.writeFile(wb, `aether_master_data_${Date.now()}.xlsx`);
+        };
+    }
+    
+    function initProfilePage(userData) {
+        document.getElementById('profile-avatar').src = userData.avatarUrl;
+        document.getElementById('profile-name').textContent = userData.fullName;
+        document.getElementById('profile-headline').textContent = userData.headline;
+        document.getElementById('profile-bio').textContent = userData.bio;
+        document.getElementById('profile-email').textContent = userData.email;
+        
+        document.getElementById('edit-profile-btn').addEventListener('click', () => {
+             mainApp.style.display = 'none';
+             landingPage.style.display = 'flex';
+             const regForm = document.getElementById('regForm');
+             regForm.fullName.value = userData.fullName;
+             regForm.email.value = userData.email;
+             regForm.headline.value = userData.headline;
+             regForm.bioReg.value = userData.bio;
+             regForm.avatarReg.value = userData.avatarUrl;
+        });
+        document.getElementById('exportMyData').onclick = () => {
+             const ws = XLSX.utils.json_to_sheet([userData]);
+             const wb = XLSX.utils.book_new();
+             XLSX.utils.book_append_sheet(wb, ws, 'My Data');
+             XLSX.writeFile(wb, `aether_my_data_${Date.now()}.xlsx`);
+        };
+    }
+    
+    // --- AI Search Functionality (Gemini) ---
+    const profileSearchModal = document.getElementById('profile-search-modal');
+    const profileResultsContainer = document.getElementById('profile-results-content');
+    
+    async function performProfileSearch(term) {
+        profileSearchModal.style.display = 'flex';
+        profileResultsContainer.innerHTML = `<div class="flex justify-center items-center h-full"><div class="animate-spin rounded-full h-8 w-8 border-b-2 border-accent-primary"></div><p class="ml-4 text-text-secondary">Generating ideal profiles...</p></div>`;
+        try {
+            const profiles = await fetchIdealProfiles(term);
+            renderProfileResults(profiles);
+        } catch (error) {
+            console.error("Profile Generation Error:", error);
+            profileResultsContainer.innerHTML = `<div class="text-center text-red-500 p-4"><p><strong>Sorry, an error occurred.</strong></p><p class="text-sm text-gray-600 mt-2">This feature requires a valid Gemini API key to be set in the code.</p></div>`;
+        }
+    }
+    
+    async function fetchIdealProfiles(term) {
+        // IMPORTANT: Replace "" with your actual Google AI Gemini API key.
+        const apiKey = ""; 
+        if (!apiKey) { throw new Error("API key is not set."); }
+        
+        const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
+        const prompt = `Act as a world-class career and recruitment expert. A user's dream job is "${term}". Generate 3 fictional but realistic professional profiles of people who are perfect for this role. For each profile, provide their name, current title, company, location, a compelling 2-3 sentence summary of their experience and key skills, and a fictional LinkedIn URL. Return the response as a valid JSON array of objects, where each object has "name", "title", "company", "location", "summary", and "linkedin_url" keys.`;
+        const payload = {
+            contents: [{ role: "user", parts: [{ text: prompt }] }],
+            generationConfig: { responseMimeType: "application/json" }
+        };
+        const response = await fetch(apiUrl, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+        if (!response.ok) throw new Error(`API request failed with status ${response.status}`);
+        const result = await response.json();
+        return JSON.parse(result.candidates[0].content.parts[0].text);
+    }
+
+    function renderProfileResults(profiles) {
+        if (!profiles || !Array.isArray(profiles) || profiles.length === 0) {
+            profileResultsContainer.innerHTML = `<p class="text-text-secondary">Could not generate valid profiles. Please try a different query.</p>`;
+            return;
+        }
+        profileResultsContainer.innerHTML = profiles.map(profile => `
+            <div class="mb-6 p-4 border border-border-color rounded-lg bg-gray-50">
+                <div class="flex items-start justify-between">
+                    <div>
+                        <h4 class="text-xl font-bold text-accent-primary">${profile.name}</h4>
+                        <p class="text-md font-medium text-text-primary">${profile.title} at ${profile.company}</p>
+                        <p class="text-sm text-text-secondary">${profile.location}</p>
+                    </div>
+                    <a href="${profile.linkedin_url}" target="_blank" class="text-sm text-white bg-accent-secondary hover:bg-accent-primary px-4 py-2 rounded-lg flex-shrink-0 ml-4">View Profile</a>
+                </div>
+                <p class="text-sm text-text-secondary mt-3">${profile.summary}</p>
+            </div>
+        `).join('');
+    }
+    document.getElementById('close-search-modal').addEventListener('click', () => profileSearchModal.style.display = 'none');
 });
 </script>
 </body>
