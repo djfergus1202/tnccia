@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width,initial-scale=1"/>
-  <title>Aether: Interactive Career & Study Hub</title>
+  <title>Aether: Career & Study Hub</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/interactjs/dist/interact.min.js"></script>
   <style>
@@ -16,141 +16,236 @@
       --accent-secondary: #004182;
       --border-color: #e0e0e0;
     }
-    * { box-sizing: border-box; margin:0; padding:0; }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
       font-family: system-ui, sans-serif;
       background: var(--bg-main);
       color: var(--text-primary);
     }
+    /* Header */
     header {
       background: var(--bg-alt);
       box-shadow: 0 1px 4px rgba(0,0,0,0.1);
-      position: fixed; top:0; width:100%; z-index:50;
+      position: fixed; top: 0; width: 100%; z-index: 50;
     }
     header .container {
-      max-width:1200px; margin:auto;
-      display:flex; justify-content:space-between; align-items:center;
-      padding:.75rem 1rem;
+      max-width: 1200px; margin: auto;
+      display: flex; justify-content: space-between; align-items: center;
+      padding: .75rem 1rem;
     }
-    header .logo { color:var(--accent-primary); font-weight:700; font-size:1.5rem; cursor:pointer; }
+    header .logo {
+      color: var(--accent-primary);
+      font-weight: 700;
+      font-size: 1.5rem;
+      cursor: pointer;
+    }
+    /* Sidebar */
     #sidebar {
       background: var(--bg-alt);
-      border-right:1px solid var(--border-color);
-      padding:1rem;
-      height:100vh; position:sticky; top:0;
+      border-right: 1px solid var(--border-color);
+      padding: 1rem;
+      height: 100vh;
+      position: sticky;
+      top: 0;
+      flex-shrink: 0;
     }
-    #sidebar .profile-card { text-align:center; margin-bottom:2rem;}
-    #sidebar .profile-card img { width:4rem; height:4rem; border-radius:50%; }
-    #sidebar .profile-card h2 { margin:.5rem 0 0; font-weight:600; }
-    #sidebar .profile-card p { margin:.25rem 0; font-size:.875rem; color:var(--text-secondary); }
+    #sidebar .profile-card {
+      text-align: center;
+      margin-bottom: 2rem;
+    }
+    #sidebar .profile-card img {
+      width: 4rem; height: 4rem; border-radius: 50%;
+    }
+    #sidebar .profile-card h2 {
+      margin: .5rem 0 0; font-weight: 600;
+    }
+    #sidebar .profile-card p {
+      margin: .25rem 0; font-size: .875rem; color: var(--text-secondary);
+    }
     #sidebar .menu button {
-      width:100%; text-align:left; padding:.75rem; border:none; background:transparent;
-      cursor:pointer; transition:background .2s;
+      width: 100%; text-align: left;
+      padding: .75rem; border: none; background: transparent;
+      cursor: pointer; transition: background .2s;
+      margin-bottom: .25rem;
     }
-    #sidebar .menu button:hover { background:rgba(0,0,0,0.03); }
-    .nav-button.active { color:var(--accent-primary); font-weight:600; }
-    .content-section { display:none; animation:fadeIn .3s ease-in-out;}
-    .content-section.active { display:block;}
-    @keyframes fadeIn { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:translateY(0)} }
+    #sidebar .menu button:hover {
+      background: rgba(0,0,0,0.03);
+    }
+    .nav-button.active {
+      color: var(--accent-primary);
+      font-weight: 600;
+    }
+    /* Main content */
+    #content-area {
+      padding: 1rem;
+      margin-top: 4rem;
+      flex: 1;
+    }
+    .content-section {
+      display: none;
+      animation: fadeIn .3s ease-in-out;
+    }
+    .content-section.active {
+      display: block;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
     .card {
-      background:var(--bg-alt); border:1px solid var(--border-color); border-radius:.75rem;
-      box-shadow:0 4px 10px rgba(0,0,0,0.05); padding:1rem; margin-bottom:1.5rem;
+      background: var(--bg-alt);
+      border: 1px solid var(--border-color);
+      border-radius: .75rem;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+      padding: 1rem;
+      margin-bottom: 1.5rem;
     }
-    .card h3 { font-weight:600; margin-bottom:.5rem; }
-    .card p { color:var(--text-secondary); line-height:1.4; }
+    .card h3 {
+      font-weight: 600; margin-bottom: .5rem;
+    }
+    .card p {
+      color: var(--text-secondary); line-height: 1.4;
+    }
+    /* Loader */
     #loading-overlay {
-      position:fixed; inset:0; display:flex; align-items:center; justify-content:center;
-      background:rgba(255,255,255,0.75); z-index:100; visibility:hidden;
+      position: fixed; inset: 0;
+      display: flex; align-items: center; justify-content: center;
+      background: rgba(255,255,255,0.75);
+      z-index: 100;
+      visibility: hidden;
     }
     .loader {
-      border:4px solid #f3f3f3; border-top:4px solid var(--accent-primary);
-      border-radius:50%; width:40px; height:40px; animation:spin 1s linear infinite;
+      border: 4px solid #f3f3f3;
+      border-top: 4px solid var(--accent-primary);
+      border-radius: 50%;
+      width: 40px; height: 40px;
+      animation: spin 1s linear infinite;
     }
-    @keyframes spin { from{transform:rotate(0)} to{transform:rotate(360deg)} }
-    /* Auth & Reg */
-    #auth-page, #registration-page {
-      position:fixed; inset:0; display:flex; align-items:center; justify-content:center;
-      background:rgba(0,0,0,0.05); z-index:200;
+    @keyframes spin {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+    /* Single Auth Modal */
+    #auth-page {
+      position: fixed; inset: 0;
+      display: flex; align-items: center; justify-content: center;
+      background: rgba(0,0,0,0.05);
+      z-index: 200;
     }
     .auth-container {
-      background:var(--bg-alt); max-width:400px; width:100%; padding:2rem;
-      border-radius:1rem; box-shadow:0 10px 25px rgba(0,0,0,0.1);
+      background: var(--bg-alt);
+      max-width: 400px; width: 100%;
+      padding: 2rem; border-radius: 1rem;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.1);
     }
-    .auth-tabs { display:flex; margin-bottom:1rem; }
+    .auth-tabs {
+      display: flex; margin-bottom: 1rem;
+    }
     .auth-tabs button {
-      flex:1; padding:.75rem; font-size:1.125rem; border:none; background:transparent;
-      cursor:pointer; transition:background .2s;
+      flex: 1; padding: .75rem;
+      font-size: 1.125rem; border: none;
+      background: transparent; cursor: pointer;
+      transition: background .2s;
     }
-    .auth-tabs button.active { border-bottom:3px solid var(--accent-primary); font-weight:600;}
+    .auth-tabs button.active {
+      border-bottom: 3px solid var(--accent-primary);
+      font-weight: 600;
+    }
     .auth-form input {
-      width:100%; padding:.75rem; border:1px solid var(--border-color);
-      border-radius:.5rem; margin-bottom:.5rem; outline:none;
-      transition:border .2s;
+      width: 100%; padding: .75rem;
+      border: 1px solid var(--border-color);
+      border-radius: .5rem; margin-bottom: .5rem;
+      outline: none; transition: border .2s;
     }
-    .auth-form input:focus { border-color:var(--accent-primary); }
+    .auth-form input:focus {
+      border-color: var(--accent-primary);
+    }
     .auth-form .btn {
-      width:100%; padding:.75rem; border:none; border-radius:.5rem;
-      background:var(--accent-primary); color:#fff; font-weight:600;
-      cursor:pointer; transition:background .2s;
+      width: 100%; padding: .75rem;
+      border: none; border-radius: .5rem;
+      background: var(--accent-primary);
+      color: #fff; font-weight: 600; cursor: pointer;
+      transition: background .2s;
     }
-    .auth-form .btn:hover { background:var(--accent-secondary); }
-    .auth-error { color:#dc2626; font-size:.875rem; text-align:center; margin-top:.5rem; }
-    /* Mind Map */
+    .auth-form .btn:hover {
+      background: var(--accent-secondary);
+    }
+    .auth-error {
+      color: #dc2626; font-size: .875rem;
+      text-align: center; margin-top: .5rem;
+    }
+    /* Mind Map Modal */
     #mind-map-modal {
-      position:fixed; inset:0; display:flex; align-items:center; justify-content:center;
-      background:rgba(0,0,0,0.7); backdrop-filter:blur(5px); z-index:150;
-      visibility:hidden;
+      position: fixed; inset: 0; display: flex;
+      align-items: center; justify-content: center;
+      background: rgba(0,0,0,0.7); backdrop-filter: blur(5px);
+      z-index: 150; visibility: hidden;
     }
-    #mind-map-modal.active { visibility:visible; }
+    #mind-map-modal.active {
+      visibility: visible;
+    }
     #mind-map-modal .modal-container {
-      background:var(--bg-alt); border-radius:1rem; overflow:hidden;
-      width:90%; max-width:1000px; height:85vh; display:flex; flex-direction:column;
+      background: var(--bg-alt); border-radius: 1rem;
+      width: 90%; max-width: 1000px; height: 85vh;
+      display: flex; flex-direction: column; overflow: hidden;
     }
     #mind-map-modal .modal-header {
-      display:flex; justify-content:space-between; align-items:center;
-      border-bottom:1px solid var(--border-color); padding:.75rem 1rem;
+      display: flex; justify-content: space-between;
+      align-items: center; padding: .75rem 1rem;
+      border-bottom: 1px solid var(--border-color);
     }
     #mind-map-modal .close-btn {
-      background:transparent; border:none; font-size:1.5rem; cursor:pointer;
+      background: transparent; border: none;
+      font-size: 1.5rem; cursor: pointer;
     }
     #mind-map-container {
-      flex:1; position:relative; background:#1e293b;
-      background-image:radial-gradient(rgba(255,255,255,0.1)1px,transparent1px);
-      background-size:20px 20px; cursor:grab;
+      flex: 1; position: relative;
+      background: #1e293b;
+      background-image: radial-gradient(rgba(255,255,255,0.1) 1px, transparent 1px);
+      background-size: 20px 20px; cursor: grab;
     }
     .puzzle-node {
-      position:absolute; width:140px; height:100px;
-      display:flex; align-items:center; justify-content:center; text-align:center;
-      padding:.5rem; font-weight:600; color:#fff; cursor:grab; user-select:none;
-      border:2px solid rgba(255,255,255,0.5); border-radius:.75rem;
-      box-shadow:0 5px 15px rgba(0,0,0,0.4);
-      transition:transform .2s,box-shadow .2s,background-color .3s;
+      position: absolute; width: 140px; height: 100px;
+      display: flex; align-items: center; justify-content: center;
+      text-align: center; padding: .5rem;
+      font-weight: 600; color: #fff; cursor: grab;
+      user-select: none;
+      border: 2px solid rgba(255,255,255,0.5);
+      border-radius: .75rem;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.4);
+      transition: transform .2s, box-shadow .2s, background-color .3s;
     }
-    .puzzle-node:hover { transform:scale(1.05); box-shadow:0 8px 20px rgba(0,0,0,0.5); }
+    .puzzle-node:hover {
+      transform: scale(1.05);
+      box-shadow: 0 8px 20px rgba(0,0,0,0.5);
+    }
     .puzzle-node.selected {
-      outline:3px solid #facc15; box-shadow:0 0 20px #facc15; z-index:100;
+      outline: 3px solid #facc15;
+      box-shadow: 0 0 20px #facc15;
+      z-index: 100;
     }
     #node-editor {
-      position:absolute; top:10px; right:10px;
-      background:var(--bg-alt); padding:1rem; border-radius:.5rem;
-      box-shadow:0 4px 20px rgba(0,0,0,0.25);
-      z-index:200; display:none; width:280px;
+      position: absolute; top: 10px; right: 10px;
+      background: var(--bg-alt); padding: 1rem;
+      border-radius: .5rem; box-shadow: 0 4px 20px rgba(0,0,0,0.25);
+      z-index: 200; display: none; width: 280px;
     }
     #mind-map-svg {
-      position:absolute; top:0; left:0; width:100%; height:100%;
-      pointer-events:none; z-index:10;
+      position: absolute; top: 0; left: 0;
+      width: 100%; height: 100%;
+      pointer-events: none; z-index: 10;
     }
     #mind-map-svg line {
-      stroke:rgba(255,255,255,0.4); stroke-width:3;
+      stroke: rgba(255,255,255,0.4); stroke-width: 3;
     }
   </style>
 </head>
-<body class="antialiased">
+<body class="antialiased flex">
 
   <!-- Loading -->
   <div id="loading-overlay"><div class="loader"></div></div>
 
-  <!-- Authentication -->
+  <!-- Single Auth Modal -->
   <div id="auth-page">
     <div class="auth-container">
       <h1 class="text-2xl font-bold text-center text-accent-primary mb-4">Aether</h1>
@@ -166,35 +261,22 @@
       </form>
       <form id="form-signup" class="auth-form hidden">
         <input type="text" id="signup-name" placeholder="Full Name" required>
+        <input type="text" id="signup-headline" placeholder="Professional Headline" required>
         <input type="email" id="signup-email" placeholder="Email" required>
-        <input type="password" id="signup-password" placeholder="Password (min 6)" required>
-        <input type="text" id="signup-headline" placeholder="Professional Headline">
+        <input type="password" id="signup-password" placeholder="Password" required>
         <button type="submit" class="btn">Create Account</button>
         <p id="error-signup" class="auth-error"></p>
       </form>
     </div>
   </div>
 
-  <!-- Registration (simple profile setup) -->
-  <div id="registration-page" class="hidden">
-    <div class="auth-container">
-      <h1 class="text-3xl font-black text-center text-accent-primary mb-4">Welcome to Aether</h1>
-      <form id="regForm" class="space-y-4">
-        <input type="text" id="reg-fullName" placeholder="Full Name" required class="auth-form-input">
-        <input type="email" id="reg-email" placeholder="Email" required class="auth-form-input">
-        <input type="text" id="reg-headline" placeholder="Professional Headline" class="auth-form-input">
-        <button type="submit" class="btn w-full">Start</button>
-      </form>
-    </div>
-  </div>
-
-  <!-- Main Application -->
-  <div id="main-app" class="hidden flex">
+  <!-- Main App Container -->
+  <div id="main-app" class="hidden flex w-full">
     <!-- Sidebar -->
-    <aside id="sidebar">
+    <aside id="sidebar" class="w-64 flex-shrink-0">
       <div class="profile-card">
         <img id="profile-avatar" src="https://i.pravatar.cc/80" alt="Avatar">
-        <h2 id="profile-name">Your Name</h2>
+        <h2 id="profile-name">Name</h2>
         <p id="profile-headline">Headline</p>
       </div>
       <div class="menu">
@@ -202,12 +284,13 @@
         <button class="nav-button" data-target="mindmap">Mind Map</button>
         <button class="nav-button" data-target="learning">Learning Hub</button>
         <button id="admin-btn" class="nav-button hidden" data-target="admin">Admin Panel</button>
+        <button id="sign-out-btn" class="mt-4 w-full text-left text-sm text-text-secondary hover:text-accent-primary">Sign Out</button>
       </div>
     </aside>
 
     <!-- Content Area -->
-    <main id="content-area">
-      <!-- Strategy Feed -->
+    <main id="content-area" class="flex-1">
+      <!-- Feed Section -->
       <section id="feed" class="content-section active">
         <div class="card">
           <h3>Add to your strategy</h3>
@@ -236,11 +319,11 @@
         </div>
       </section>
 
-      <!-- Admin Panel (local DB) -->
+      <!-- Admin Panel (local) -->
       <section id="admin" class="content-section">
         <div class="card">
           <h3>Admin Panel</h3>
-          <p>Manage local users & data.</p>
+          <p>View all local users.</p>
           <button id="open-admin-btn" class="btn mt-3">Open Admin Panel</button>
         </div>
       </section>
@@ -255,6 +338,21 @@
         <button class="close-btn" id="close-map-btn">&times;</button>
       </div>
       <div id="mind-map-container"></div>
+      <div id="node-editor">
+        <h3 class="font-bold mb-2">Edit Node</h3>
+        <div class="mb-2">
+          <label class="block text-sm">Label</label>
+          <input type="text" id="node-label" class="w-full p-1 border rounded mt-1"/>
+        </div>
+        <div class="mb-2">
+          <label class="block text-sm">Uncertainty: <span id="uncertainty-value">5</span></label>
+          <input type="range" id="node-uncertainty" min="1" max="10" value="5" class="w-full mt-1"/>
+        </div>
+        <div class="flex justify-between mt-4">
+          <button id="delete-node-btn" class="text-sm text-red-600">Delete</button>
+          <button id="close-editor" class="text-sm text-gray-600">Close</button>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -269,347 +367,314 @@
 
   <script>
     document.addEventListener('DOMContentLoaded', () => {
-      // --- LocalStorage Helpers ---
-      function loadUsers() {
-        return JSON.parse(localStorage.getItem('aetherUsers')||'[]');
-      }
-      function saveUsers(u) {
-        localStorage.setItem('aetherUsers', JSON.stringify(u));
-      }
-      function getCurrent() {
-        return localStorage.getItem('aetherCurrent');
-      }
-      function setCurrent(email) {
-        localStorage.setItem('aetherCurrent', email);
-      }
-      function clearCurrent() {
-        localStorage.removeItem('aetherCurrent');
-      }
+      // --- Helpers for localStorage ---
+      const LS_USERS = 'aetherUsers';
+      const LS_CUR   = 'aetherCurrent';
+      function loadUsers(){ return JSON.parse(localStorage.getItem(LS_USERS)||'[]'); }
+      function saveUsers(u){ localStorage.setItem(LS_USERS,JSON.stringify(u)); }
+      function getCurrent(){ return localStorage.getItem(LS_CUR); }
+      function setCurrent(e){ localStorage.setItem(LS_CUR,e); }
+      function clearCurrent(){ localStorage.removeItem(LS_CUR); }
 
-      // --- UI Refs ---
-      const loading = document.getElementById('loading-overlay');
-      const authPage = document.getElementById('auth-page');
-      const regPage = document.getElementById('registration-page');
-      const mainApp = document.getElementById('main-app');
-      const tabLogin = document.getElementById('tab-login');
-      const tabSignup = document.getElementById('tab-signup');
-      const formLogin = document.getElementById('form-login');
+      // --- UI References ---
+      const authPage   = document.getElementById('auth-page');
+      const mainApp    = document.getElementById('main-app');
+      const tabLogin   = document.getElementById('tab-login');
+      const tabSignup  = document.getElementById('tab-signup');
+      const formLogin  = document.getElementById('form-login');
       const formSignup = document.getElementById('form-signup');
-      const errLogin = document.getElementById('error-login');
-      const errSignup = document.getElementById('error-signup');
-      const regForm = document.getElementById('regForm');
-      const sidebarBtns = document.querySelectorAll('#sidebar .menu button');
-      const sections = document.querySelectorAll('.content-section');
-      const signOutBtn = document.getElementById('sign-out-btn');
-      const addNoteBtn = document.getElementById('add-note-btn');
-      const addGoalBtn = document.getElementById('add-goal-btn');
-      const strategyFeed = document.getElementById('strategy-feed');
-      const openMapBtn = document.getElementById('open-map-btn');
-      const mapModal = document.getElementById('mind-map-modal');
-      const closeMapBtn = document.getElementById('close-map-btn');
-      const mapContainer = document.getElementById('mind-map-container');
-      const adminModal = document.getElementById('admin-modal');
-      const openAdminBtn = document.getElementById('open-admin-btn');
-      const closeAdminBtn = document.getElementById('close-admin-btn');
-      const adminList = document.getElementById('admin-user-list');
-      const profileAvatar = document.getElementById('profile-avatar');
-      const profileName = document.getElementById('profile-name');
+      const errLogin   = document.getElementById('error-login');
+      const errSignup  = document.getElementById('error-signup');
+      const profileAvatar   = document.getElementById('profile-avatar');
+      const profileName     = document.getElementById('profile-name');
       const profileHeadline = document.getElementById('profile-headline');
+      const addNoteBtn  = document.getElementById('add-note-btn');
+      const addGoalBtn  = document.getElementById('add-goal-btn');
+      const strategyFeed= document.getElementById('strategy-feed');
+      const openMapBtn  = document.getElementById('open-map-btn');
+      const mapModal    = document.getElementById('mind-map-modal');
+      const closeMapBtn = document.getElementById('close-map-btn');
+      const mapContainer= document.getElementById('mind-map-container');
+      const adminModal  = document.getElementById('admin-modal');
+      const openAdminBtn = document.getElementById('open-admin-btn');
+      const closeAdminBtn= document.getElementById('close-admin-btn');
+      const adminList    = document.getElementById('admin-user-list');
+      const signOutBtn   = document.getElementById('sign-out-btn');
+      const sidebarBtns  = document.querySelectorAll('#sidebar .menu button');
+      const sections     = document.querySelectorAll('.content-section');
+      const lblInput     = document.getElementById('node-label');
+      const rngInput     = document.getElementById('node-uncertainty');
+      const rngValue     = document.getElementById('uncertainty-value');
+      const deleteBtn    = document.getElementById('delete-node-btn');
+      const closeEditor  = document.getElementById('close-editor');
 
-      // --- Auth Tabs ---
+      // --- Auth tab switching ---
       function showLogin() {
         tabLogin.classList.add('active');
         tabSignup.classList.remove('active');
         formLogin.classList.remove('hidden');
         formSignup.classList.add('hidden');
-        errLogin.textContent='';
+        errLogin.textContent = '';
       }
       function showSignup() {
         tabSignup.classList.add('active');
         tabLogin.classList.remove('active');
         formSignup.classList.remove('hidden');
         formLogin.classList.add('hidden');
-        errSignup.textContent='';
+        errSignup.textContent = '';
       }
-      tabLogin.addEventListener('click',showLogin);
-      tabSignup.addEventListener('click',showSignup);
+      tabLogin.addEventListener('click', showLogin);
+      tabSignup.addEventListener('click', showSignup);
 
-      // --- Registration Form (collects profile) ---
-      regForm.addEventListener('submit',e=>{
+      // --- Sign Up Handler ---
+      formSignup.addEventListener('submit', e => {
         e.preventDefault();
-        const fullName = document.getElementById('reg-fullName').value.trim();
-        const email    = document.getElementById('reg-email').value.trim();
-        const headline = document.getElementById('reg-headline').value.trim();
-        let users = loadUsers();
-        if(users.find(u=>u.email===email)){
-          alert('Email already registered.');
-          return;
-        }
-        users.push({
-          email, password:'',// no password on first step
-          fullName, headline,
-          avatarUrl:`https://i.pravatar.cc/150?u=${email}`,
-          feed:[], mindMap:{nodes:[],connections:[]}
-        });
-        saveUsers(users);
-        // Next, ask for password
-        authPage.classList.remove('hidden');
-        regPage.classList.add('hidden');
-        showSignup();
-      });
-
-      // --- Signup (set password) ---
-      formSignup.addEventListener('submit',e=>{
-        e.preventDefault();
-        const name     = document.getElementById('signup-name').value.trim();
+        const fullName = document.getElementById('signup-name').value.trim();
+        const headline = document.getElementById('signup-headline').value.trim();
         const email    = document.getElementById('signup-email').value.trim();
         const password = document.getElementById('signup-password').value;
-        const headline = document.getElementById('signup-headline').value.trim();
         let users = loadUsers();
-        const u = users.find(u=>u.email===email);
-        if(!u){
-          errSignup.textContent="No registration found for that email.";
+        if (users.find(u => u.email === email)) {
+          errSignup.textContent = 'Email already registered.';
           return;
         }
-        u.password = password;
-        u.fullName = name;
-        u.headline = headline;
+        const user = {
+          fullName, headline,
+          email, password,
+          avatarUrl: `https://i.pravatar.cc/150?u=${email}`,
+          feed: [], mindMap: { nodes: [], connections: [] }
+        };
+        users.push(user);
         saveUsers(users);
-        // auto-login
         setCurrent(email);
-        showApp(u);
+        showApp(user);
       });
 
-      // --- Login ---
-      formLogin.addEventListener('submit',e=>{
+      // --- Login Handler ---
+      formLogin.addEventListener('submit', e => {
         e.preventDefault();
         const email    = document.getElementById('login-email').value.trim();
         const password = document.getElementById('login-password').value;
         let users = loadUsers();
-        const u = users.find(u=>u.email===email && u.password===password);
-        if(!u){
-          errLogin.textContent="Invalid email/password.";
+        const user = users.find(u => u.email === email && u.password === password);
+        if (!user) {
+          errLogin.textContent = 'Invalid email or password.';
           return;
         }
         setCurrent(email);
-        showApp(u);
+        showApp(user);
       });
 
-      // --- Logout ---
-      signOutBtn.addEventListener('click',()=>{
-        clearCurrent();
-        location.reload();
-      });
+      // --- Show App After Auth ---
+      function showApp(user) {
+        authPage.classList.add('hidden');
+        mainApp.classList.remove('hidden');
+        profileAvatar.src     = user.avatarUrl;
+        profileName.textContent     = user.fullName;
+        profileHeadline.textContent = user.headline;
+        renderFeed(user);
+        setupFeedActions(user);
+        setupMindMap(user);
+        setupAdmin();
+      }
+
+      // --- Strategy Feed ---
+      function renderFeed(user) {
+        strategyFeed.innerHTML = user.feed.map(item =>
+          `<div class="card">
+             <p>${item.content}</p>
+             <p class="text-xs text-text-secondary mt-1">${new Date(item.timestamp).toLocaleString()}</p>
+           </div>`
+        ).join('');
+      }
+      function setupFeedActions(user) {
+        addNoteBtn.onclick = () => {
+          const text = prompt('Enter note:');
+          if (!text) return;
+          user.feed.unshift({ content: text, timestamp: Date.now() });
+          saveUser(user);
+          renderFeed(user);
+        };
+        addGoalBtn.onclick = () => {
+          const text = prompt('Enter goal:');
+          if (!text) return;
+          user.feed.unshift({ content: `🎯 ${text}`, timestamp: Date.now() });
+          saveUser(user);
+          renderFeed(user);
+        };
+      }
+      function saveUser(user) {
+        let users = loadUsers();
+        const i = users.findIndex(u => u.email === user.email);
+        users[i] = user;
+        saveUsers(users);
+      }
+
+      // --- Mind Map Setup ---
+      function setupMindMap(user) {
+        openMapBtn.onclick = () => mapModal.classList.add('active');
+        closeMapBtn.onclick= () => mapModal.classList.remove('active');
+        renderMindMap(user);
+      }
+      function renderMindMap(user) {
+        mapContainer.innerHTML = '';
+        const svg = document.createElementNS('http://www.w3.org/2000/svg','svg');
+        svg.id = 'mind-map-svg';
+        mapContainer.appendChild(svg);
+
+        const editor = document.getElementById('node-editor');
+        mapContainer.appendChild(editor);
+
+        let nodes = user.mindMap.nodes || [];
+        let conns = user.mindMap.connections || [];
+        let activeNode = null;
+
+        function saveMap() {
+          user.mindMap = { nodes, connections: conns };
+          saveUser(user);
+        }
+        function drawConnections() {
+          svg.innerHTML = '';
+          conns.forEach(c => {
+            const fn = nodes.find(n=>n.id===c.from);
+            const tn = nodes.find(n=>n.id===c.to);
+            if(!fn||!tn) return;
+            const line = document.createElementNS('http://www.w3.org/2000/svg','line');
+            const r1 = fn.el.getBoundingClientRect(), r2 = tn.el.getBoundingClientRect();
+            const p = mapContainer.getBoundingClientRect();
+            line.setAttribute('x1', r1.left-p.left+r1.width/2);
+            line.setAttribute('y1', r1.top-p.top+r1.height/2);
+            line.setAttribute('x2', r2.left-p.left+r2.width/2);
+            line.setAttribute('y2', r2.top-p.top+r2.height/2);
+            svg.appendChild(line);
+          });
+        }
+        function updateNodeVisual(n) {
+          const u = n.data.uncertainty;
+          const r = Math.floor(240-140*(u/10)),
+                g = Math.floor(150-50*(u/10)),
+                b = Math.floor(250-200*(u/10));
+          n.el.style.backgroundColor = `rgb(${r},${g},${b})`;
+        }
+        function openEditor(n) {
+          if(activeNode) activeNode.el.classList.remove('selected');
+          activeNode = n; n.el.classList.add('selected');
+          editor.style.display = 'block';
+          lblInput.value = n.data.label;
+          rngInput.value = n.data.uncertainty;
+          rngValue.textContent = n.data.uncertainty;
+        }
+        lblInput.oninput = () => {
+          if(!activeNode) return;
+          activeNode.data.label = lblInput.value;
+          activeNode.el.textContent = lblInput.value;
+          saveMap();
+        };
+        rngInput.oninput = () => {
+          if(!activeNode) return;
+          const u = parseInt(rngInput.value);
+          activeNode.data.uncertainty = u;
+          rngValue.textContent = u;
+          updateNodeVisual(activeNode);
+          saveMap();
+        };
+        closeEditor.onclick = () => {
+          if(activeNode) activeNode.el.classList.remove('selected');
+          editor.style.display = 'none';
+          activeNode = null;
+        };
+        deleteBtn.onclick = () => {
+          if(!activeNode) return;
+          mapContainer.removeChild(activeNode.el);
+          nodes = nodes.filter(n=>n!==activeNode);
+          conns = conns.filter(c=>c.from!==activeNode.data.id && c.to!==activeNode.data.id);
+          editor.style.display = 'none'; activeNode = null;
+          saveMap(); drawConnections();
+        };
+        mapContainer.ondblclick = e => {
+          if(e.target!==mapContainer) return;
+          const rect = mapContainer.getBoundingClientRect();
+          const x = e.clientX-rect.left-70;
+          const y = e.clientY-rect.top-50;
+          const label = prompt('Enter node label:');
+          if(!label) return;
+          const d = { x,y,label,uncertainty:5,id:Date.now() };
+          createNode(d); nodes.push(d);
+          saveMap(); drawConnections();
+        };
+        function createNode(data) {
+          const div = document.createElement('div');
+          div.className = 'puzzle-node';
+          div.textContent = data.label;
+          div.style.transform = `translate(${data.x}px,${data.y}px)`;
+          div.dataset.id = data.id;
+          mapContainer.appendChild(div);
+          const node = { el:div, data };
+          updateNodeVisual(node);
+          div.addEventListener('click', ev => {
+            ev.stopPropagation();
+            if(ev.shiftKey && activeNode && activeNode!==node) {
+              conns.push({ from: activeNode.data.id, to: node.data.id });
+              saveMap(); drawConnections();
+            } else openEditor(node);
+          });
+          return node;
+        }
+        nodes.forEach(d=>createNode(d));
+        drawConnections();
+        interact('.puzzle-node').draggable({
+          listeners: {
+            move(ev) {
+              const id=ev.target.dataset.id;
+              const n = nodes.find(x=>x.data.id==id);
+              n.data.x += ev.dx; n.data.y += ev.dy;
+              ev.target.style.transform = `translate(${n.data.x}px,${n.data.y}px)`;
+              drawConnections();
+            },
+            end(){ saveMap(); }
+          }
+        });
+      }
+
+      // --- Admin Panel ---
+      openAdminBtn.onclick = () => {
+        adminModal.classList.remove('hidden');
+        const users = loadUsers();
+        adminList.innerHTML = users.map(u =>
+          `<div class="card p-2">
+             <p class="font-semibold">${u.fullName}</p>
+             <p class="text-sm">${u.email}</p>
+           </div>`
+        ).join('');
+      };
+      closeAdminBtn.onclick = () => adminModal.classList.add('hidden');
 
       // --- Navigation ---
       sidebarBtns.forEach(btn=>{
         btn.addEventListener('click',()=>{
           sidebarBtns.forEach(b=>b.classList.remove('active'));
           btn.classList.add('active');
-          const tgt=btn.dataset.target;
+          const tgt = btn.dataset.target;
           sections.forEach(s=>{
-            s.id===tgt? s.classList.add('active'): s.classList.remove('active');
+            s.id === tgt ? s.classList.add('active') : s.classList.remove('active');
           });
         });
       });
 
-      // --- Show main app ---
-      function showApp(user){
-        authPage.classList.add('hidden');
-        regPage.classList.add('hidden');
-        mainApp.classList.remove('hidden');
-        profileAvatar.src = user.avatarUrl;
-        profileName.textContent = user.fullName;
-        profileHeadline.textContent = user.headline;
-        renderFeed(user);
-        setupFeedButtons(user);
-        setupMindMap(user);
-        setupAdmin();
-      }
-
-      // --- Strategy Feed ---
-      function renderFeed(user){
-        strategyFeed.innerHTML = user.feed.map(item=>
-          `<div class="card"><p>${item.content}</p>
-           <p class="text-xs text-text-secondary mt-1">${new Date(item.timestamp).toLocaleString()}</p></div>`
-        ).join('');
-      }
-      function setupFeedButtons(user){
-        addNoteBtn.onclick = async ()=>{
-          const txt=prompt("Enter note:");
-          if(!txt)return;
-          user.feed.unshift({content:txt,timestamp:Date.now()});
-          saveUser(user);
-          renderFeed(user);
-        };
-        addGoalBtn.onclick = async ()=>{
-          const txt=prompt("Enter goal:");
-          if(!txt)return;
-          user.feed.unshift({content:`🎯 ${txt}`,timestamp:Date.now()});
-          saveUser(user);
-          renderFeed(user);
-        };
-      }
-      function saveUser(u){
-        let users=loadUsers();
-        const idx=users.findIndex(x=>x.email===u.email);
-        users[idx]=u;
-        saveUsers(users);
-      }
-
-      // --- Mind Map ---
-      function setupMindMap(user){
-        openMapBtn.onclick = ()=> mapModal.classList.add('active');
-        closeMapBtn.onclick= ()=> mapModal.classList.remove('active');
-        mapModal.querySelector('.modal-container').focus();
-        renderMindMap(user);
-      }
-      function renderMindMap(user){
-        mapContainer.innerHTML = '';
-        const svg=document.createElementNS("http://www.w3.org/2000/svg","svg");
-        svg.id="mind-map-svg"; mapContainer.appendChild(svg);
-
-        const editor = document.createElement('div');
-        editor.id='node-editor';
-        editor.innerHTML=`
-          <h3 class="font-bold mb-2">Edit Goal</h3>
-          <div class="mb-2">
-            <label class="block text-sm">Goal Name</label>
-            <input type="text" id="node-label" class="w-full p-1 border rounded mt-1"/>
-          </div>
-          <div class="mb-2">
-            <label class="block text-sm">Uncertainty: <span id="uncertainty-value">5</span></label>
-            <input type="range" id="node-uncertainty" min="1" max="10" value="5" class="w-full mt-1"/>
-          </div>
-          <div class="flex justify-between mt-4">
-            <button id="delete-node-btn" class="text-sm text-red-600">Delete</button>
-            <button id="close-editor" class="text-sm text-gray-600">Close</button>
-          </div>`;
-        mapContainer.appendChild(editor);
-
-        let nodes = user.mindMap.nodes || [];
-        let conns = user.mindMap.connections || [];
-
-        const lbl = editor.querySelector('#node-label');
-        const rng = editor.querySelector('#node-uncertainty');
-        const val = editor.querySelector('#uncertainty-value');
-        const del = editor.querySelector('#delete-node-btn');
-        const clo = editor.querySelector('#close-editor');
-        let active = null;
-
-        function saveMap(){
-          user.mindMap={nodes,connections:conns};
-          saveUser(user);
-        }
-        function drawConns(){
-          svg.innerHTML='';
-          conns.forEach(c=>{
-            const f=nodes.find(n=>n.id===c.from);
-            const t=nodes.find(n=>n.id===c.to);
-            if(!f||!t)return;
-            const l=document.createElementNS("http://www.w3.org/2000/svg","line");
-            const r1=f.el.getBoundingClientRect(),r2=t.el.getBoundingClientRect();
-            const p=mapContainer.getBoundingClientRect();
-            l.setAttribute("x1",r1.left-p.left+r1.width/2);
-            l.setAttribute("y1",r1.top-p.top+r1.height/2);
-            l.setAttribute("x2",r2.left-p.left+r2.width/2);
-            l.setAttribute("y2",r2.top-p.top+r2.height/2);
-            svg.appendChild(l);
-          });
-        }
-        function updateNode(n){
-          const u=n.data.uncertainty;
-          const r=Math.floor(240-140*(u/10)),
-                g=Math.floor(150-50*(u/10)),
-                b=Math.floor(250-200*(u/10));
-          n.el.style.backgroundColor=`rgb(${r},${g},${b})`;
-        }
-        function openEd(n){
-          if(active) active.el.classList.remove('selected');
-          active=n; n.el.classList.add('selected');
-          editor.style.display='block';
-          lbl.value=n.data.label;
-          rng.value=n.data.uncertainty;
-          val.textContent=n.data.uncertainty;
-        }
-        lbl.oninput = ()=>{ if(!active)return; active.data.label=lbl.value; active.el.textContent=lbl.value; saveMap(); };
-        rng.oninput = ()=>{
-          if(!active)return;
-          const u=parseInt(rng.value);
-          active.data.uncertainty=u;
-          val.textContent=u;
-          updateNode(active);
-          saveMap();
-        };
-        clo.onclick = ()=>{ if(active)active.el.classList.remove('selected'); editor.style.display='none'; active=null; };
-        del.onclick = ()=>{
-          if(!active)return;
-          mapContainer.removeChild(active.el);
-          nodes=nodes.filter(n=>n!==active);
-          conns=conns.filter(c=>c.from!==active.data.id && c.to!==active.data.id);
-          editor.style.display='none'; active=null;
-          saveMap(); drawConns();
-        };
-        mapContainer.ondblclick=e=>{
-          if(e.target!==mapContainer)return;
-          const r=mapContainer.getBoundingClientRect();
-          const x=e.clientX-r.left-70,
-                y=e.clientY-r.top-50;
-          const text=prompt("Enter goal:");
-          if(!text)return;
-          const d={x,y,label:text,uncertainty:5,id:Date.now()};
-          createNode(d); nodes.push(d);
-          saveMap(); drawConns();
-        };
-        function createNode(data){
-          const d=document.createElement('div');
-          d.className='puzzle-node'; d.textContent=data.label;
-          d.style.transform=`translate(${data.x}px,${data.y}px)`;
-          d.dataset.id=data.id;
-          mapContainer.appendChild(d);
-          const node={el:d,data};
-          updateNode(node);
-          d.addEventListener('click',ev=>{
-            ev.stopPropagation();
-            if(ev.shiftKey && active && active!==node){
-              conns.push({from:active.data.id,to:node.data.id});
-              saveMap(); drawConns();
-            } else openEd(node);
-          });
-          return node;
-        }
-        const nodeObjs = nodes.map(d=>createNode(d));
-        drawConns();
-        interact('.puzzle-node').draggable({
-          listeners:{move(ev){
-            const id=ev.target.dataset.id;
-            const n=nodes.find(x=>x.id==id);
-            n.x+=ev.dx;n.y+=ev.dy;
-            ev.target.style.transform=`translate(${n.x}px,${n.y}px)`;
-            drawConns();
-          },end(){saveMap()}}
-        });
-      }
-
-      // --- Admin Panel (local) ---
-      openAdminBtn.onclick = ()=>{
-        adminModal.classList.remove('hidden');
-        const users=loadUsers();
-        adminList.innerHTML = users.map(u=>
-          `<div class="card p-2"><p class="font-semibold">${u.fullName}</p><p class="text-sm">${u.email}</p></div>`
-        ).join('');
+      // --- Sign Out ---
+      signOutBtn.onclick = () => {
+        clearCurrent();
+        location.reload();
       };
-      closeAdminBtn.onclick = ()=> adminModal.classList.add('hidden');
 
-      // --- Init on load ---
-      const cur = getCurrent();
-      if(cur){
-        const u = loadUsers().find(x=>x.email===cur);
-        if(u) showApp(u);
-        else { clearCurrent(); authPage.classList.remove('hidden'); }
-      } else {
-        authPage.classList.remove('hidden');
+      // --- Initialize on load ---
+      const curr = getCurrent();
+      if(curr) {
+        const user = loadUsers().find(u=>u.email===curr);
+        if(user) showApp(user);
+        else clearCurrent();
       }
+      else showLogin();
     });
   </script>
 </body>
