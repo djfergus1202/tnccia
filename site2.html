@@ -5,566 +5,583 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Aether: Interactive Career & Study Hub</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
-    <script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
-    <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
-    
-    <!-- Three.js Libraries -->
-    <script src="https://cdn.jsdelivr.net/npm/three@0.156.0/build/three.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/three@0.156.0/examples/js/controls/OrbitControls.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/three@0.156.0/examples/js/renderers/CSS2DRenderer.js"></script>
-    
-    <script src="https://unpkg.com/jspdf@latest/dist/jspdf.umd.min.js"></script>
-    <script src="https://unpkg.com/docx@7.1.0/build/index.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/interactjs/dist/interact.min.js"></script>
     <style>
         :root {
-            --bg-main: #F4F4F5; --bg-alt: #FFFFFF; --text-primary: #1F2937;
-            --text-secondary: #4B5563; --accent-primary: #DC2626; --accent-secondary: #B91C1C;
-            --border-color: #E5E7EB;
+            --bg-main: #f3f2ef;
+            --bg-alt: #ffffff;
+            --text-primary: #1f2937;
+            --text-secondary: #4b5563;
+            --accent-primary: #0a66c2;
+            --accent-secondary: #004182;
+            --border-color: #e0e0e0;
         }
-        body { font-family: 'Inter', sans-serif; background-color: var(--bg-main); color: var(--text-primary); }
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
-        .nav-item { transition: all 0.2s ease-in-out; border-bottom: 3px solid transparent; }
-        .nav-item.active { border-bottom-color: var(--accent-primary); color: var(--accent-primary); }
-        .nav-item:not(.active):hover { color: var(--accent-primary); }
+        body { font-family: -apple-system, system-ui, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', 'Fira Sans', Ubuntu, Oxygen, 'Oxygen Sans', Cantarell, 'Droid Sans', 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Lucida Grande', Helvetica, Arial, sans-serif; background-color: var(--bg-main); color: var(--text-primary); }
+        .nav-button.active { color: var(--accent-primary); font-weight: 600; }
         .content-section { display: none; }
         .content-section.active { display: block; }
-        .chart-container { position: relative; margin: auto; height: 50vh; width: 100%; max-width: 800px; max-height: 500px; }
-        #notes-editor { height: 300px; background-color: white; }
-        .flashcard-container { perspective: 1000px; cursor: pointer; }
-        .flashcard-inner { position: relative; width: 100%; height: 100%; transition: transform 0.6s; transform-style: preserve-3d; }
-        .flashcard-container.is-flipped .flashcard-inner { transform: rotateY(180deg); }
-        .flashcard-front, .flashcard-back { position: absolute; width: 100%; height: 100%; -webkit-backface-visibility: hidden; backface-visibility: hidden; display: flex; align-items: center; justify-content: center; text-align: center; padding: 1rem; }
-        .flashcard-back { transform: rotateY(180deg); }
-        .carousel::-webkit-scrollbar { height: 6px; }
-        .carousel::-webkit-scrollbar-thumb { background-color: rgba(100, 100, 100, 0.5); border-radius: 3px; }
-        .drag-drop.drag-over { background: #fee2e2; border-color: var(--accent-primary); }
-        .required { color: var(--accent-primary); }
-        .disclaimer { font-size: 0.8em; color: #555; margin-top: 8px; }
-        .accordion-content { max-height: 0; overflow: hidden; transition: max-height 0.3s ease-out; }
-        #goal-map-3d-container { width: 100%; height: 70vh; position: relative; border-radius: 0.75rem; overflow: hidden; background-color: #cde6d0; /* Monopoly board green */ }
-        .timeline-container { max-height: 400px; overflow-y: auto; border: 1px solid var(--border-color); border-radius: 0.5rem; padding: 0.5rem; }
-        .timeline-list li { padding: 0.75rem; border-bottom: 1px solid var(--border-color); display: flex; align-items: center; }
-        .timeline-list li:last-child { border-bottom: none; }
-        .timeline-avatar { width: 40px; height: 40px; border-radius: 50%; margin-right: 0.75rem; object-fit: cover; }
         
-        /* Styles for 3D Visualizer UI */
-        #ui-panel {
-          position: absolute;
-          top: 15px;
-          left: 15px;
-          background: rgba(255, 255, 255, 0.95);
-          padding: 1rem;
-          border-radius: 8px;
-          box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-          z-index: 10;
-          display: flex;
-          gap: 1rem;
-          align-items: center;
+        #mind-map-modal {
+            background-color: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(5px);
         }
-        #ui-panel label {
-          font-weight: bold;
+        #mind-map-container { 
+            position: relative; 
+            width: 100%; 
+            height: 100%; 
+            background-color: #1e293b;
+            background-image: radial-gradient(rgba(255,255,255,0.1) 1px, transparent 1px);
+            background-size: 20px 20px;
+            border-radius: .75rem; 
+            overflow: hidden; 
         }
-        #ui-panel select, #ui-panel button {
-          padding: 8px 12px;
-          border-radius: 6px;
-          border: 1px solid #ccc;
-          background-color: white;
-        }
-        #ui-panel button {
-            background-color: var(--accent-primary);
+        .puzzle-node {
+            position: absolute;
+            width: 140px;
+            height: 100px;
             color: white;
-            font-weight: bold;
-            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 0.5rem;
+            font-weight: 600;
+            cursor: grab;
+            user-select: none;
+            border: 2px solid rgba(255, 255, 255, 0.5);
+            border-radius: 0.75rem;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.4);
+            transition: transform 0.2s, box-shadow 0.2s, background-color 0.3s;
+            touch-action: none;
         }
-        .label {
-          font-family: 'Inter', sans-serif;
-          color: black;
-          font-size: 10px;
-          text-align: center;
-          width: 80px; /* Tile width */
-          pointer-events: none;
+        .puzzle-node.selected {
+            outline: 3px solid #facc15;
+            box-shadow: 0 0 20px #facc15;
+            z-index: 100;
+        }
+        #node-editor {
+            position: absolute;
+            background: var(--bg-alt);
+            padding: 1rem;
+            border-radius: 0.5rem;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.25);
+            z-index: 101;
+            display: none;
+            width: 280px;
+        }
+        #mind-map-svg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 10;
+        }
+        #mind-map-svg line {
+            stroke: rgba(255, 255, 255, 0.4);
+            stroke-width: 3;
+        }
+        .loader {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid var(--accent-primary);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
         }
     </style>
 </head>
 <body class="antialiased">
 
-    <!-- Landing/Registration Page -->
-    <div id="registration-page" class="flex items-center justify-center min-h-screen bg-gray-100">
-        <div class="text-center p-8 bg-white rounded-xl shadow-2xl max-w-lg mx-auto w-full">
-            <h1 class="text-5xl font-black text-red-600 mb-4">Aether</h1>
-            <p class="text-xl text-text-secondary mb-8">Create your profile to begin your integrated career and learning journey.</p>
-            <form id="regForm" class="text-left" novalidate>
-                <div class="space-y-4">
-                    <div><label for="fullName" class="block text-sm font-medium text-gray-700">Full Name<span class="required">*</span></label><input type="text" id="fullName" name="fullName" required class="mt-1 w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-red-500"></div>
-                    <div><label for="email" class="block text-sm font-medium text-gray-700">Email<span class="required">*</span></label><input type="email" id="email" name="email" required class="mt-1 w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-red-500"></div>
-                    <div><label for="headline" class="block text-sm font-medium text-gray-700">Headline</label><input type="text" id="headline" name="headline" placeholder="e.g. Aspiring AI Researcher" class="mt-1 w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-red-500"></div>
-                    <div><label for="bioReg" class="block text-sm font-medium text-gray-700">Bio</label><textarea id="bioReg" name="bioReg" rows="3" placeholder="Tell us about your goals and interests..." class="mt-1 w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-red-500"></textarea></div>
-                    <div><label for="avatarReg" class="block text-sm font-medium text-gray-700">Avatar URL</label><input type="url" id="avatarReg" name="avatarReg" placeholder="Link to your photo" class="mt-1 w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-red-500"></div>
-                </div>
-                <button type="submit" class="mt-6 w-full px-6 py-3 bg-red-600 text-white font-bold rounded-lg hover:bg-red-700 transition-colors">Create Profile & Enter</button>
-                <p class="text-center mt-4 text-sm text-gray-600">Already have an account? <a href="#" id="show-signin" class="font-medium text-red-600 hover:text-red-500">Sign In</a></p>
-                <p class="disclaimer">By signing up you agree to be a part of this research study. We maintain the claim that the data will solely be used for research purposes and de-identified before use in analysis.</p>
+    <!-- Auth Page -->
+    <div id="auth-page" class="flex items-center justify-center min-h-screen bg-gray-100">
+        <div class="p-8 bg-white rounded-xl shadow-2xl max-w-md w-full">
+            <h1 class="text-4xl font-black text-accent-primary mb-2 text-center">Aether</h1>
+            <p class="text-center text-text-secondary mb-6">Your strategic career co-pilot.</p>
+            
+            <!-- Sign In Form -->
+            <form id="signin-form" class="space-y-4">
+                <input type="email" id="signin-email" placeholder="Email" required class="w-full px-4 py-3 rounded-lg border focus:outline-none focus:ring-2 focus:ring-accent-primary">
+                <input type="password" id="signin-password" placeholder="Password" required class="w-full px-4 py-3 rounded-lg border focus:outline-none focus:ring-2 focus:ring-accent-primary">
+                <button type="submit" class="w-full py-3 bg-accent-primary text-white font-bold rounded-full hover:bg-accent-secondary transition-colors">Sign In</button>
+                <p class="text-center text-sm">New to Aether? <a href="#" id="show-register" class="font-semibold text-accent-primary hover:underline">Create an account</a></p>
             </form>
+
+            <!-- Registration Form -->
+            <form id="register-form" class="hidden space-y-4">
+                <input type="text" id="register-name" placeholder="Full Name" required class="w-full px-4 py-3 rounded-lg border focus:outline-none focus:ring-2 focus:ring-accent-primary">
+                <input type="email" id="register-email" placeholder="Email" required class="w-full px-4 py-3 rounded-lg border focus:outline-none focus:ring-2 focus:ring-accent-primary">
+                <input type="password" id="register-password" placeholder="Password (min. 6 characters)" required class="w-full px-4 py-3 rounded-lg border focus:outline-none focus:ring-2 focus:ring-accent-primary">
+                <input type="text" id="register-headline" placeholder="Professional Headline" class="w-full px-4 py-3 rounded-lg border focus:outline-none focus:ring-2 focus:ring-accent-primary">
+                <button type="submit" class="w-full py-3 bg-accent-primary text-white font-bold rounded-full hover:bg-accent-secondary transition-colors">Create Account</button>
+                <p class="text-center text-sm">Already have an account? <a href="#" id="show-signin" class="font-semibold text-accent-primary hover:underline">Sign in</a></p>
+            </form>
+            <p id="auth-error" class="text-red-500 text-sm mt-4 text-center"></p>
         </div>
     </div>
 
     <!-- Main App Container -->
     <div id="main-app" class="hidden">
-        <nav class="bg-white shadow-md fixed w-full z-20">
-            <div class="container mx-auto px-4 py-3 flex items-center justify-between">
-                <div class="flex items-center space-x-8">
-                    <span class="text-red-600 font-black text-2xl">Aether</span>
-                    <div id="main-nav" class="hidden md:flex items-center space-x-6">
-                        <button data-target="dashboard" class="nav-item font-semibold text-gray-600 active">Dashboard</button>
-                        <button data-target="strategy" class="nav-item font-semibold text-gray-600">My Strategy</button>
-                        <button data-target="canvas" class="nav-item font-semibold text-gray-600">Career Board</button>
-                        <button data-target="learning" class="nav-item font-semibold text-gray-600">Learning Hub</button>
-                        <button data-target="collaboration" class="nav-item font-semibold text-gray-600">Collaborate</button>
-                    </div>
-                </div>
-                <div class="flex items-center space-x-4">
-                    <button data-target="profile" id="profile-nav-btn" title="My Profile" class="nav-item p-2 rounded-full hover:bg-gray-100"><img id="nav-avatar" src="https://i.pravatar.cc/32" alt="Profile" class="w-8 h-8 rounded-full"/></button>
-                    <button id="sign-out-btn" title="Sign Out" class="p-2 rounded-full hover:bg-gray-100"><svg class="w-6 h-6 text-gray-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15m3 0l3-3m0 0l-3-3m3 3H9" /></svg></button>
-                </div>
+        <header class="bg-white shadow-sm fixed w-full z-30">
+            <div class="max-w-6xl mx-auto px-4 py-2 flex items-center justify-between">
+                <h1 class="text-2xl font-bold text-accent-primary">Aether</h1>
+                <button id="sign-out-btn" class="text-sm text-text-secondary hover:text-accent-primary">Sign Out</button>
             </div>
-        </nav>
+        </header>
 
-        <main class="pt-20">
-            <div class="container mx-auto px-4">
-                <section id="dashboard" class="content-section active">
-                     <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                        <section class="lg:col-span-2 space-y-6">
-                            <h2 class="text-xl font-bold text-text-primary">Strategy Feed</h2>
-                            <div id="strategy-feed" class="space-y-6"></div>
-                        </section>
-                        <aside class="space-y-8">
-                            <div>
-                               <h2 class="text-xl font-bold text-text-primary mb-3">Community Spotlight</h2>
-                               <div class="bg-white rounded-lg shadow p-4"><div class="flex items-center mb-3"><img src="https://i.pravatar.cc/40?u=a" alt="User" class="w-10 h-10 rounded-full mr-3"/><div><p class="font-medium">career_crafter</p><p class="text-xs text-gray-500">San Francisco, CA</p></div></div><img src="https://source.unsplash.com/random/400x300?workspace" alt="Post" class="w-full rounded-lg object-cover mb-3"/><p class="text-sm"><span class="font-medium">career_crafter</span> Mapped out my entire PhD plan on Aether. Game changer!</p></div>
-                            </div>
-                             <div>
-                                <h2 class="text-xl font-bold text-text-primary mb-3">⏳ Connections Timeline</h2>
-                                <div class="timeline-container bg-white rounded-lg shadow"><ul id="timelineList" class="timeline-list"></ul></div>
-                             </div>
-                        </aside>
-                    </div>
-                </section>
-                <section id="strategy" class="content-section"><h2 class="text-3xl font-bold mb-2">My Strategy</h2><p class="text-lg text-text-secondary mb-6">Define your goals, skills, and study plans. Use bullet points to list items in each category.</p><div class="space-y-4" id="strategy-accordions"></div></section>
-                <section id="canvas" class="content-section h-full flex flex-col">
-                    <div class="flex-shrink-0">
-                        <h2 class="text-3xl font-bold mb-2">Career Strategy Board</h2>
-                        <p class="text-lg text-text-secondary mb-4 max-w-4xl">Select a career strategy template to visualize the path. Use the "Advance" button to move your token.</p>
-                    </div>
-                    <div id="goal-map-3d-container">
-                        <div id="ui-panel">
-                            <label for="strategy-select">Choose a Strategy:</label>
-                            <select id="strategy-select"></select>
-                            <button id="advance-btn">Advance</button>
-                        </div>
-                    </div>
-                </section>
-                <section id="learning" class="content-section">
-                    <h2 class="text-3xl font-bold mb-2">Learning Hub</h2>
-                    <p class="text-lg text-text-secondary mb-6">Create study materials, generate your CV, and tune into career podcasts.</p>
-                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                        <div class="bg-alt p-6 rounded-xl border border-border-color shadow-sm space-y-6">
-                            <div>
-                                <h3 class="text-xl font-bold mb-4">CV / Resume Generator</h3>
-                                <div class="space-y-2"><input type="text" id="cv-name" placeholder="Full Name" class="w-full p-2 border rounded"><input type="text" id="cv-email" placeholder="Email" class="w-full p-2 border rounded"><input type="text" id="cv-phone" placeholder="Phone" class="w-full p-2 border rounded"><textarea id="cv-experience" placeholder="Work Experience (use bullet points)" class="w-full p-2 border rounded" rows="4"></textarea><textarea id="cv-education" placeholder="Education" class="w-full p-2 border rounded" rows="3"></textarea><textarea id="cv-skills" placeholder="Skills (comma-separated)" class="w-full p-2 border rounded" rows="2"></textarea></div>
-                                <div class="flex gap-4 mt-4"><button id="cv-word-btn" class="flex-1 px-4 py-2 bg-blue-600 text-white font-semibold rounded-lg">Download as Word</button><button id="cv-pdf-btn" class="flex-1 px-4 py-2 bg-red-600 text-white font-semibold rounded-lg">Download as PDF</button></div>
-                            </div>
-                            <div>
-                                <h3 class="text-xl font-bold mb-4">🎙️ Podcast Episodes</h3>
-                                <div class="flex gap-2 mb-4"><input id="feedUrl" type="url" placeholder="Enter RSS feed URL" required class="w-full p-2 border rounded-lg"><button id="fetchFeed" class="px-4 py-2 bg-accent-primary text-white font-semibold rounded-lg">Load</button></div>
-                                <ul id="episodeFeed" class="space-y-4 max-h-60 overflow-y-auto"></ul>
-                            </div>
-                        </div>
-                        <div class="bg-alt p-6 rounded-xl border border-border-color shadow-sm">
-                            <h3 class="text-xl font-bold mb-4">Flashcards</h3>
-                            <div id="flashcard-deck-selector" class="mb-4"></div><div id="flashcard-viewer" class="h-64" style="display: none;"><div id="flashcard-container" class="flashcard-container bg-sky-100 rounded-lg w-full h-full shadow-inner"><div class="flashcard-inner"><div class="flashcard-front bg-sky-100 rounded-lg border-2 border-sky-300"><p id="flashcard-front-content" class="text-xl font-semibold text-sky-800"></p></div><div class="flashcard-back bg-green-100 rounded-lg border-2 border-green-300"><p id="flashcard-back-content" class="text-lg text-green-800"></p></div></div></div><div class="flex justify-center gap-4 mt-4"><button id="prev-card-btn" class="px-4 py-2 bg-gray-200 rounded-lg">Previous</button><span id="card-counter"></span><button id="next-card-btn" class="px-4 py-2 bg-gray-200 rounded-lg">Next</button></div></div><p id="no-flashcards-msg" class="text-text-secondary">No flashcard deck selected. Create one from your strategy notes!</p>
-                        </div>
-                    </div>
-                </section>
-                <section id="collaboration" class="content-section">
-                    <h2 class="text-3xl font-bold mb-2">Collaborate & Network</h2>
-                    <p class="text-lg text-text-secondary mb-6">Create shared projects, chat with your team, and manage publishing rights.</p>
-                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                        <div class="space-y-6">
-                            <div class="bg-white p-6 rounded-xl border shadow-sm">
-                                <h3 class="text-xl font-bold mb-4">New Project/Skill</h3>
-                                <form id="projectForm" novalidate class="space-y-4">
-                                    <div><label for="projName" class="text-sm font-medium text-gray-700">Project Title<span class="required">*</span></label><input type="text" id="projName" placeholder="Project Title" required class="w-full mt-1 p-2 border border-border-color rounded-lg"></div>
-                                    <div><label for="projInfo" class="text-sm font-medium text-gray-700">Description</label><textarea id="projInfo" placeholder="Describe your project..." class="w-full mt-1 p-2 border border-border-color rounded-lg" rows="3"></textarea></div>
-                                    <div id="dropZone" class="drag-drop border-2 border-dashed border-border-color rounded-lg p-4 text-center">
-                                       <label for="projAssets" class="text-sm font-medium text-gray-700">Upload Assets</label>
-                                       <div class="text-sm text-text-secondary mt-1">Drag & drop files here or click to select</div>
-                                       <input type="file" id="projAssets" multiple class="sr-only">
-                                       <ul id="fileList" class="text-left text-sm mt-2"></ul>
-                                    </div>
-                                    <button type="submit" id="initProject" class="w-full px-6 py-2 bg-accent-primary text-white font-bold rounded-lg hover:bg-accent-secondary">Create Workspace</button>
-                                </form>
-                            </div>
-                            <div class="bg-white p-6 rounded-xl border shadow-sm">
-                                <h3 class="text-xl font-bold mb-4">Active Projects</h3>
-                                <ul id="projectsList" class="space-y-3"></ul>
-                            </div>
-                        </div>
-                        <div class="space-y-6">
-                            <div id="chatSection" class="bg-white p-6 rounded-xl border shadow-sm" style="display:none;">
-                                <h3 class="text-xl font-bold mb-4">Project Chat</h3>
-                                <div id="messages" class="h-64 overflow-y-auto bg-gray-50 p-3 border rounded-lg mb-4"></div>
-                                <form id="chatForm" class="flex gap-2"><input type="text" id="chatInput" placeholder="Type a message..." autocomplete="off" class="w-full p-2 border border-border-color rounded-lg"><button type="submit" class="px-4 py-2 bg-accent-primary text-white font-bold rounded-lg hover:bg-accent-secondary">Send</button></form>
-                            </div>
-                            <div id="publishSection" class="bg-white p-6 rounded-xl border shadow-sm" style="display:none;">
-                                <h3 class="text-xl font-bold mb-4">Publish Content</h3>
-                                <p class="text-sm text-text-secondary mb-4">Check below to consent to publicize this project's work:</p>
-                                <div class="space-y-2"><label class="flex items-center"><input type="checkbox" class="consentCheckbox h-4 w-4 text-red-600 border-gray-300 rounded focus:ring-red-500 mr-2"> I agree to publish</label><label class="flex items-center"><input type="checkbox" class="consentCheckbox h-4 w-4 text-red-600 border-gray-300 rounded focus:ring-red-500 mr-2"> Collaborator agrees</label></div>
-                                <button id="publishBtn" disabled class="w-full mt-4 px-6 py-2 bg-gray-300 text-gray-500 font-bold rounded-lg cursor-not-allowed">Publish</button>
-                            </div>
-                        </div>
-                    </div>
-                </section>
-                <section id="profile" class="content-section">
-                    <div class="max-w-2xl mx-auto space-y-6">
-                        <div class="bg-white p-6 rounded-lg shadow">
-                            <div class="flex items-center space-x-4 mb-4"><img id="profile-avatar" class="w-24 h-24 rounded-full" src=""><div class="flex-1"><h3 id="profile-name" class="text-2xl font-bold"></h3><p id="profile-headline" class="text-text-secondary"></p></div></div>
-                            <div class="space-y-2">
-                                <div><h4 class="font-semibold">About</h4><p id="profile-bio" class="text-text-secondary text-sm"></p></div>
-                                <div><h4 class="font-semibold">Contact</h4><p id="profile-email" class="text-text-secondary text-sm"></p></div>
-                            </div>
-                            <button id="edit-profile-btn" class="mt-6 w-full px-6 py-2 bg-gray-200 text-text-primary font-semibold rounded-lg hover:bg-gray-300">Edit Profile</button>
-                        </div>
-                         <div class="bg-white p-6 rounded-lg shadow">
-                            <h3 class="text-xl font-bold mb-4">Data & Admin</h3>
-                            <div class="flex flex-col sm:flex-row gap-4">
-                               <button id="exportMyData" class="flex-1 px-4 py-2 bg-blue-600 text-white font-semibold rounded-lg">Export My Data</button>
-                               <button id="admin-nav-btn" data-target="admin" class="flex-1 px-4 py-2 bg-slate-700 text-white font-semibold rounded-lg">Admin Panel</button>
-                            </div>
-                        </div>
-                    </div>
-                </section>
-                <section id="admin" class="content-section">
-                    <h2 class="text-3xl font-bold mb-6">🔒 Admin Dashboard</h2>
-                    <div id="adminLoginForm" class="max-w-md mx-auto bg-white p-6 rounded-lg shadow">
-                         <div class="space-y-4">
-                            <input type="password" id="adminCode" placeholder="Enter admin code" class="w-full p-2 border rounded-lg">
-                            <button id="adminLoginBtn" class="w-full px-4 py-2 bg-accent-primary text-white font-semibold rounded-lg">Login</button>
-                         </div>
-                    </div>
-                    <div id="adminDashboard" class="hidden max-w-md mx-auto bg-white p-6 rounded-lg shadow space-y-4">
-                         <h3 class="text-xl font-bold">Website Analytics & Stats</h3>
-                         <p>Total Registrations: <span id="totalRegs" class="font-bold">0</span></p>
-                         <p>Total Projects: <span id="totalProjects" class="font-bold">0</span></p>
-                         <p>Total Connections: <span id="totalConnections" class="font-bold">0</span></p>
-                         <button id="exportMaster" class="w-full px-4 py-2 bg-slate-700 text-white font-semibold rounded-lg">Download All Data</button>
-                    </div>
-                </section>
+        <main class="max-w-6xl mx-auto pt-20 grid grid-cols-1 md:grid-cols-4 gap-6 px-4">
+            <!-- Left Panel -->
+            <aside class="md:col-span-1 space-y-6">
+                <div class="bg-white p-4 rounded-lg border border-border-color text-center">
+                    <img id="nav-avatar" src="https://i.pravatar.cc/80" class="w-20 h-20 rounded-full mx-auto mb-2"/>
+                    <h2 id="profile-name" class="font-bold text-lg"></h2>
+                    <p id="profile-headline" class="text-sm text-text-secondary"></p>
+                </div>
+                <div class="bg-white p-4 rounded-lg border border-border-color space-y-2">
+                    <button id="open-mind-map-btn" class="w-full text-left font-semibold text-text-primary hover:bg-gray-100 p-2 rounded">Mind Map</button>
+                    <button id="admin-panel-btn" class="hidden w-full text-left font-semibold text-text-primary hover:bg-gray-100 p-2 rounded">Admin Panel</button>
+                </div>
+            </aside>
+
+            <!-- Center Feed -->
+            <div id="center-feed" class="md:col-span-2 space-y-6">
+                <div class="bg-white p-4 rounded-lg border border-border-color">
+                    <h3 class="font-semibold mb-2">Add to your strategy...</h3>
+                    <textarea id="feed-input" class="w-full p-2 border rounded-lg" placeholder="What's on your mind?"></textarea>
+                    <button id="add-feed-btn" class="mt-2 w-full py-2 bg-accent-primary text-white font-bold rounded-full hover:bg-accent-secondary">Post</button>
+                </div>
+                <div id="strategy-feed" class="space-y-4"></div>
             </div>
+
+            <!-- Right Panel -->
+            <aside class="md:col-span-1 space-y-6">
+                <div class="bg-white p-4 rounded-lg border border-border-color">
+                    <h3 class="font-bold mb-2">Opportunities</h3>
+                    <div id="opportunities-panel" class="space-y-3">
+                        <p class="text-sm text-text-secondary">AI-suggested roles based on your profile will appear here.</p>
+                    </div>
+                </div>
+            </aside>
         </main>
     </div>
 
     <!-- Modals -->
-    <div id="signin-modal" class="fixed inset-0 bg-gray-900 bg-opacity-50 flex items-center justify-center p-4 z-50" style="display: none;">
-        <div class="bg-white rounded-lg shadow-xl w-full max-w-md p-8">
-            <h2 class="text-2xl font-bold text-center mb-6">Sign In</h2>
-            <form id="signin-form"><div class="space-y-4"><input type="email" id="signin-email" placeholder="Email" required class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-red-500"><button type="submit" class="w-full px-6 py-3 bg-red-600 text-white font-bold rounded-lg hover:bg-red-700">Sign In</button></div></form>
+    <div id="mind-map-modal" class="fixed inset-0 z-40 hidden items-center justify-center p-4">
+        <div class="w-full h-full max-w-5xl max-h-[85vh] relative">
+            <button id="close-mind-map-btn" class="absolute -top-2 -right-2 z-50 bg-white rounded-full w-8 h-8 flex items-center justify-center text-xl font-bold">&times;</button>
+            <div id="mind-map-container">
+                <div id="node-editor">
+                    <h3 class="font-bold mb-2">Edit Goal</h3>
+                    <div class="mb-2">
+                        <label for="node-label" class="block text-sm font-medium text-gray-700">Goal Name</label>
+                        <input type="text" id="node-label" class="w-full p-1 border rounded mt-1">
+                    </div>
+                    <div class="mb-2">
+                        <label for="node-uncertainty" class="block text-sm font-medium text-gray-700">Uncertainty: <span id="uncertainty-value">5</span></label>
+                        <input type="range" id="node-uncertainty" min="1" max="10" value="5" class="w-full mt-1">
+                    </div>
+                    <div class="flex justify-between items-center mt-4">
+                        <button id="delete-node-btn" class="text-sm text-red-600 hover:underline">Delete</button>
+                        <button id="close-editor" class="text-sm text-gray-600 hover:underline">Close</button>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
+    <div id="admin-modal" class="fixed inset-0 z-40 hidden items-center justify-center p-4 bg-black bg-opacity-50">
+        <div class="bg-white rounded-lg shadow-xl w-full max-w-2xl p-6">
+            <h2 class="text-2xl font-bold mb-4">Admin Panel: All Users</h2>
+            <div id="admin-user-list" class="max-h-96 overflow-y-auto"></div>
+            <button id="close-admin-modal-btn" class="mt-4 w-full py-2 bg-gray-200 rounded-lg">Close</button>
+        </div>
+    </div>
+    <div id="loading-overlay" class="fixed inset-0 z-50 flex items-center justify-center bg-white bg-opacity-75">
+        <div class="loader"></div>
+    </div>
 
-<script>
-document.addEventListener('DOMContentLoaded', () => {
+<script type="module">
+    // Firebase Imports
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+    import { 
+        getAuth, 
+        onAuthStateChanged, 
+        createUserWithEmailAndPassword, 
+        signInWithEmailAndPassword, 
+        signOut 
+    } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+    import { 
+        getFirestore, 
+        doc, 
+        setDoc, 
+        getDoc, 
+        collection,
+        onSnapshot,
+        updateDoc,
+        getDocs
+    } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-    const appData = {
+    // --- App State and Config ---
+    const appState = {
         currentUser: null,
-        lastRegisteredIndex: null,
-        registrations: JSON.parse(localStorage.getItem('aetherRegistrations') || '[]'),
-        connections: JSON.parse(localStorage.getItem('aetherConnections') || '[]'),
-        projects: [],
-        feedItems: [{ type: 'ai-opportunity', content: "<strong>AI Opportunity:</strong> A new 'Computational Neuroscience' position opened. Its requirements are a 90% match with your skills.", insights: [] },{ type: 'node-add', content: "You added a new <strong>Rock</strong>: 'Become a Robotics Engineer'.", insights: [] }],
-        notes: [], flashcardDecks: {},
+        mindMap: { nodes: [], connections: [] },
+        feed: [],
+        unsubscribeMindMap: null,
+        unsubscribeFeed: null,
     };
-    const ADMIN_PIN = '373202';
+    const ADMIN_UID = "YOUR_ADMIN_UID_HERE"; // Replace with your actual Firebase Admin UID
 
+    // --- Firebase Initialization ---
+    const firebaseConfig = {
+        apiKey: "YOUR_API_KEY",
+        authDomain: "YOUR_AUTH_DOMAIN",
+        projectId: "YOUR_PROJECT_ID",
+        storageBucket: "YOUR_STORAGE_BUCKET",
+        messagingSenderId: "YOUR_SENDER_ID",
+        appId: "YOUR_APP_ID"
+    };
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    // --- UI Elements ---
     const mainApp = document.getElementById('main-app');
-    const landingPage = document.getElementById('registration-page');
-    const regForm = document.getElementById('regForm');
-    const signinModal = document.getElementById('signin-modal');
-    const showSigninBtn = document.getElementById('show-signin');
+    const authPage = document.getElementById('auth-page');
+    const loadingOverlay = document.getElementById('loading-overlay');
     const signinForm = document.getElementById('signin-form');
+    const registerForm = document.getElementById('register-form');
+    const authError = document.getElementById('auth-error');
 
-    function showApp(userData) {
-        appData.currentUser = userData;
-        landingPage.style.display = 'none';
-        signinModal.style.display = 'none';
-        mainApp.style.display = 'block';
-        initializeMainApp(userData);
-    }
-
-    // AUTHENTICATION & USER MANAGEMENT
-    regForm.addEventListener('submit', (e) => {
+    // --- Auth UI Logic ---
+    document.getElementById('show-register').addEventListener('click', (e) => {
         e.preventDefault();
-        const userData = {
-            fullName: regForm.fullName.value, email: regForm.email.value,
-            headline: regForm.headline.value, bio: regForm.bioReg.value,
-            avatarUrl: regForm.avatarReg.value || `https://i.pravatar.cc/150?u=${regForm.email.value}`
-        };
-        appData.registrations.push(userData);
-        appData.lastRegisteredIndex = appData.registrations.length - 1;
-        localStorage.setItem('aetherRegistrations', JSON.stringify(appData.registrations));
-        localStorage.setItem('aetherCurrentUser', JSON.stringify(userData));
-        showApp(userData);
+        signinForm.classList.add('hidden');
+        registerForm.classList.remove('hidden');
+    });
+    document.getElementById('show-signin').addEventListener('click', (e) => {
+        e.preventDefault();
+        registerForm.classList.add('hidden');
+        signinForm.classList.remove('hidden');
     });
 
-    showSigninBtn.addEventListener('click', (e) => { e.preventDefault(); signinModal.style.display = 'flex'; });
-    signinModal.addEventListener('click', (e) => { if (e.target === signinModal) signinModal.style.display = 'none'; });
-
-    signinForm.addEventListener('submit', (e) => {
+    // --- Firebase Auth Handlers ---
+    registerForm.addEventListener('submit', async (e) => {
         e.preventDefault();
-        const emailToFind = document.getElementById('signin-email').value;
-        const foundUser = appData.registrations.find(user => user.email === emailToFind);
-        if (foundUser) {
-            localStorage.setItem('aetherCurrentUser', JSON.stringify(foundUser));
-            showApp(foundUser);
-        } else {
-            alert('No account found with that email. Please register.');
+        const name = document.getElementById('register-name').value;
+        const email = document.getElementById('register-email').value;
+        const password = document.getElementById('register-password').value;
+        const headline = document.getElementById('register-headline').value;
+        
+        try {
+            const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+            const user = userCredential.user;
+            
+            await setDoc(doc(db, "users", user.uid), {
+                fullName: name,
+                email: email,
+                headline: headline,
+                avatarUrl: `https://i.pravatar.cc/150?u=${user.uid}`
+            });
+            await setDoc(doc(db, "users", user.uid, "data", "mindMap"), { nodes: [], connections: [] });
+            await setDoc(doc(db, "users", user.uid, "data", "feed"), { items: [] });
+
+        } catch (error) {
+            authError.textContent = error.message;
         }
+    });
+
+    signinForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const email = document.getElementById('signin-email').value;
+        const password = document.getElementById('signin-password').value;
+        try {
+            await signInWithEmailAndPassword(auth, email, password);
+        } catch (error) {
+            authError.textContent = error.message;
+        }
+    });
+
+    document.getElementById('sign-out-btn').addEventListener('click', () => signOut(auth));
+
+    // --- Auth State Management ---
+    onAuthStateChanged(auth, async (user) => {
+        loadingOverlay.style.display = 'flex';
+        if (appState.unsubscribeMindMap) appState.unsubscribeMindMap();
+        if (appState.unsubscribeFeed) appState.unsubscribeFeed();
+
+        if (user) {
+            const userDocRef = doc(db, "users", user.uid);
+            const userDoc = await getDoc(userDocRef);
+            if (userDoc.exists()) {
+                appState.currentUser = { uid: user.uid, ...userDoc.data() };
+                authPage.style.display = 'none';
+                mainApp.style.display = 'block';
+                initializeMainApp(appState.currentUser);
+            }
+        } else {
+            appState.currentUser = null;
+            mainApp.style.display = 'none';
+            authPage.style.display = 'flex';
+        }
+        loadingOverlay.style.display = 'none';
     });
     
-    // Initial Load Check
-    const storedUser = localStorage.getItem('aetherCurrentUser');
-    if (storedUser) {
-        showApp(JSON.parse(storedUser));
-    } else {
-        landingPage.style.display = 'flex';
+    // --- Mind Map and Admin Panel Functions (defined outside for clarity) ---
+    function initMindMap() {
+        const container = document.getElementById('mind-map-container');
+        container.innerHTML = '';
+
+        const editor = document.getElementById('node-editor');
+        container.appendChild(editor);
+
+        const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+        svg.id = 'mind-map-svg';
+        container.appendChild(svg);
+
+        let nodes = [];
+        let connections = appState.mindMap.connections;
+        let selectedForConnection = [];
+        let activeNode = null;
+
+        const labelInput = document.getElementById('node-label');
+        const uncertaintySlider = document.getElementById('node-uncertainty');
+        const uncertaintyValue = document.getElementById('uncertainty-value');
+        
+        const mindMapDocRef = doc(db, "users", appState.currentUser.uid, "data", "mindMap");
+
+        function saveMindMap() {
+            const nodesData = nodes.map(n => n.data);
+            updateDoc(mindMapDocRef, { nodes: nodesData, connections: connections });
+        }
+
+        function updateNodeVisuals(node) {
+            const u = node.data.uncertainty;
+            const r = Math.floor(240 - 140 * (u / 10));
+            const g = Math.floor(150 - 50 * (u / 10));
+            const b = Math.floor(250 - 200 * (u / 10));
+            node.el.style.backgroundColor = `rgb(${r}, ${g}, ${b})`;
+        }
+        
+        function openEditor(node) {
+            if (activeNode) activeNode.el.classList.remove('selected');
+            activeNode = node;
+            node.el.classList.add('selected');
+            
+            editor.style.display = 'block';
+            labelInput.value = node.data.label;
+            uncertaintySlider.value = node.data.uncertainty;
+            uncertaintyValue.textContent = node.data.uncertainty;
+        }
+
+        labelInput.oninput = () => { if (activeNode) { activeNode.data.label = activeNode.el.textContent = labelInput.value; saveMindMap(); }};
+        uncertaintySlider.oninput = () => {
+            if (activeNode) {
+                activeNode.data.uncertainty = parseInt(uncertaintySlider.value);
+                uncertaintyValue.textContent = uncertaintySlider.value;
+                updateNodeVisuals(activeNode);
+                saveMindMap();
+            }
+        };
+        document.getElementById('close-editor').onclick = () => {
+            if (activeNode) activeNode.el.classList.remove('selected');
+            editor.style.display = 'none';
+            activeNode = null;
+        };
+        document.getElementById('delete-node-btn').onclick = () => {
+            if(activeNode) {
+                container.removeChild(activeNode.el);
+                nodes = nodes.filter(n => n.id !== activeNode.id);
+                connections = connections.filter(c => c.from !== activeNode.id && c.to !== activeNode.id);
+                editor.style.display = 'none';
+                activeNode = null;
+                drawConnections();
+                saveMindMap();
+            }
+        };
+
+        container.ondblclick = e => {
+            if (e.target !== container) return;
+            const rect = container.getBoundingClientRect();
+            const x = e.clientX - rect.left - 70;
+            const y = e.clientY - rect.top - 50;
+            const label = prompt('Enter goal name:');
+            if (label) {
+                const data = { x, y, label, uncertainty: 5, id: Date.now() };
+                createNodeElement(data);
+                saveMindMap();
+            }
+        };
+
+        function createNodeElement(data) {
+            const div = document.createElement('div');
+            div.className = 'puzzle-node';
+            div.textContent = data.label;
+            div.style.transform = `translate(${data.x}px, ${data.y}px)`;
+            div.dataset.id = data.id;
+            container.appendChild(div);
+
+            const node = { el: div, data: data, id: data.id };
+            nodes.push(node);
+            updateNodeVisuals(node);
+
+            div.addEventListener('click', (e) => {
+                e.stopPropagation();
+                if (e.shiftKey) selectForConnection(node);
+                else openEditor(node);
+            });
+            return node;
+        }
+        
+        function selectForConnection(node) {
+            if (selectedForConnection.includes(node)) return;
+            node.el.classList.add('selected');
+            selectedForConnection.push(node);
+
+            if (selectedForConnection.length === 2) {
+                connections.push({ from: selectedForConnection[0].id, to: selectedForConnection[1].id });
+                selectedForConnection.forEach(n => n.el.classList.remove('selected'));
+                selectedForConnection = [];
+                drawConnections();
+                saveMindMap();
+            }
+        }
+
+        function drawConnections() {
+            svg.innerHTML = '';
+            connections.forEach(conn => {
+                const fromNode = nodes.find(n => n.id === conn.from);
+                const toNode = nodes.find(n => n.id === conn.to);
+                if (!fromNode || !toNode) return;
+
+                const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+                const fromRect = fromNode.el.getBoundingClientRect();
+                const toRect = toNode.el.getBoundingClientRect();
+                const containerRect = container.getBoundingClientRect();
+
+                line.setAttribute('x1', fromRect.left - containerRect.left + fromRect.width / 2);
+                line.setAttribute('y1', fromRect.top - containerRect.top + fromRect.height / 2);
+                line.setAttribute('x2', toRect.left - containerRect.left + toRect.width / 2);
+                line.setAttribute('y2', toRect.top - containerRect.top + toRect.height / 2);
+                svg.appendChild(line);
+            });
+        }
+        
+        nodes = appState.mindMap.nodes.map(createNodeElement);
+        drawConnections();
+
+        interact('.puzzle-node').draggable({
+            listeners: {
+                move(event) {
+                    const node = nodes.find(n => n.id == event.target.dataset.id);
+                    if (node) {
+                        node.data.x += event.dx;
+                        node.data.y += event.dy;
+                        event.target.style.transform = `translate(${node.data.x}px, ${node.data.y}px)`;
+                        drawConnections();
+                    }
+                },
+                end() {
+                    saveMindMap();
+                }
+            }
+        });
     }
 
-    // MAIN APP INITIALIZATION
+    async function openAdminPanel() {
+        const adminModal = document.getElementById('admin-modal');
+        const userList = document.getElementById('admin-user-list');
+        userList.innerHTML = `<div class="loader mx-auto"></div>`;
+        adminModal.style.display = 'flex';
+
+        const usersCollection = collection(db, "users");
+        const userSnapshot = await getDocs(usersCollection);
+        const users = userSnapshot.docs.map(doc => doc.data());
+
+        userList.innerHTML = users.map(user => `
+            <div class="p-2 border-b">
+                <p class="font-semibold">${user.fullName}</p>
+                <p class="text-sm text-text-secondary">${user.email}</p>
+            </div>
+        `).join('');
+    }
+
+    // --- Main App Initialization ---
     function initializeMainApp(userData) {
         document.getElementById('nav-avatar').src = userData.avatarUrl;
+        document.getElementById('profile-name').textContent = userData.fullName;
+        document.getElementById('profile-headline').textContent = userData.headline;
         
-        // --- NAVIGATION ---
-        const nav = document.getElementById('main-nav');
-        const profileNavBtn = document.getElementById('profile-nav-btn');
-        const adminNavBtn = document.getElementById('admin-nav-btn');
-        const sections = document.querySelectorAll('.content-section');
-        
-        function navigateTo(targetId) {
-            nav.querySelectorAll('button').forEach(btn => btn.classList.toggle('active', btn.dataset.target === targetId));
-            profileNavBtn.classList.toggle('active', 'profile' === targetId);
-            adminNavBtn.classList.toggle('active', 'admin' === targetId);
-            sections.forEach(section => section.classList.toggle('active', section.id === targetId));
-            
-            const initializers = {
-                canvas: init3DGoalMap,
-                profile: renderProfilePage,
-                collaboration: initCollaborationPage, 
-                strategy: initStrategyPage,
-                dashboard: () => { renderFeed(); loadTimeline(); }, 
-                admin: initAdminPage
-            };
-            if (initializers[targetId]) initializers[targetId]();
+        const adminBtn = document.getElementById('admin-panel-btn');
+        if (userData.uid === ADMIN_UID) {
+            adminBtn.classList.remove('hidden');
+            adminBtn.onclick = () => openAdminPanel();
+        } else {
+            adminBtn.classList.add('hidden');
         }
 
-        nav.addEventListener('click', (e) => e.target.closest('button') && navigateTo(e.target.dataset.target));
-        profileNavBtn.addEventListener('click', () => navigateTo('profile'));
-        adminNavBtn.addEventListener('click', () => navigateTo('admin'));
+        const feedContainer = document.getElementById('strategy-feed');
+        const feedInput = document.getElementById('feed-input');
 
-        document.getElementById('sign-out-btn').addEventListener('click', () => {
-            localStorage.removeItem('aetherCurrentUser');
-            appData.currentUser = null;
-            mainApp.style.display = 'none';
-            landingPage.style.display = 'flex';
-            regForm.reset();
+        const feedDocRef = doc(db, "users", userData.uid, "data", "feed");
+        appState.unsubscribeFeed = onSnapshot(feedDocRef, (doc) => {
+            appState.feed = doc.data()?.items || [];
+            renderFeed();
+        });
+        
+        const mindMapDocRef = doc(db, "users", userData.uid, "data", "mindMap");
+        appState.unsubscribeMindMap = onSnapshot(mindMapDocRef, (doc) => {
+            appState.mindMap = doc.data() || { nodes: [], connections: [] };
         });
 
-        // --- DASHBOARD ---
-        const feedContainer = document.getElementById('strategy-feed');
         function renderFeed() {
-            feedContainer.innerHTML = appData.feedItems.map(item => {
-                 let icon, color;
-                 switch(item.type.split('-')[0]) {
-                    case 'ai': icon = '💡'; color = 'blue'; break;
-                    case 'node': icon = '🎯'; color = 'gray'; break;
-                    default: icon = '🔔'; color = 'gray';
-                 }
-                 return `<article class="flex bg-white rounded-lg overflow-hidden shadow-sm border border-border-color"><div class="p-4 flex-1"><div class="flex items-start gap-4"><div class="w-10 h-10 flex-shrink-0 bg-${color}-100 text-${color}-600 rounded-full flex items-center justify-center text-xl">${icon}</div><p class="text-text-secondary searchable flex-1">${item.content}</p></div></div></article>`;
-            }).join('');
-        }
-        
-        // --- CONNECTIONS TIMELINE ---
-        function loadTimeline() {
-            const list = document.getElementById('timelineList');
-            if (appData.connections.length === 0) {
-                list.innerHTML = `<li class="text-text-secondary">No connections yet.</li>`;
-                return;
-            }
-            list.innerHTML = appData.connections.slice(0, 100).map(conn => `
-                <li>
-                    <img src="${conn.avatarUrl || 'https://i.pravatar.cc/40'}" class="timeline-avatar">
-                    <div class="flex-1"><div class="font-bold">${conn.name}</div><div class="text-xs text-gray-500">${new Date(conn.connectedAt).toLocaleString()}</div></div>
-                </li>
+            feedContainer.innerHTML = appState.feed.map(item => `
+                <div class="bg-white p-4 rounded-lg border border-border-color">
+                    <p class="text-sm">${item.content}</p>
+                    <p class="text-xs text-text-secondary mt-1">${new Date(item.timestamp).toLocaleString()}</p>
+                </div>
             `).join('');
         }
         
-        // --- CAREER STRATEGY BOARD (MONOPOLY THEME) ---
-        function init3DGoalMap() {
-            const container = document.getElementById('goal-map-3d-container');
-            const uiPanel = document.getElementById('ui-panel');
-            
-            // Clear previous renderers to prevent duplication and state issues
-            while (container.firstChild) {
-                if (container.firstChild === uiPanel) break;
-                container.removeChild(container.firstChild);
+        document.getElementById('add-feed-btn').addEventListener('click', async () => {
+            if (feedInput.value.trim()) {
+                const newFeed = [{ content: feedInput.value, timestamp: Date.now() }, ...appState.feed];
+                await updateDoc(feedDocRef, { items: newFeed });
+                feedInput.value = '';
             }
-            if (container.children.length === 0) {
-                container.appendChild(uiPanel);
-            }
+        });
+        
+        const mindMapModal = document.getElementById('mind-map-modal');
+        document.getElementById('open-mind-map-btn').addEventListener('click', () => {
+            mindMapModal.style.display = 'flex';
+            initMindMap();
+        });
+        document.getElementById('close-mind-map-btn').addEventListener('click', () => {
+            mindMapModal.style.display = 'none';
+        });
+        document.getElementById('close-admin-modal-btn').onclick = () => {
+            document.getElementById('admin-modal').style.display = 'none';
+        };
 
-
-            const scene = new THREE.Scene();
-            const camera = new THREE.OrthographicCamera(container.clientWidth / -2, container.clientWidth / 2, container.clientHeight / 2, container.clientHeight / -2, 1, 1000);
-            camera.position.set(0, 50, 0);
-            camera.lookAt(0, 0, 0);
-
-            const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
-            renderer.setSize(container.clientWidth, container.clientHeight);
-            renderer.setPixelRatio(window.devicePixelRatio);
-            container.appendChild(renderer.domElement);
-
-            const labelRenderer = new THREE.CSS2DRenderer();
-            labelRenderer.setSize(container.clientWidth, container.clientHeight);
-            labelRenderer.domElement.style.position = 'absolute';
-            labelRenderer.domElement.style.top = '0px';
-            labelRenderer.domElement.style.pointerEvents = 'none'; 
-            container.appendChild(labelRenderer.domElement);
-            
-            const strategyTemplates = {
-              specialist: { name: 'The Specialist', color: 0x1e40af, path: ['Foundation', 'Core Skills', 'Advanced Practice', 'Internship', 'Specialization', 'Mastery', 'Leadership'] },
-              generalist: { name: 'The Generalist', color: 0x166534, path: ['Broad Studies', 'Internship', 'Core Role', 'Project Mgmt', 'Data Analysis', 'Specialist Focus', 'Leadership'] },
-              entrepreneur: { name: 'The Entrepreneur', color: 0x9a3412, path: ['Idea', 'Prototype', 'Seed Funding', 'Team Building', 'Market Fit', 'Scaling', 'Pivot', 'Acquisition'] },
-            };
-
-            const strategySelect = document.getElementById('strategy-select');
-            if (strategySelect.options.length === 0) { // Populate only if empty
-                for (const key in strategyTemplates) {
-                  const option = document.createElement('option');
-                  option.value = key;
-                  option.textContent = strategyTemplates[key].name;
-                  strategySelect.appendChild(option);
+        async function fetchOpportunities(headline) {
+            const opportunitiesPanel = document.getElementById('opportunities-panel');
+            opportunitiesPanel.innerHTML = `<p class="text-sm text-text-secondary animate-pulse">Generating relevant roles...</p>`;
+            setTimeout(() => {
+                const keywords = headline.toLowerCase().split(' ');
+                let roles = ['Software Engineer', 'Product Manager', 'UX Designer', 'Data Scientist', 'Marketing Lead'];
+                if(keywords.includes('ai') || keywords.includes('researcher')) {
+                    roles = ['AI Research Scientist', 'Machine Learning Engineer', 'Data Analyst', 'Robotics Engineer'];
                 }
-            }
-            
-            let playerToken, currentPath = [], currentPosition = 0;
-            
-            function generateBoard(strategyKey) {
-                // Clear previous board objects from the scene
-                const toRemove = [];
-                scene.traverse(child => {
-                    if (child.userData.isBoardObject) {
-                        toRemove.push(child);
-                    }
-                });
-                toRemove.forEach(child => {
-                    if (child.geometry) child.geometry.dispose();
-                    if (child.material) child.material.dispose();
-                    scene.remove(child);
-                    if (child.isCSS2DObject) child.element.remove();
-                });
-                
-                currentPath = [];
-                currentPosition = 0;
-                const config = strategyTemplates[strategyKey];
-                const TILE_SIZE = 90;
-                const TILE_GAP = 10;
-                const BOARD_SIZE = 8; 
-                let x = - (BOARD_SIZE / 2) * (TILE_SIZE + TILE_GAP) + TILE_SIZE/2;
-                let z = - (BOARD_SIZE / 2) * (TILE_SIZE + TILE_GAP) + TILE_SIZE/2;
-                let direction = 'right';
-
-                config.path.forEach((step, i) => {
-                    const tileGeo = new THREE.BoxGeometry(TILE_SIZE, 5, TILE_SIZE);
-                    const tileMat = new THREE.MeshLambertMaterial({ color: 0xffffff });
-                    const tile = new THREE.Mesh(tileGeo, tileMat);
-                    tile.position.set(x, 0, z);
-                    tile.userData.isBoardObject = true;
-                    scene.add(tile);
-                    
-                    const barGeo = new THREE.BoxGeometry(TILE_SIZE, 5, TILE_SIZE/4);
-                    const barMat = new THREE.MeshLambertMaterial({ color: config.color });
-                    const bar = new THREE.Mesh(barGeo, barMat);
-                    bar.position.set(x, 2.6, z + TILE_SIZE/2 - TILE_SIZE/8);
-                    bar.userData.isBoardObject = true;
-                    scene.add(bar);
-
-                    const div = document.createElement('div');
-                    div.className = 'label';
-                    div.textContent = step;
-                    const label = new THREE.CSS2DObject(div);
-                    label.position.set(x, 5, z);
-                    label.userData.isBoardObject = true;
-                    scene.add(label);
-
-                    currentPath.push(new THREE.Vector3(x, 10, z));
-
-                    if (direction === 'right') x += TILE_SIZE + TILE_GAP;
-                    if (direction === 'down') z += TILE_SIZE + TILE_GAP;
-                    if (direction === 'left') x -= TILE_SIZE + TILE_GAP;
-                    if (direction === 'up') z -= TILE_SIZE + TILE_GAP;
-
-                    if (i === BOARD_SIZE - 2) direction = 'down';
-                    if (i === (BOARD_SIZE - 1) * 2 - 1) direction = 'left';
-                    if (i === (BOARD_SIZE - 1) * 3 - 1) direction = 'up';
-                });
-                
-                const tokenGeo = new THREE.ConeGeometry(15, 30, 8);
-                const tokenMat = new THREE.MeshLambertMaterial({ color: 0xffd700 });
-                playerToken = new THREE.Mesh(tokenGeo, tokenMat);
-                playerToken.position.copy(currentPath[0]);
-                playerToken.userData.isBoardObject = true;
-                scene.add(playerToken);
-            }
-            
-            document.getElementById('advance-btn').onclick = () => {
-                if (currentPath.length > 0 && currentPosition < currentPath.length - 1) {
-                    currentPosition++;
-                    playerToken.position.copy(currentPath[currentPosition]);
-                }
-            };
-            
-            strategySelect.onchange = (e) => generateBoard(e.target.value);
-
-            function animate() {
-              requestAnimationFrame(animate);
-              renderer.render(scene, camera);
-              labelRenderer.render(scene, camera);
-            }
-            
-            window.addEventListener('resize', () => {
-              camera.left = container.clientWidth / -2;
-              camera.right = container.clientWidth / 2;
-              camera.top = container.clientHeight / 2;
-              camera.bottom = container.clientHeight / -2;
-              camera.updateProjectionMatrix();
-              renderer.setSize(container.clientWidth, container.clientHeight);
-              labelRenderer.setSize(container.clientWidth, container.clientHeight);
-            });
-
-            generateBoard(strategySelect.value);
-            animate();
+                opportunitiesPanel.innerHTML = roles.map(role => `<div class="p-2 bg-gray-100 rounded text-sm font-semibold">${role}</div>`).join('');
+            }, 1500);
         }
-        
-        // --- OTHER PAGE INITIALIZERS ---
-        function initStrategyPage() { /* ... */ }
-        function initCollaborationPage() { /* ... */ }
-        function renderProfilePage() { /* ... */ }
-        function initAdminPage() { /* ... */ }
-        
-        // --- INITIAL RENDER ---
-        navigateTo('dashboard');
+
+        fetchOpportunities(userData.headline);
     }
-});
+
 </script>
 </body>
 </html>
