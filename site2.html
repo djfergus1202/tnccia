@@ -413,8 +413,15 @@ document.addEventListener('DOMContentLoaded', () => {
             const container = document.getElementById('goal-map-3d-container');
             const uiPanel = document.getElementById('ui-panel');
             
-            container.innerHTML = '';
-            container.appendChild(uiPanel);
+            // Clear previous renderers to prevent duplication and state issues
+            while (container.firstChild) {
+                if (container.firstChild === uiPanel) break;
+                container.removeChild(container.firstChild);
+            }
+            if (container.children.length === 0) {
+                container.appendChild(uiPanel);
+            }
+
 
             const scene = new THREE.Scene();
             const camera = new THREE.OrthographicCamera(container.clientWidth / -2, container.clientWidth / 2, container.clientHeight / 2, container.clientHeight / -2, 1, 1000);
@@ -440,33 +447,43 @@ document.addEventListener('DOMContentLoaded', () => {
             };
 
             const strategySelect = document.getElementById('strategy-select');
-            strategySelect.innerHTML = '';
-            for (const key in strategyTemplates) {
-              const option = document.createElement('option');
-              option.value = key;
-              option.textContent = strategyTemplates[key].name;
-              strategySelect.appendChild(option);
+            if (strategySelect.options.length === 0) { // Populate only if empty
+                for (const key in strategyTemplates) {
+                  const option = document.createElement('option');
+                  option.value = key;
+                  option.textContent = strategyTemplates[key].name;
+                  strategySelect.appendChild(option);
+                }
             }
             
             let playerToken, currentPath = [], currentPosition = 0;
             
             function generateBoard(strategyKey) {
-                // Clear previous board
-                const toRemove = scene.children.filter(child => child.userData.isBoardObject);
-                toRemove.forEach(child => scene.remove(child));
+                // Clear previous board objects from the scene
+                const toRemove = [];
+                scene.traverse(child => {
+                    if (child.userData.isBoardObject) {
+                        toRemove.push(child);
+                    }
+                });
+                toRemove.forEach(child => {
+                    if (child.geometry) child.geometry.dispose();
+                    if (child.material) child.material.dispose();
+                    scene.remove(child);
+                    if (child.isCSS2DObject) child.element.remove();
+                });
                 
                 currentPath = [];
                 currentPosition = 0;
                 const config = strategyTemplates[strategyKey];
                 const TILE_SIZE = 90;
                 const TILE_GAP = 10;
-                const BOARD_SIZE = 8; // 8x8 board
+                const BOARD_SIZE = 8; 
                 let x = - (BOARD_SIZE / 2) * (TILE_SIZE + TILE_GAP) + TILE_SIZE/2;
                 let z = - (BOARD_SIZE / 2) * (TILE_SIZE + TILE_GAP) + TILE_SIZE/2;
                 let direction = 'right';
 
                 config.path.forEach((step, i) => {
-                    // Create Tile
                     const tileGeo = new THREE.BoxGeometry(TILE_SIZE, 5, TILE_SIZE);
                     const tileMat = new THREE.MeshLambertMaterial({ color: 0xffffff });
                     const tile = new THREE.Mesh(tileGeo, tileMat);
@@ -474,7 +491,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     tile.userData.isBoardObject = true;
                     scene.add(tile);
                     
-                    // Create Color Bar on Tile
                     const barGeo = new THREE.BoxGeometry(TILE_SIZE, 5, TILE_SIZE/4);
                     const barMat = new THREE.MeshLambertMaterial({ color: config.color });
                     const bar = new THREE.Mesh(barGeo, barMat);
@@ -482,7 +498,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     bar.userData.isBoardObject = true;
                     scene.add(bar);
 
-                    // Create Label
                     const div = document.createElement('div');
                     div.className = 'label';
                     div.textContent = step;
@@ -493,19 +508,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
                     currentPath.push(new THREE.Vector3(x, 10, z));
 
-                    // Move to next position
                     if (direction === 'right') x += TILE_SIZE + TILE_GAP;
                     if (direction === 'down') z += TILE_SIZE + TILE_GAP;
                     if (direction === 'left') x -= TILE_SIZE + TILE_GAP;
                     if (direction === 'up') z -= TILE_SIZE + TILE_GAP;
 
-                    // Change direction at corners
                     if (i === BOARD_SIZE - 2) direction = 'down';
                     if (i === (BOARD_SIZE - 1) * 2 - 1) direction = 'left';
                     if (i === (BOARD_SIZE - 1) * 3 - 1) direction = 'up';
                 });
                 
-                // Add player token
                 const tokenGeo = new THREE.ConeGeometry(15, 30, 8);
                 const tokenMat = new THREE.MeshLambertMaterial({ color: 0xffd700 });
                 playerToken = new THREE.Mesh(tokenGeo, tokenMat);
@@ -515,15 +527,13 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             
             document.getElementById('advance-btn').onclick = () => {
-                if (currentPosition < currentPath.length - 1) {
+                if (currentPath.length > 0 && currentPosition < currentPath.length - 1) {
                     currentPosition++;
                     playerToken.position.copy(currentPath[currentPosition]);
                 }
             };
             
-            const newSelect = strategySelect.cloneNode(true);
-            strategySelect.parentNode.replaceChild(newSelect, strategySelect);
-            newSelect.addEventListener('change', (e) => generateBoard(e.target.value));
+            strategySelect.onchange = (e) => generateBoard(e.target.value);
 
             function animate() {
               requestAnimationFrame(animate);
@@ -541,7 +551,7 @@ document.addEventListener('DOMContentLoaded', () => {
               labelRenderer.setSize(container.clientWidth, container.clientHeight);
             });
 
-            generateBoard('specialist');
+            generateBoard(strategySelect.value);
             animate();
         }
         
