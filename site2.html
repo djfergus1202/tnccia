@@ -43,7 +43,7 @@
         .required { color: var(--accent-primary); }
         .disclaimer { font-size: 0.8em; color: #555; margin-top: 8px; }
         .accordion-content { max-height: 0; overflow: hidden; transition: max-height 0.3s ease-out; }
-        #goal-map-3d-container { width: 100%; height: 70vh; position: relative; border-radius: 0.75rem; overflow: hidden; }
+        #goal-map-3d-container { width: 100%; height: 70vh; position: relative; border-radius: 0.75rem; overflow: hidden; background-color: #cde6d0; /* Monopoly board green */ }
         .timeline-container { max-height: 400px; overflow-y: auto; border: 1px solid var(--border-color); border-radius: 0.5rem; padding: 0.5rem; }
         .timeline-list li { padding: 0.75rem; border-bottom: 1px solid var(--border-color); display: flex; align-items: center; }
         .timeline-list li:last-child { border-bottom: none; }
@@ -54,29 +54,37 @@
           position: absolute;
           top: 15px;
           left: 15px;
-          background: rgba(255, 255, 255, 0.9);
-          padding: 15px;
+          background: rgba(255, 255, 255, 0.95);
+          padding: 1rem;
           border-radius: 8px;
-          box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+          box-shadow: 0 4px 12px rgba(0,0,0,0.15);
           z-index: 10;
+          display: flex;
+          gap: 1rem;
+          align-items: center;
         }
         #ui-panel label {
           font-weight: bold;
-          margin-right: 10px;
         }
-        #ui-panel select {
-          padding: 5px;
-          border-radius: 4px;
+        #ui-panel select, #ui-panel button {
+          padding: 8px 12px;
+          border-radius: 6px;
           border: 1px solid #ccc;
+          background-color: white;
+        }
+        #ui-panel button {
+            background-color: var(--accent-primary);
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
         }
         .label {
-          font-family: sans-serif;
-          background: rgba(40, 40, 40, 0.8);
-          color: white;
-          padding: 3px 8px;
-          border-radius: 4px;
+          font-family: 'Inter', sans-serif;
+          color: black;
+          font-size: 10px;
+          text-align: center;
+          width: 80px; /* Tile width */
           pointer-events: none;
-          font-size: 14px;
         }
     </style>
 </head>
@@ -111,7 +119,7 @@
                     <div id="main-nav" class="hidden md:flex items-center space-x-6">
                         <button data-target="dashboard" class="nav-item font-semibold text-gray-600 active">Dashboard</button>
                         <button data-target="strategy" class="nav-item font-semibold text-gray-600">My Strategy</button>
-                        <button data-target="canvas" class="nav-item font-semibold text-gray-600">3D Goal Map</button>
+                        <button data-target="canvas" class="nav-item font-semibold text-gray-600">Career Board</button>
                         <button data-target="learning" class="nav-item font-semibold text-gray-600">Learning Hub</button>
                         <button data-target="collaboration" class="nav-item font-semibold text-gray-600">Collaborate</button>
                     </div>
@@ -146,13 +154,14 @@
                 <section id="strategy" class="content-section"><h2 class="text-3xl font-bold mb-2">My Strategy</h2><p class="text-lg text-text-secondary mb-6">Define your goals, skills, and study plans. Use bullet points to list items in each category.</p><div class="space-y-4" id="strategy-accordions"></div></section>
                 <section id="canvas" class="content-section h-full flex flex-col">
                     <div class="flex-shrink-0">
-                        <h2 class="text-3xl font-bold mb-2">3D Goal Map</h2>
-                        <p class="text-lg text-text-secondary mb-4 max-w-4xl">Select a career strategy template to visualize the path. Drag to rotate, scroll to zoom.</p>
+                        <h2 class="text-3xl font-bold mb-2">Career Strategy Board</h2>
+                        <p class="text-lg text-text-secondary mb-4 max-w-4xl">Select a career strategy template to visualize the path. Use the "Advance" button to move your token.</p>
                     </div>
-                    <div id="goal-map-3d-container" class="bg-gray-800">
+                    <div id="goal-map-3d-container">
                         <div id="ui-panel">
                             <label for="strategy-select">Choose a Strategy:</label>
                             <select id="strategy-select"></select>
+                            <button id="advance-btn">Advance</button>
                         </div>
                     </div>
                 </section>
@@ -399,20 +408,20 @@ document.addEventListener('DOMContentLoaded', () => {
             `).join('');
         }
         
-        // --- 3D GOAL MAP VISUALIZER ---
+        // --- CAREER STRATEGY BOARD (MONOPOLY THEME) ---
         function init3DGoalMap() {
             const container = document.getElementById('goal-map-3d-container');
             const uiPanel = document.getElementById('ui-panel');
             
-            // Clear previous renderers to prevent duplication and state issues
             container.innerHTML = '';
             container.appendChild(uiPanel);
 
             const scene = new THREE.Scene();
-            const camera = new THREE.PerspectiveCamera(50, container.clientWidth / container.clientHeight, 0.1, 1000);
-            camera.position.set(0, 15, 50);
+            const camera = new THREE.OrthographicCamera(container.clientWidth / -2, container.clientWidth / 2, container.clientHeight / 2, container.clientHeight / -2, 1, 1000);
+            camera.position.set(0, 50, 0);
+            camera.lookAt(0, 0, 0);
 
-            const renderer = new THREE.WebGLRenderer({ antialias: true });
+            const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
             renderer.setSize(container.clientWidth, container.clientHeight);
             renderer.setPixelRatio(window.devicePixelRatio);
             container.appendChild(renderer.domElement);
@@ -423,26 +432,15 @@ document.addEventListener('DOMContentLoaded', () => {
             labelRenderer.domElement.style.top = '0px';
             labelRenderer.domElement.style.pointerEvents = 'none'; 
             container.appendChild(labelRenderer.domElement);
-
-            const controls = new THREE.OrbitControls(camera, renderer.domElement); 
-            controls.enableDamping = true;
-            controls.minDistance = 10;
-            controls.maxDistance = 150;
-
-            scene.add(new THREE.AmbientLight(0xffffff, 0.8));
-            const dirLight = new THREE.DirectionalLight(0xffffff, 0.7);
-            dirLight.position.set(10, 20, 10);
-            scene.add(dirLight);
-
+            
             const strategyTemplates = {
-              specialist: { name: 'The Specialist (I-Shaped)', color: 0x1565c0, layout: 'linear', steps: ['Foundation', 'Core Skills', 'Advanced Practice', 'Internship/Residency', 'Specialization', 'Mastery', 'Leadership'] },
-              generalist: { name: 'The Generalist (T-Shaped)', color: 0x2e7d32, layout: 't-shape', mainPath: ['Broad Studies', 'Internship', 'Core Role', 'Specialist Focus', 'Leadership'], crossSkills: ['Communication', 'Project Mgmt', 'Data Analysis', 'Finance'] },
-              entrepreneur: { name: 'The Entrepreneur', color: 0xff8f00, layout: 'network', steps: ['Idea', 'Prototype', 'Seed Funding', 'Team Building', 'Market Fit', 'Scaling', 'Pivot', 'Acquisition'] },
-              corporate: { name: 'The Corporate Ladder', color: 0x6a1b9a, layout: 'pyramid', steps: ['Entry-Level', 'Associate', 'Senior Associate', 'Manager', 'Director', 'Vice President', 'C-Suite'] }
+              specialist: { name: 'The Specialist', color: 0x1e40af, path: ['Foundation', 'Core Skills', 'Advanced Practice', 'Internship', 'Specialization', 'Mastery', 'Leadership'] },
+              generalist: { name: 'The Generalist', color: 0x166534, path: ['Broad Studies', 'Internship', 'Core Role', 'Project Mgmt', 'Data Analysis', 'Specialist Focus', 'Leadership'] },
+              entrepreneur: { name: 'The Entrepreneur', color: 0x9a3412, path: ['Idea', 'Prototype', 'Seed Funding', 'Team Building', 'Market Fit', 'Scaling', 'Pivot', 'Acquisition'] },
             };
 
             const strategySelect = document.getElementById('strategy-select');
-            strategySelect.innerHTML = ''; // Clear previous options
+            strategySelect.innerHTML = '';
             for (const key in strategyTemplates) {
               const option = document.createElement('option');
               option.value = key;
@@ -450,108 +448,100 @@ document.addEventListener('DOMContentLoaded', () => {
               strategySelect.appendChild(option);
             }
             
-            // Remove old listener before adding a new one to prevent duplicates
+            let playerToken, currentPath = [], currentPosition = 0;
+            
+            function generateBoard(strategyKey) {
+                // Clear previous board
+                const toRemove = scene.children.filter(child => child.userData.isBoardObject);
+                toRemove.forEach(child => scene.remove(child));
+                
+                currentPath = [];
+                currentPosition = 0;
+                const config = strategyTemplates[strategyKey];
+                const TILE_SIZE = 90;
+                const TILE_GAP = 10;
+                const BOARD_SIZE = 8; // 8x8 board
+                let x = - (BOARD_SIZE / 2) * (TILE_SIZE + TILE_GAP) + TILE_SIZE/2;
+                let z = - (BOARD_SIZE / 2) * (TILE_SIZE + TILE_GAP) + TILE_SIZE/2;
+                let direction = 'right';
+
+                config.path.forEach((step, i) => {
+                    // Create Tile
+                    const tileGeo = new THREE.BoxGeometry(TILE_SIZE, 5, TILE_SIZE);
+                    const tileMat = new THREE.MeshLambertMaterial({ color: 0xffffff });
+                    const tile = new THREE.Mesh(tileGeo, tileMat);
+                    tile.position.set(x, 0, z);
+                    tile.userData.isBoardObject = true;
+                    scene.add(tile);
+                    
+                    // Create Color Bar on Tile
+                    const barGeo = new THREE.BoxGeometry(TILE_SIZE, 5, TILE_SIZE/4);
+                    const barMat = new THREE.MeshLambertMaterial({ color: config.color });
+                    const bar = new THREE.Mesh(barGeo, barMat);
+                    bar.position.set(x, 2.6, z + TILE_SIZE/2 - TILE_SIZE/8);
+                    bar.userData.isBoardObject = true;
+                    scene.add(bar);
+
+                    // Create Label
+                    const div = document.createElement('div');
+                    div.className = 'label';
+                    div.textContent = step;
+                    const label = new THREE.CSS2DObject(div);
+                    label.position.set(x, 5, z);
+                    label.userData.isBoardObject = true;
+                    scene.add(label);
+
+                    currentPath.push(new THREE.Vector3(x, 10, z));
+
+                    // Move to next position
+                    if (direction === 'right') x += TILE_SIZE + TILE_GAP;
+                    if (direction === 'down') z += TILE_SIZE + TILE_GAP;
+                    if (direction === 'left') x -= TILE_SIZE + TILE_GAP;
+                    if (direction === 'up') z -= TILE_SIZE + TILE_GAP;
+
+                    // Change direction at corners
+                    if (i === BOARD_SIZE - 2) direction = 'down';
+                    if (i === (BOARD_SIZE - 1) * 2 - 1) direction = 'left';
+                    if (i === (BOARD_SIZE - 1) * 3 - 1) direction = 'up';
+                });
+                
+                // Add player token
+                const tokenGeo = new THREE.ConeGeometry(15, 30, 8);
+                const tokenMat = new THREE.MeshLambertMaterial({ color: 0xffd700 });
+                playerToken = new THREE.Mesh(tokenGeo, tokenMat);
+                playerToken.position.copy(currentPath[0]);
+                playerToken.userData.isBoardObject = true;
+                scene.add(playerToken);
+            }
+            
+            document.getElementById('advance-btn').onclick = () => {
+                if (currentPosition < currentPath.length - 1) {
+                    currentPosition++;
+                    playerToken.position.copy(currentPath[currentPosition]);
+                }
+            };
+            
             const newSelect = strategySelect.cloneNode(true);
             strategySelect.parentNode.replaceChild(newSelect, strategySelect);
-            newSelect.addEventListener('change', (e) => generateVisualization(e.target.value));
-
-
-            const sphereGeom = new THREE.SphereGeometry(0.8, 24, 24);
-
-            function clearScene() {
-              const toRemove = [];
-              scene.traverse(child => { if (child.userData.isPathObject) toRemove.push(child); });
-              toRemove.forEach(child => {
-                if (child.geometry) child.geometry.dispose();
-                if (child.material) child.material.dispose();
-                scene.remove(child);
-                if (child.isCSS2DObject) child.element.remove();
-              });
-            }
-
-            function createNode(text, position, material) {
-                const sphere = new THREE.Mesh(sphereGeom, material);
-                sphere.position.copy(position);
-                sphere.userData.isPathObject = true;
-                scene.add(sphere);
-
-                const div = document.createElement('div');
-                div.className = 'label';
-                div.textContent = text;
-                const label = new THREE.CSS2DObject(div);
-                label.position.copy(position);
-                label.userData.isPathObject = true;
-                scene.add(label);
-                return sphere;
-            }
-
-            function createLink(pos1, pos2, material) {
-                const line = new THREE.Line(new THREE.BufferGeometry().setFromPoints([pos1, pos2]), new THREE.LineBasicMaterial({ color: material.color }));
-                line.userData.isPathObject = true;
-                scene.add(line);
-            }
-
-            function generateVisualization(strategyKey) {
-              clearScene();
-              const config = strategyTemplates[strategyKey];
-              const material = new THREE.MeshStandardMaterial({ color: config.color, roughness: 0.5 });
-              let previousNode = null;
-
-              switch (config.layout) {
-                case 'linear':
-                case 'pyramid':
-                  config.steps.forEach((step, i) => {
-                    const y = i * 4;
-                    const x = config.layout === 'pyramid' ? (Math.random() - 0.5) * (config.steps.length - i) : (Math.random() - 0.5) * 2;
-                    const z = config.layout === 'pyramid' ? (Math.random() - 0.5) * (config.steps.length - i) : (Math.random() - 0.5) * 2;
-                    const currentNode = createNode(step, new THREE.Vector3(x, y, z), material);
-                    if (previousNode) createLink(previousNode.position, currentNode.position, material);
-                    previousNode = currentNode;
-                  });
-                  break;
-                case 't-shape':
-                  let specialistNode = null;
-                  config.mainPath.forEach((step, i) => {
-                    const currentNode = createNode(step, new THREE.Vector3(0, i * 5, 0), material);
-                    if (previousNode) createLink(previousNode.position, currentNode.position, material);
-                    if (i === Math.floor(config.mainPath.length / 2) + 1) specialistNode = currentNode;
-                    previousNode = currentNode;
-                  });
-                  config.crossSkills.forEach((skill, i) => {
-                    const angle = (i / config.crossSkills.length) * Math.PI * 2;
-                    const skillNode = createNode(skill, new THREE.Vector3(specialistNode.position.x + 12 * Math.cos(angle), specialistNode.position.y, specialistNode.position.z + 12 * Math.sin(angle)), material);
-                    createLink(specialistNode.position, skillNode.position, material);
-                  });
-                  break;
-                case 'network':
-                  const nodes = [];
-                  config.steps.forEach((step, i) => {
-                    const currentNode = createNode(step, new THREE.Vector3((Math.random() - 0.5) * 40, (Math.random() - 0.5) * 25 + 10, (Math.random() - 0.5) * 40), material);
-                    nodes.push(currentNode);
-                    if (i > 0) {
-                        createLink(nodes[i-1].position, currentNode.position, material);
-                        if (Math.random() > 0.6 && i > 1) createLink(nodes[Math.floor(Math.random() * (i - 1))].position, currentNode.position, material);
-                    }
-                  });
-                  break;
-              }
-            }
+            newSelect.addEventListener('change', (e) => generateBoard(e.target.value));
 
             function animate() {
               requestAnimationFrame(animate);
-              controls.update();
               renderer.render(scene, camera);
               labelRenderer.render(scene, camera);
             }
             
             window.addEventListener('resize', () => {
-              camera.aspect = container.clientWidth / container.clientHeight;
+              camera.left = container.clientWidth / -2;
+              camera.right = container.clientWidth / 2;
+              camera.top = container.clientHeight / 2;
+              camera.bottom = container.clientHeight / -2;
               camera.updateProjectionMatrix();
               renderer.setSize(container.clientWidth, container.clientHeight);
               labelRenderer.setSize(container.clientWidth, container.clientHeight);
             });
 
-            generateVisualization('specialist');
+            generateBoard('specialist');
             animate();
         }
         
