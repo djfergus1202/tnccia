@@ -10,7 +10,7 @@
     <script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
     <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
     
-    <!-- Three.js Libraries (Corrected Paths) -->
+    <!-- Three.js Libraries -->
     <script src="https://cdn.jsdelivr.net/npm/three@0.156.0/build/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/three@0.156.0/examples/js/controls/OrbitControls.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/three@0.156.0/examples/js/renderers/CSS2DRenderer.js"></script>
@@ -335,8 +335,6 @@ document.addEventListener('DOMContentLoaded', () => {
     function initializeMainApp(userData) {
         document.getElementById('nav-avatar').src = userData.avatarUrl;
         
-        let visualizerInitialized = false; // Flag to prevent re-initialization
-        
         // --- NAVIGATION ---
         const nav = document.getElementById('main-nav');
         const profileNavBtn = document.getElementById('profile-nav-btn');
@@ -350,7 +348,7 @@ document.addEventListener('DOMContentLoaded', () => {
             sections.forEach(section => section.classList.toggle('active', section.id === targetId));
             
             const initializers = {
-                canvas: () => { if (!visualizerInitialized) init3DGoalMap(); },
+                canvas: init3DGoalMap,
                 profile: renderProfilePage,
                 collaboration: initCollaborationPage, 
                 strategy: initStrategyPage,
@@ -403,8 +401,12 @@ document.addEventListener('DOMContentLoaded', () => {
         
         // --- 3D GOAL MAP VISUALIZER ---
         function init3DGoalMap() {
-            visualizerInitialized = true;
             const container = document.getElementById('goal-map-3d-container');
+            const uiPanel = document.getElementById('ui-panel');
+            
+            // Clear previous renderers to prevent duplication and state issues
+            container.innerHTML = '';
+            container.appendChild(uiPanel);
 
             const scene = new THREE.Scene();
             const camera = new THREE.PerspectiveCamera(50, container.clientWidth / container.clientHeight, 0.1, 1000);
@@ -419,10 +421,10 @@ document.addEventListener('DOMContentLoaded', () => {
             labelRenderer.setSize(container.clientWidth, container.clientHeight);
             labelRenderer.domElement.style.position = 'absolute';
             labelRenderer.domElement.style.top = '0px';
-            labelRenderer.domElement.style.pointerEvents = 'none'; // Allow controls to work through the label renderer
+            labelRenderer.domElement.style.pointerEvents = 'none'; 
             container.appendChild(labelRenderer.domElement);
 
-            const controls = new THREE.OrbitControls(camera, renderer.domElement); // Control using the main renderer
+            const controls = new THREE.OrbitControls(camera, renderer.domElement); 
             controls.enableDamping = true;
             controls.minDistance = 10;
             controls.maxDistance = 150;
@@ -440,13 +442,19 @@ document.addEventListener('DOMContentLoaded', () => {
             };
 
             const strategySelect = document.getElementById('strategy-select');
+            strategySelect.innerHTML = ''; // Clear previous options
             for (const key in strategyTemplates) {
               const option = document.createElement('option');
               option.value = key;
               option.textContent = strategyTemplates[key].name;
               strategySelect.appendChild(option);
             }
-            strategySelect.addEventListener('change', (e) => generateVisualization(e.target.value));
+            
+            // Remove old listener before adding a new one to prevent duplicates
+            const newSelect = strategySelect.cloneNode(true);
+            strategySelect.parentNode.replaceChild(newSelect, strategySelect);
+            newSelect.addEventListener('change', (e) => generateVisualization(e.target.value));
+
 
             const sphereGeom = new THREE.SphereGeometry(0.8, 24, 24);
 
