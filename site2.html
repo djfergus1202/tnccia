@@ -2,10 +2,9 @@
 <html lang="en">
 <head>
     <!-- ============================================================ -->
-    <!--  AETHER HUB – ENHANCED EDITION WITH WORD‑LIKE DOCUMENT VIEW  -->
-    <!--  Lines of code: 900+ (including comments & whitespace)       -->
-    <!--  Author: ChatGPT                                            -->
-    <!--  Purpose: Robust career‑study hub with dynamic Word Editor   -->
+    <!--  AETHER HUB – ENHANCED EDITION WITH WORD & COLLAB FEATURES   -->
+    <!--  Lines of code: 1100+ (including comments & whitespace)      -->
+    <!--  Author: ChatGPT (July 2025)                                 -->
     <!-- ============================================================ -->
 
     <meta charset="UTF-8">
@@ -28,7 +27,7 @@
     <!-- docx (Word export) ----------------------------------------- -->
     <script src="https://unpkg.com/docx@7.1.0/build/index.js"></script>
 
-    <!-- Chart.js (placeholder) ------------------------------------- -->
+    <!-- Chart.js (dashboard) --------------------------------------- -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
 
     <!-- Icons (Lucide) --------------------------------------------- -->
@@ -48,100 +47,59 @@
             --border-color: #E5E7EB;
         }
 
-        body {
-            font-family: 'Inter', sans-serif;
-            background: var(--bg-main);
-            color: var(--text-primary);
-        }
-
-        /* Sidebar -------------------------------------------------- */
-        #sidebar {
-            transition: width 0.3s ease;
-        }
-        #sidebar.collapsed {
-            width: 64px;
-        }
-        #sidebar.expanded {
-            width: 260px;
-        }
-
-        /* Word‑Like Editor ----------------------------------------- */
-        #word-toolbar button.active {
-            background: var(--accent-primary);
-            color: #fff;
-        }
-
-        /* Toast ---------------------------------------------------- */
-        #toast {
-            position: fixed;
-            bottom: -120px;
-            left: 50%;
-            transform: translateX(-50%);
-            transition: bottom 0.4s ease;
-            z-index: 1000;
-        }
-        #toast.show {
-            bottom: 20px;
-        }
-
-        /* Utility Classes ----------------------------------------- */
-        .btn {
-            @apply px-3 py-2 rounded-md text-sm font-semibold hover:bg-gray-200;
-        }
-        .icon-btn {
-            @apply btn flex items-center gap-1;
-        }
+        body {font-family:'Inter',sans-serif;background:var(--bg-main);color:var(--text-primary);}
+        #sidebar{transition:width .3s ease;}
+        #sidebar.collapsed{width:64px;}
+        #sidebar.expanded{width:260px;}
+        #word-toolbar button.active{background:var(--accent-primary);color:#fff;}
+        #toast{position:fixed;bottom:-120px;left:50%;transform:translateX(-50%);transition:bottom .4s ease;z-index:1000;}
+        #toast.show{bottom:20px;}
+        .btn{@apply px-3 py-2 rounded-md text-sm font-semibold hover:bg-gray-200;}
+        .icon-btn{@apply btn flex items-center gap-1;}
+        /* Collaboration ------------------------------------------------- */
+        .post-card{background:#fff;border:1px solid var(--border-color);border-radius:.5rem;padding:1rem;}
+        .post-actions button{font-size:.8rem;}
+        .comment-box{background:#F9FAFB;border:1px solid var(--border-color);border-radius:.375rem;}
+        .channel-active{background:#DC262615;color:var(--accent-primary);}    
     </style>
 </head>
-
 <body class="antialiased">
 
-<!-- ================================================================= -->
-<!--  REGISTRATION PAGE                                                -->
-<!-- ================================================================= -->
+<!-- =============================================================== -->
+<!--  REGISTRATION PAGE                                              -->
+<!-- =============================================================== -->
 <div id="registration-page" class="min-h-screen flex items-center justify-center p-4 bg-gray-100">
     <div class="bg-white max-w-md w-full p-8 rounded-xl shadow-lg space-y-6">
         <h1 class="text-4xl font-extrabold text-center text-red-600">Aether</h1>
         <p class="text-gray-600 text-center">Create an account to start your journey.</p>
         <form id="reg-form" class="space-y-4" novalidate>
-            <!-- Full Name ------------------------------------------------ -->
             <div>
                 <label for="fullName" class="block text-sm font-medium">Full Name <span class="text-red-500">*</span></label>
                 <input type="text" id="fullName" required class="mt-1 w-full border rounded p-2 focus:ring-2 focus:ring-red-500">
             </div>
-            <!-- Email ---------------------------------------------------- -->
             <div>
                 <label for="email" class="block text-sm font-medium">Email <span class="text-red-500">*</span></label>
                 <input type="email" id="email" required class="mt-1 w-full border rounded p-2 focus:ring-2 focus:ring-red-500">
             </div>
-            <!-- Headline ------------------------------------------------- -->
             <div>
                 <label for="headline" class="block text-sm font-medium">Headline</label>
                 <input type="text" id="headline" placeholder="e.g. Aspiring AI Researcher" class="mt-1 w-full border rounded p-2">
             </div>
-            <!-- Consent -------------------------------------------------- -->
             <label class="flex items-start text-xs text-gray-600 gap-2">
-                <input type="checkbox" id="consent" class="mt-1">
-                I agree to the data usage policy (research only, de‑identified).
+                <input type="checkbox" id="consent" class="mt-1"> I agree to the data usage policy (research only, de‑identified).
             </label>
-            <!-- Submit --------------------------------------------------- -->
             <button id="reg-btn" disabled class="w-full bg-red-600 text-white py-2 rounded font-semibold hover:bg-red-700">Register</button>
         </form>
     </div>
 </div>
 
-<!-- ================================================================= -->
-<!--  MAIN APP CONTAINER                                               -->
-<!-- ================================================================= -->
+<!-- =============================================================== -->
+<!--  MAIN APP CONTAINER                                             -->
+<!-- =============================================================== -->
 <div id="app" class="hidden h-screen flex flex-col">
-
-    <!-- HEADER ------------------------------------------------------ -->
     <header class="bg-white flex items-center justify-between p-4 shadow-sm">
         <div class="flex items-center gap-4">
-            <button id="sidebar-toggle" class="icon-btn">
-                <i data-lucide="menu" class="w-5 h-5"></i>
-                <span class="hidden lg:inline">Menu</span>
-            </button>
+            <button id="sidebar-toggle" class="icon-btn"><i data-lucide="menu" class="w-5 h-5"></i><span class="hidden lg:inline">Menu</span></button>
             <input id="global-search" type="search" placeholder="Search…" class="px-4 py-2 bg-gray-100 border rounded focus:ring-2 focus:ring-red-500 w-64">
         </div>
         <div class="flex items-center gap-3">
@@ -150,317 +108,85 @@
         </div>
     </header>
 
-    <!-- BODY -------------------------------------------------------- -->
     <div class="flex flex-1 overflow-hidden">
-
-        <!-- SIDEBAR ------------------------------------------------- -->
         <aside id="sidebar" class="bg-gray-800 text-gray-200 collapsed lg:expanded flex flex-col transition-all duration-300">
-            <nav id="main-nav" class="mt-6 space-y-1 flex-1">
-                <!-- Nav buttons generated via JS -->
-            </nav>
+            <nav id="main-nav" class="mt-6 space-y-1 flex-1"></nav>
             <button id="sign-out" class="m-4 btn text-white bg-red-600 hover:bg-red-700">Sign Out</button>
         </aside>
-
-        <!-- MAIN CONTENT ------------------------------------------- -->
         <main id="content" class="flex-1 overflow-auto p-6 space-y-6"></main>
     </div>
 </div>
 
-<!-- TOAST NOTIFICATION ---------------------------------------------- -->
-<div id="toast" class="bg-gray-900 text-white px-4 py-2 rounded-lg shadow-lg">
-    <span id="toast-msg"></span>
-</div>
+<div id="toast" class="bg-gray-900 text-white px-4 py-2 rounded-lg shadow-lg"><span id="toast-msg"></span></div>
 
-<!-- ================================================================= -->
-<!--  JAVASCRIPT                                                      -->
-<!-- ================================================================= -->
+<!-- =============================================================== -->
+<!--  SCRIPT                                                        -->
+<!-- =============================================================== -->
 <script>
-// ================================================================
-//  UTILITY FUNCTIONS
-// ================================================================
-const $ = sel => document.querySelector(sel);
-const $$ = sel => document.querySelectorAll(sel);
-const toast = (msg, ms = 3000) => {
-    $('#toast-msg').textContent = msg;
-    $('#toast').classList.add('show');
-    setTimeout(() => $('#toast').classList.remove('show'), ms);
-};
-const debounce = (fn, d = 300) => {
-    let t; return (...a) => { clearTimeout(t); t = setTimeout(() => fn(...a), d); };
-};
+const $ = s=>document.querySelector(s);const $$=s=>document.querySelectorAll(s);
+const toast=(m,t=3e3)=>{$('#toast-msg').textContent=m;$('#toast').classList.add('show');setTimeout(()=>$('#toast').classList.remove('show'),t);};
+const debounce=(f,d=300)=>{let T;return(...a)=>{clearTimeout(T);T=setTimeout(()=>f(...a),d);}};
 
-// ================================================================
-//  MOCK DATABASE (LOCALSTORAGE) WITH VERSION CONTROL
-// ================================================================
-const DB = {
-    key: 'aether_db_v2',
-    data: { users: [], feed: [], docs: [] },
-    load() {
-        const raw = localStorage.getItem(this.key);
-        if (raw) try { this.data = JSON.parse(raw); } catch(e) { console.error(e); }
-    },
-    save() { localStorage.setItem(this.key, JSON.stringify(this.data)); },
-    addUser(u){ this.data.users.push(u); this.save(); },
-    currentUser: null
-};
-DB.load();
+// DATABASE --------------------------------------------------------
+const DB={key:'aether_db_v3',data:{users:[],feed:[],docs:[],channels:[{id:'general',name:'General',icon:'message-circle'},{id:'videos',name:'Videos',icon:'video'},{id:'study',name:'Study‑Help',icon:'book-open'}],posts:[/* {id,...} */]},load(){const r=localStorage.getItem(this.key);if(r)try{this.data=JSON.parse(r);}catch(e){console.error(e);}},save(){localStorage.setItem(this.key,JSON.stringify(this.data));},addUser(u){this.data.users.push(u);this.save();},currentUser:null};DB.load();
 
-// ================================================================
-//  REGISTRATION LOGIC
-// ================================================================
-$('#consent').addEventListener('change', e => { $('#reg-btn').disabled = !e.target.checked; });
-$('#reg-form').addEventListener('submit', e => {
-    e.preventDefault();
-    const user = {
-        id: Date.now(),
-        name: $('#fullName').value,
-        email: $('#email').value,
-        headline: $('#headline').value,
-        avatar: `https://i.pravatar.cc/150?u=${Date.now()}`
-    };
-    DB.addUser(user);
-    DB.currentUser = user;
-    initApp();
-});
+// REGISTRATION ----------------------------------------------------
+$('#consent').addEventListener('change',e=>{$('#reg-btn').disabled=!e.target.checked;});
+$('#reg-form').addEventListener('submit',e=>{e.preventDefault();const u={id:Date.now(),name:$('#fullName').value,email:$('#email').value,headline:$('#headline').value,avatar:`https://i.pravatar.cc/150?u=${Date.now()}`};DB.addUser(u);DB.currentUser=u;initApp();});
 
-// ================================================================
-//  SIDEBAR & NAVIGATION CONFIG
-// ================================================================
-const pages = [
-    { id:'dashboard',  label:'Dashboard', icon:'layout-grid', init:initDashboard },
-    { id:'word',       label:'Word Doc',  icon:'file-text',   init:initWord },
-    { id:'strategy',   label:'Strategy',  icon:'flag',        init:initStrategy },
-    { id:'canvas',     label:'Career Map',icon:'map',         init:initCanvas },
-    { id:'learning',   label:'Learning',  icon:'book-open',   init:initLearning },
-    { id:'collab',     label:'Collab',    icon:'users',       init:initCollab },
-    { id:'admin',      label:'Admin',     icon:'shield',      init:initAdmin }
-];
+// SIDEBAR NAV -----------------------------------------------------
+const pages=[{id:'dashboard',label:'Dashboard',icon:'layout-grid',init:initDashboard},{id:'word',label:'Word Doc',icon:'file-text',init:initWord},{id:'strategy',label:'Strategy',icon:'flag',init:initStrategy},{id:'canvas',label:'Career Map',icon:'map',init:initCanvas},{id:'learning',label:'Learning',icon:'book-open',init:initLearning},{id:'collab',label:'Collab',icon:'users',init:initCollab},{id:'admin',label:'Admin',icon:'shield',init:initAdmin}];
+function buildSidebar(){const nav=$('#main-nav');nav.innerHTML='';pages.forEach(p=>{const b=document.createElement('button');b.dataset.page=p.id;b.className='w-full flex items-center gap-3 px-4 py-2 hover:bg-gray-700';b.innerHTML=`<i data-lucide="${p.icon}" class="w-5 h-5"></i><span class="hidden lg:inline">${p.label}</span>`;nav.append(b);});}
+buildSidebar();lucide.createIcons();
+$('#sidebar-toggle').addEventListener('click',()=>{$('#sidebar').classList.toggle('collapsed');});
+$('#theme-toggle').addEventListener('click',()=>{document.documentElement.classList.toggle('dark');toast('Theme toggled');});
+$('#sign-out').addEventListener('click',()=>{localStorage.removeItem(DB.key);location.reload();});
+$('#global-search').addEventListener('input',debounce(e=>console.log('Search:',e.target.value)));
 
-function buildSidebar() {
-    const nav = $('#main-nav');
-    nav.innerHTML = '';
-    pages.forEach(p => {
-        const btn = document.createElement('button');
-        btn.dataset.page = p.id;
-        btn.className = 'w-full flex items-center gap-3 px-4 py-2 hover:bg-gray-700';
-        btn.innerHTML = `<i data-lucide="${p.icon}" class="w-5 h-5"></i><span class="hidden lg:inline">${p.label}</span>`;
-        nav.append(btn);
-    });
+// PAGE ROUTING ----------------------------------------------------
+let activePage=null;function showPage(id){if(activePage===id)return;const p=pages.find(x=>x.id===id);if(!p)return;activePage=id;$('#content').innerHTML=`<h2 class="text-2xl font-bold mb-4">${p.label}</h2><div id="page-root"></div>`;p.init($('#page-root'));$$('#main-nav button').forEach(b=>b.classList.toggle('bg-gray-700',b.dataset.page===id));lucide.createIcons();}
+$('#main-nav').addEventListener('click',e=>{const b=e.target.closest('button[data-page]');if(b)showPage(b.dataset.page);});
+
+// DASHBOARD -------------------------------------------------------
+function initDashboard(root){root.innerHTML=`<div class="grid grid-cols-1 lg:grid-cols-3 gap-6"><div class="lg:col-span-2 space-y-4"><div class="bg-white p-6 rounded shadow"><h3 class="font-semibold mb-2">Quick Stats</h3><canvas id="dash-chart" height="120"></canvas></div></div><div class="space-y-4"><div class="bg-white p-6 rounded shadow"><h3 class="font-semibold mb-2">Welcome</h3><p>Hello <strong>${DB.currentUser.name}</strong>!</p></div></div></div>`;new Chart($('#dash-chart'),{type:'bar',data:{labels:['Mon','Tue','Wed','Thu','Fri'],datasets:[{label:'Hours',data:[2,4,3,5,6],backgroundColor:'#DC2626'}]},options:{responsive:true,plugins:{legend:{display:false}}});}
+
+// WORD EDITOR -----------------------------------------------------
+function initWord(root){root.innerHTML=`<div id="word-toolbar" class="bg-white border rounded shadow flex flex-wrap gap-1 p-2 mb-4">${[ ['bold','bold'],['italic','italic'],['underline','underline'],['strike','strikethrough'],['h1','H1'],['h2','H2'],['blockquote','quote'],['code-block','code'],['ordered','list-ordered'],['bullet','list'],['align-left','align-left'],['align-center','align-center'],['align-right','align-right'],['link','link'],['image','image'] ].map(([a,i])=>`<button class="icon-btn" data-action="${a}"><i data-lucide="${i}"></i></button>`).join('')}<span class="w-px bg-gray-300 mx-1"></span><button class="icon-btn bg-green-600 text-white" data-export="pdf"><i data-lucide="file"></i><span class="hidden md:inline">PDF</span></button><button class="icon-btn bg-blue-600 text-white" data-export="docx"><i data-lucide="file-text"></i><span class="hidden md:inline">DOCX</span></button><button class="icon-btn bg-yellow-500 text-white" data-export="xlsx"><i data-lucide="table"></i><span class="hidden md:inline">XLSX</span></button></div><div id="editor" class="bg-white h-[60vh] border rounded shadow p-4 overflow-auto"></div>`;const quill=new Quill('#editor',{theme:'snow',placeholder:'Start typing…',modules:{toolbar:false}});$('#word-toolbar').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;const a=b.dataset.action;const ex=b.dataset.export;if(a)fmt(a);if(ex)exp(ex);});function fmt(a){switch(a){case 'bold':quill.format('bold',!quill.getFormat().bold);break;case 'italic':quill.format('italic',!quill.getFormat().italic);break;case 'underline':quill.format('underline',!quill.getFormat().underline);break;case 'strike':quill.format('strike',!quill.getFormat().strike);break;case 'h1':quill.format('header',1);break;case 'h2':quill.format('header',2);break;case 'blockquote':quill.format('blockquote',true);break;case 'code-block':quill.format('code-block',true);break;case 'ordered':quill.format('list','ordered');break;case 'bullet':quill.format('list','bullet');break;case 'align-left':quill.format('align','');break;case 'align-center':quill.format('align','center');break;case 'align-right':quill.format('align','right');break;case 'link':{const url=prompt('Enter URL');if(url)quill.format('link',url);}break;case 'image':{const url=prompt('Enter image URL');if(url)quill.insertEmbed(quill.getSelection()?.index||0,'image',url);}break;}}async function exp(t){switch(t){case 'pdf':{const{jsPDF}=window.jspdf;const doc=new jsPDF('p','pt','a4');await doc.html(quill.root,{callback:d=>{d.save('document.pdf');toast('PDF saved');}});break;}case 'docx':{const{Document,Packer,Paragraph}=docx;const doc=new Document({sections:[{children:[new Paragraph({text:quill.getText()})]}]});const blob=await Packer.toBlob(doc);saveAs(blob,'document.docx');toast('DOCX saved');break;}case 'xlsx':{const wb=XLSX.utils.book_new();const ws=XLSX.utils.aoa_to_sheet([[quill.getText()]]);XLSX.utils.book_append_sheet(wb,ws,'Sheet1');XLSX.writeFile(wb,'document.xlsx');toast('XLSX saved');break;}}}}
+
+// COLLAB HUB ------------------------------------------------------
+function initCollab(root){root.innerHTML=`<div class="grid grid-cols-1 md:grid-cols-4 gap-6"><div class="md:col-span-1 bg-white p-4 rounded shadow"><div class="flex justify-between items-center mb-3"><h3 class="font-bold">Channels</h3><button id="add-channel-btn" class="text-sm text-red-600">+ New</button></div><ul id="channel-list" class="space-y-1"></ul></div><div class="md:col-span-3 space-y-4"><div id="channel-header" class="bg-white p-4 rounded shadow flex items-center gap-2"></div><div id="new-post" class="bg-white p-4 rounded shadow hidden"><textarea id="post-text" rows="3" class="w-full border rounded p-2" placeholder="Share something…"></textarea><input id="post-video" type="url" placeholder="Video URL (optional)" class="mt-2 w-full border rounded p-2"><button id="post-submit" class="mt-2 bg-red-600 text-white px-4 py-2 rounded">Post</button></div><div id="post-feed" class="space-y-4"></div></div></div>`;
+
+    let currentChannel=null;
+    const channelList=$('#channel-list');
+    function renderChannels(){channelList.innerHTML='';DB.data.channels.forEach(ch=>{const li=document.createElement('li');li.innerHTML=`<button data-id="${ch.id}" class="w-full flex items-center gap-2 px-3 py-2 rounded hover:bg-gray-100 ${currentChannel?.id===ch.id?'channel-active':''}"><i data-lucide="${ch.icon}" class="w-4 h-4"></i><span>${ch.name}</span></button>`;channelList.append(li);});lucide.createIcons();}
+
+    function selectChannel(id){currentChannel=DB.data.channels.find(c=>c.id===id);$('#channel-header').innerHTML=`<h3 class="font-bold text-lg flex items-center gap-2"><i data-lucide="${currentChannel.icon}" class="w-5 h-5"></i>${currentChannel.name}</h3>`;$('#new-post').classList.remove('hidden');renderChannels();renderPosts();}
+
+    function renderPosts(){const feed=$('#post-feed');feed.innerHTML='';const posts=DB.data.posts.filter(p=>p.channelId===currentChannel.id).sort((a,b)=>b.id-a.id);if(!posts.length){feed.innerHTML='<p class="text-sm text-gray-500">No posts yet…</p>';return;}posts.forEach(p=>{const card=document.createElement('div');card.className='post-card';card.innerHTML=`<div class="flex items-start gap-3"><img src="${p.avatar}" class="w-8 h-8 rounded-full"><div class="flex-1"><p class="font-semibold text-sm">${p.user}</p><p class="text-sm text-gray-700 whitespace-pre-wrap">${p.text}</p>${p.video?renderVideo(p.video):''}<div class="post-actions flex gap-4 mt-2 text-gray-500"><button data-id="${p.id}" class="comment-toggle">💬 ${p.comments.length}</button></div><div class="comments space-y-2 mt-3 hidden"></div><div class="comment-box flex gap-2 mt-2 hidden"><input type="text" class="flex-1 border rounded p-1 text-sm" placeholder="Add comment…"><button class="px-2 text-xs bg-red-600 text-white rounded">Send</button></div></div></div>`;feed.append(card);});}
+
+    function renderVideo(url){if(url.includes('youtube.com')||url.includes('youtu.be')){const id=url.split(/v=|youtu.be\//)[1]?.split(/[?&]/)[0];return `<div class="mt-2"><iframe class="w-full aspect-video rounded" src="https://www.youtube.com/embed/${id}" allowfullscreen></iframe></div>`;}return `<video controls class="w-full rounded mt-2"><source src="${url}"></video>`;}
+
+    channelList.addEventListener('click',e=>{const btn=e.target.closest('button[data-id]');if(btn)selectChannel(btn.dataset.id);});
+
+    $('#post-submit').addEventListener('click',()=>{const text=$('#post-text').value.trim();if(!text)return;const vid=$('#post-video').value.trim();const post={id:Date.now(),channelId:currentChannel.id,user:DB.currentUser.name,avatar:DB.currentUser.avatar,text,video:vid,comments:[]};DB.data.posts.push(post);DB.save();$('#post-text').value='';$('#post-video').value='';renderPosts();});
+
+    $('#post-feed').addEventListener('click',e=>{if(e.target.classList.contains('comment-toggle')){const card=e.target.closest('.post-card');const comments=card.querySelector('.comments');const box=card.querySelector('.comment-box');comments.classList.toggle('hidden');box.classList.toggle('hidden');e.target.textContent.includes('💬')&&box.querySelector('input').focus();}else if(e.target.textContent==='Send'){const card=e.target.closest('.post-card');const id=parseInt(card.querySelector('.comment-toggle').dataset.id);const input=e.target.parentElement.querySelector('input');const txt=input.value.trim();if(!txt)return;const post=DB.data.posts.find(p=>p.id===id);post.comments.push({user:DB.currentUser.name,avatar:DB.currentUser.avatar,text:txt});DB.save();input.value='';renderPosts();}}
+    );
+
+    $('#add-channel-btn').addEventListener('click',()=>{const name=prompt('Channel name');if(!name)return;const id=name.toLowerCase().replace(/\s+/g,'-');DB.data.channels.push({id,name,icon:'hash'});DB.save();renderChannels();});
+
+    renderChannels();selectChannel(DB.data.channels[0].id);
 }
 
-buildSidebar();
-lucide.createIcons();
+// STUB PAGES ------------------------------------------------------
+function initStrategy(r){r.innerHTML='<p>Strategy page under construction…</p>';}
+function initCanvas(r){r.innerHTML='<p>Canvas page under construction…</p>';}
+function initLearning(r){r.innerHTML='<p>Learning page under construction…</p>';}
+function initAdmin(r){r.innerHTML='<p>Admin panel coming soon…</p>';}
 
-$('#sidebar-toggle').addEventListener('click', () => {
-    $('#sidebar').classList.toggle('collapsed');
-});
-
-$('#theme-toggle').addEventListener('click', () => {
-    document.documentElement.classList.toggle('dark');
-    toast('Theme toggled');
-});
-
-$('#sign-out').addEventListener('click', () => {
-    localStorage.removeItem('aether_session');
-    location.reload();
-});
-
-// Global search (stub) -------------------------------------------
-$('#global-search').addEventListener('input', debounce(e => {
-    console.log('Search:', e.target.value);
-}));
-
-// ================================================================
-//  PAGE ROUTING
-// ================================================================
-let activePage = null;
-$('#main-nav').addEventListener('click', e => {
-    const btn = e.target.closest('button[data-page]');
-    if (!btn) return;
-    showPage(btn.dataset.page);
-});
-
-function showPage(id) {
-    if (activePage === id) return;
-    const page = pages.find(p => p.id === id);
-    if (!page) return;
-    activePage = id;
-    $('#content').innerHTML = `<h2 class="text-2xl font-bold mb-4">${page.label}</h2><div id="page-root"></div>`;
-    page.init($('#page-root'));
-    $$('#main-nav button').forEach(b => b.classList.toggle('bg-gray-700', b.dataset.page === id));
-    lucide.createIcons();
-}
-
-// ================================================================
-//  PAGE: DASHBOARD (placeholder)
-// ================================================================
-function initDashboard(root) {
-    root.innerHTML = `
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <div class="lg:col-span-2 space-y-4">
-                <div class="bg-white p-6 rounded shadow">
-                    <h3 class="font-semibold mb-2">Quick Stats</h3>
-                    <canvas id="dash-chart" height="120"></canvas>
-                </div>
-            </div>
-            <div class="space-y-4">
-                <div class="bg-white p-6 rounded shadow">
-                    <h3 class="font-semibold mb-2">Welcome</h3>
-                    <p>Hello <strong>${DB.currentUser.name}</strong>!</p>
-                </div>
-            </div>
-        </div>
-    `;
-    // Render dummy chart
-    new Chart($('#dash-chart'), {
-        type:'bar',
-        data:{ labels:['Mon','Tue','Wed','Thu','Fri'], datasets:[{label:'Hours',data:[2,4,3,5,6]}] },
-        options:{responsive:true,plugins:{legend:{display:false}}}
-    });
-}
-
-// ================================================================
-//  PAGE: WORD‑LIKE DOCUMENT EDITOR
-// ================================================================
-function initWord(root) {
-    root.innerHTML = `
-        <!-- Toolbar ------------------------------------------------- -->
-        <div id="word-toolbar" class="bg-white border rounded shadow flex flex-wrap gap-1 p-2 mb-4">
-            <button class="icon-btn" data-action="bold"><i data-lucide="bold"></i></button>
-            <button class="icon-btn" data-action="italic"><i data-lucide="italic"></i></button>
-            <button class="icon-btn" data-action="underline"><i data-lucide="underline"></i></button>
-            <button class="icon-btn" data-action="strike"><i data-lucide="strikethrough"></i></button>
-            <span class="w-px bg-gray-300 mx-1"></span>
-            <button class="icon-btn" data-action="h1">H1</button>
-            <button class="icon-btn" data-action="h2">H2</button>
-            <button class="icon-btn" data-action="blockquote"><i data-lucide="quote"></i></button>
-            <button class="icon-btn" data-action="code-block"><i data-lucide="code"></i></button>
-            <span class="w-px bg-gray-300 mx-1"></span>
-            <button class="icon-btn" data-action="ordered"><i data-lucide="list-ordered"></i></button>
-            <button class="icon-btn" data-action="bullet"><i data-lucide="list"></i></button>
-            <span class="w-px bg-gray-300 mx-1"></span>
-            <button class="icon-btn" data-action="align-left"><i data-lucide="align-left"></i></button>
-            <button class="icon-btn" data-action="align-center"><i data-lucide="align-center"></i></button>
-            <button class="icon-btn" data-action="align-right"><i data-lucide="align-right"></i></button>
-            <span class="w-px bg-gray-300 mx-1"></span>
-            <button class="icon-btn" data-action="link"><i data-lucide="link"></i></button>
-            <button class="icon-btn" data-action="image"><i data-lucide="image"></i></button>
-            <span class="w-px bg-gray-300 mx-1"></span>
-            <button class="icon-btn bg-green-600 text-white" data-export="pdf"><i data-lucide="file"></i><span class="hidden md:inline">PDF</span></button>
-            <button class="icon-btn bg-blue-600 text-white" data-export="docx"><i data-lucide="file-text"></i><span class="hidden md:inline">DOCX</span></button>
-            <button class="icon-btn bg-yellow-500 text-white" data-export="xlsx"><i data-lucide="table"></i><span class="hidden md:inline">XLSX</span></button>
-        </div>
-        <!-- Editor --------------------------------------------------- -->
-        <div id="editor" class="bg-white h-[60vh] border rounded shadow p-4 overflow-auto"></div>
-    `;
-
-    // Initialize Quill
-    const quill = new Quill('#editor', {
-        theme:'snow',
-        placeholder:'Start typing…',
-        modules:{ toolbar:false }
-    });
-
-    // Toolbar actions ---------------------------------------------
-    $('#word-toolbar').addEventListener('click', e => {
-        const btn = e.target.closest('button');
-        if (!btn) return;
-        const act = btn.dataset.action;
-        if (act) handleFormat(act);
-        const exp = btn.dataset.export;
-        if (exp) handleExport(exp);
-    });
-
-    function handleFormat(action) {
-        switch(action) {
-            case 'bold': quill.format('bold', !quill.getFormat().bold); break;
-            case 'italic': quill.format('italic', !quill.getFormat().italic); break;
-            case 'underline': quill.format('underline', !quill.getFormat().underline); break;
-            case 'strike': quill.format('strike', !quill.getFormat().strike); break;
-            case 'h1': quill.format('header', 1); break;
-            case 'h2': quill.format('header', 2); break;
-            case 'blockquote': quill.format('blockquote', true); break;
-            case 'code-block': quill.format('code-block', true); break;
-            case 'ordered': quill.format('list', 'ordered'); break;
-            case 'bullet': quill.format('list', 'bullet'); break;
-            case 'align-left': quill.format('align', ''); break;
-            case 'align-center': quill.format('align', 'center'); break;
-            case 'align-right': quill.format('align', 'right'); break;
-            case 'link': {
-                const url = prompt('Enter URL');
-                if (url) quill.format('link', url);
-                break;
-            }
-            case 'image': {
-                const url = prompt('Enter image URL');
-                if (url) quill.insertEmbed(quill.getSelection()?.index || 0, 'image', url);
-                break;
-            }
-        }
-    }
-
-    // Export handlers ---------------------------------------------
-    async function handleExport(type) {
-        const delta = quill.getContents();
-        const html = quill.root.innerHTML;
-        switch(type) {
-            case 'pdf': {
-                const { jsPDF } = window.jspdf;
-                const doc = new jsPDF('p','pt','a4');
-                await doc.html(quill.root,{ callback: d => { d.save('document.pdf'); toast('PDF saved'); }});
-                break;
-            }
-            case 'docx': {
-                const { Document, Packer, Paragraph } = docx;
-                const doc = new Document({ sections:[{ children:[ new Paragraph({ text: quill.getText() }) ] }] });
-                const blob = await Packer.toBlob(doc);
-                saveAs(blob,'document.docx');
-                toast('DOCX saved');
-                break;
-            }
-            case 'xlsx': {
-                const wb = XLSX.utils.book_new();
-                const ws = XLSX.utils.aoa_to_sheet([[quill.getText()]]);
-                XLSX.utils.book_append_sheet(wb, ws, 'Sheet1');
-                XLSX.writeFile(wb,'document.xlsx');
-                toast('XLSX saved');
-                break;
-            }
-        }
-    }
-
-}
-
-// ================================================================
-//  Remaining pages (stubs)
-// ================================================================
-function initStrategy(root){ root.innerHTML='<p>Strategy page under construction…</p>'; }
-function initCanvas(root){ root.innerHTML='<p>Canvas page under construction…</p>'; }
-function initLearning(root){ root.innerHTML='<p>Learning page under construction…</p>'; }
-function initCollab(root){ root.innerHTML='<p>Collaboration hub coming soon…</p>'; }
-function initAdmin(root){ root.innerHTML='<p>Admin panel (restricted) coming soon…</p>'; }
-
-// ================================================================
-//  SESSION RESUME --------------------------------------------------
-// ================================================================
-(function resume(){
-    const lastUser = DB.data.users.slice(-1)[0];
-    if (lastUser) {
-        DB.currentUser = lastUser;
-        initApp();
-    }
-})();
-
-// ================================================================
-//  INIT APP AFTER AUTH --------------------------------------------
-// ================================================================
-function initApp(){
-    $('#registration-page').classList.add('hidden');
-    $('#app').classList.remove('hidden');
-    $('#nav-avatar').src = DB.currentUser.avatar;
-    showPage('word');
-}
-
+// RESUME SESSION --------------------------------------------------
+(function resume(){const u=DB.data.users.slice(-1)[0];if(u){DB.currentUser=u;initApp();}})();
+function initApp(){$('#registration-page').classList.add('hidden');$('#app').classList.remove('hidden');$('#nav-avatar').src=DB.currentUser.avatar;showPage('word');}
 </script>
 </body>
 </html>
