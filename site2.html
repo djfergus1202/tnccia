@@ -361,27 +361,50 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const ADMIN_PIN = '373202';
 
-    // Central Data Store
-    const appData = {
-        feedPosts: JSON.parse(localStorage.getItem('aetherFeedPosts') || '[]'),
-        projects: JSON.parse(localStorage.getItem('aetherProjects') || '[]'),
-        canvasNodes: JSON.parse(localStorage.getItem('aetherCanvasNodes')) || [
-            { id: 'n1', type: 'rock', title: 'Become a Robotics Engineer', x: 50, y: 150 },
-            { id: 'n2', type: 'pebble', title: 'Master Python for Robotics', x: 350, y: 50 },
-            { id: 'n3', type: 'study', title: 'Complete CS50 Course', x: 350, y: 250 }
-        ],
-        canvasConnections: JSON.parse(localStorage.getItem('aetherCanvasConnections')) || [ { from: 'n1', to: 'n2' }, { from: 'n1', to: 'n3' } ],
-        ganttTasks: JSON.parse(localStorage.getItem('aetherGanttTasks')) || [
-            { id: 1, name: 'Initial Research', start: '2025-07-15', end: '2025-07-25', color: '#3B82F6' },
-            { id: 2, name: 'Develop Prototype', start: '2025-07-26', end: '2025-08-15', color: '#10B981' }
-        ],
-        uploadedEpisodes: [],
-        collabPosts: JSON.parse(localStorage.getItem('aetherCollabPosts')) || [
-            { id: 1, community: 'neuro', user: 'Alex Ray', avatar: 'https://i.pravatar.cc/150?u=alex', text: 'Just read a fascinating paper on optogenetics. The level of precision is incredible!', reactions: {appreciate: 15, learn: 8, understood: 12, questions: 2}, comments: [{user: 'Becca Chan', text: 'Totally agree! The implications for mapping neural circuits are huge.'}] },
-            { id: 2, community: 'stats', user: 'Becca Chan', avatar: 'https://i.pravatar.cc/150?u=becca', text: 'Anyone have experience with Bayesian modeling for time-series data? Looking for advice on my thesis.', reactions: {appreciate: 22, learn: 18, understood: 5, questions: 10}, comments: [] },
-            { id: 3, community: 'general', user: 'Carlito Rodriguez', avatar: 'https://i.pravatar.cc/150?u=carlito', text: 'Feeling a bit of imposter syndrome today. Any tips for staying motivated during a long Ph.D. program?', reactions: {appreciate: 45, learn: 3, understood: 30, questions: 1}, comments: [{user: 'Alex Ray', text: "You're not alone! Taking regular breaks and celebrating small wins helps me a lot."}]}
-        ]
+    // --- MOCK DATABASE ---
+    // This simulates a backend database. All data operations go through this object.
+    const mockDatabase = {
+        _data: {
+            feedPosts: [],
+            projects: [],
+            canvasNodes: [
+                { id: 'n1', type: 'rock', title: 'Become a Robotics Engineer', x: 50, y: 150 },
+                { id: 'n2', type: 'pebble', title: 'Master Python for Robotics', x: 350, y: 50 },
+                { id: 'n3', type: 'study', title: 'Complete CS50 Course', x: 350, y: 250 }
+            ],
+            canvasConnections: [ { from: 'n1', to: 'n2' }, { from: 'n1', to: 'n3' } ],
+            ganttTasks: [
+                { id: 1, name: 'Initial Research', start: '2025-07-15', end: '2025-07-25', color: '#3B82F6' },
+                { id: 2, name: 'Develop Prototype', start: '2025-07-26', end: '2025-08-15', color: '#10B981' }
+            ],
+            collabPosts: [
+                { id: 1, community: 'neuro', user: 'Alex Ray', avatar: 'https://i.pravatar.cc/150?u=alex', text: 'Just read a fascinating paper on optogenetics. The level of precision is incredible!', reactions: {appreciate: 15, learn: 8, understood: 12, questions: 2}, comments: [{user: 'Becca Chan', text: 'Totally agree! The implications for mapping neural circuits are huge.'}] },
+                { id: 2, community: 'stats', user: 'Becca Chan', avatar: 'https://i.pravatar.cc/150?u=becca', text: 'Anyone have experience with Bayesian modeling for time-series data? Looking for advice on my thesis.', reactions: {appreciate: 22, learn: 18, understood: 5, questions: 10}, comments: [] },
+                { id: 3, community: 'general', user: 'Carlito Rodriguez', avatar: 'https://i.pravatar.cc/150?u=carlito', text: 'Feeling a bit of imposter syndrome today. Any tips for staying motivated during a long Ph.D. program?', reactions: {appreciate: 45, learn: 3, understood: 30, questions: 1}, comments: [{user: 'Alex Ray', text: "You're not alone! Taking regular breaks and celebrating small wins helps me a lot."}]}
+            ],
+            allRegistrations: [],
+            connections: []
+        },
+        // Load data from localStorage into the mock DB on startup
+        init() {
+            for (const key in this._data) {
+                const storedData = localStorage.getItem(`aether_${key}`);
+                if (storedData) {
+                    this._data[key] = JSON.parse(storedData);
+                }
+            }
+        },
+        // Get data from the mock DB
+        get(key) {
+            return this._data[key] || [];
+        },
+        // Set data in the mock DB and save to localStorage
+        set(key, value) {
+            this._data[key] = value;
+            localStorage.setItem(`aether_${key}`, JSON.stringify(value));
+        }
     };
+    mockDatabase.init();
 
     const mainAppContainer = document.getElementById('main-app-container');
     const landingPage = document.getElementById('registration-page');
@@ -406,12 +429,15 @@ document.addEventListener('DOMContentLoaded', () => {
             bio: regForm.bioReg.value, avatarUrl: regForm.avatarReg.value || `https://i.pravatar.cc/150?u=${regForm.email.value}`
         };
         localStorage.setItem('aetherCurrentUser', JSON.stringify(userData));
-        const allRegistrations = JSON.parse(localStorage.getItem('aetherAllRegistrations') || '[]');
+        
+        const allRegistrations = mockDatabase.get('allRegistrations');
         allRegistrations.push(userData);
-        localStorage.setItem('aetherAllRegistrations', JSON.stringify(allRegistrations));
-        const connections = JSON.parse(localStorage.getItem('aetherConnections') || '[]');
+        mockDatabase.set('allRegistrations', allRegistrations);
+
+        const connections = mockDatabase.get('connections');
         connections.unshift({ name: userData.fullName, avatarUrl: userData.avatarUrl, connectedAt: new Date().toISOString() });
-        localStorage.setItem('aetherConnections', JSON.stringify(connections.slice(0, 100)));
+        mockDatabase.set('connections', connections.slice(0, 100));
+        
         showApp(userData);
     });
 
@@ -444,7 +470,6 @@ document.addEventListener('DOMContentLoaded', () => {
         
         function navigateTo(targetId) {
             if (!targetId) return;
-            // Update active state for sidebar items
             nav.querySelectorAll('.sidebar-item').forEach(btn => btn.classList.toggle('active', btn.dataset.target === targetId));
             profileNavBtn.classList.toggle('active', 'profile' === targetId);
 
@@ -540,7 +565,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         function renderFeedPosts() {
             feedPostsContainer.innerHTML = '';
-            appData.feedPosts.forEach(post => {
+            mockDatabase.get('feedPosts').forEach(post => {
                 const postEl = document.createElement('div');
                 postEl.className = 'flex items-start gap-3 border-t border-gray-100 pt-4';
                 postEl.innerHTML = `
@@ -565,8 +590,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 message: message,
                 timestamp: new Date().toISOString()
             };
-            appData.feedPosts.push(newPost);
-            localStorage.setItem('aetherFeedPosts', JSON.stringify(appData.feedPosts));
+            const currentPosts = mockDatabase.get('feedPosts');
+            currentPosts.push(newPost);
+            mockDatabase.set('feedPosts', currentPosts);
             
             if (document.getElementById('feed-notify-email').checked) {
                 console.log(`Simulating email notification to ${userData.email} for post: "${message}"`);
@@ -608,7 +634,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     name: file.name,
                     url: URL.createObjectURL(file)
                 };
-                appData.uploadedEpisodes.push(episode);
+                mockDatabase.get('uploadedEpisodes').push(episode);
                 renderUploadedEpisodes();
             }
         });
@@ -616,11 +642,12 @@ document.addEventListener('DOMContentLoaded', () => {
         function renderUploadedEpisodes() {
             const container = document.getElementById('uploaded-episodes');
             container.innerHTML = '';
-            if (appData.uploadedEpisodes.length === 0) {
+            const uploadedEpisodes = mockDatabase.get('uploadedEpisodes');
+            if (uploadedEpisodes.length === 0) {
                 container.innerHTML = `<li class="text-sm text-gray-500 text-center py-4">No uploaded audio files.</li>`;
                 return;
             }
-            appData.uploadedEpisodes.forEach(ep => {
+            uploadedEpisodes.forEach(ep => {
                 const li = document.createElement('li');
                 li.className = "border-t border-gray-200 pt-3";
                 li.innerHTML = `<p class="font-semibold text-sm mb-2">${ep.name}</p><audio controls class="w-full h-8" src="${ep.url}"></audio>`;
@@ -654,7 +681,7 @@ document.addEventListener('DOMContentLoaded', () => {
         function loadTimeline() {
              const list = document.getElementById('timelineList');
              list.innerHTML = '';
-             const connections = JSON.parse(localStorage.getItem('aetherConnections')||'[]');
+             const connections = mockDatabase.get('connections');
              if (connections.length === 0) {
                  list.innerHTML = `<li class="text-sm text-gray-500">No connections yet.</li>`;
                  return;
@@ -689,20 +716,31 @@ document.addEventListener('DOMContentLoaded', () => {
         let activeCommunityId = 'general';
 
         const communities = [
-            { id: 'general', name: 'General Discussion', guidelines: 'Be respectful and constructive. Share your thoughts, ask questions, and help others on their academic and career journeys.', trends: 'A recent PubMed review highlights the growing importance of interdisciplinary skills. Researchers combining computational methods with traditional lab work are seeing increased funding and publication success.' },
-            { id: 'neuro', name: 'Neuroscience', guidelines: 'Focus on topics related to neuroscience. Cite sources where possible, especially when discussing new research. All levels of expertise are welcome.', trends: 'The use of AI in analyzing fMRI data is a major trend. New algorithms are identifying patterns previously invisible to human analysis, leading to breakthroughs in understanding cognitive disorders.' },
-            { id: 'stats', name: 'Statistics & Data Science', guidelines: 'Share code snippets, discuss statistical methods, and ask for help with data analysis challenges. Please format code clearly.', trends: 'Causal inference is a hot topic. Methods like Mendelian randomization are being applied outside of genetics to fields like economics and social science to establish causality from observational data.' },
+            { id: 'general', name: 'General Discussion', guidelines: '1. Be respectful and constructive.\n2. Share your thoughts, ask questions, and help others.\n3. Keep discussions relevant to career and academic development.', trends: 'A recent PubMed review highlights the growing importance of interdisciplinary skills. Researchers combining computational methods with traditional lab work are seeing increased funding and publication success.', media: [{type: 'video', url: 'https://www.youtube.com/embed/hS5CfP8n_js'}] },
+            { id: 'neuro', name: 'Neuroscience', guidelines: '1. Focus on topics related to neuroscience.\n2. Cite sources where possible, especially when discussing new research.\n3. All levels of expertise are welcome.', trends: 'The use of AI in analyzing fMRI data is a major trend. New algorithms are identifying patterns previously invisible to human analysis, leading to breakthroughs in understanding cognitive disorders.', media: [{type: 'video', url: 'https://www.youtube.com/embed/uhRhtFFhNzQ'}] },
+            { id: 'stats', name: 'Statistics & Data Science', guidelines: '1. Share code snippets, discuss statistical methods, and ask for help with data analysis challenges.\n2. Please format code clearly using markdown.\n3. Be patient with beginners.', trends: 'Causal inference is a hot topic. Methods like Mendelian randomization are being applied outside of genetics to fields like economics and social science to establish causality from observational data.', media: [{type: 'video', url: 'https://www.youtube.com/embed/c1-O2_lW2yE'}] },
         ];
 
         function renderCommunityContent() {
             const community = communities.find(c => c.id === activeCommunityId);
-            container.querySelector('#community-main-content').innerHTML = `
+            const mainContent = container.querySelector('#community-main-content');
+            mainContent.innerHTML = `
                 <div class="flex border-b mb-4">
                     <button class="community-main-tab flex-1 py-2 text-sm font-semibold border-b-2 border-transparent active" data-tab="posts">Posts</button>
                     <button class="community-main-tab flex-1 py-2 text-sm font-semibold border-b-2 border-transparent" data-tab="guidelines">Guidelines</button>
                     <button class="community-main-tab flex-1 py-2 text-sm font-semibold border-b-2 border-transparent" data-tab="trends">Current Trends</button>
                 </div>
-                <div id="community-posts" class="community-content-panel active">
+                <div id="community-posts" class="community-content-panel active space-y-6">
+                    <div id="community-trends" class="bg-white p-6 rounded-xl border shadow-sm">
+                        <h3 class="text-xl font-bold mb-3">Current Trends from PubMed</h3>
+                        <p class="text-gray-700 whitespace-pre-wrap">${community.trends}</p>
+                    </div>
+                    <div id="community-media" class="bg-white p-6 rounded-xl border shadow-sm">
+                        <h3 class="text-xl font-bold mb-3">Inspirational Media</h3>
+                        <div class="aspect-w-16 aspect-h-9">
+                            <iframe src="${community.media[0].url}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen class="w-full h-full rounded-lg"></iframe>
+                        </div>
+                    </div>
                     <div class="bg-white p-4 rounded-xl border shadow-sm">
                         <div class="flex items-start gap-3">
                             <img src="${userData.avatarUrl}" class="w-10 h-10 rounded-full">
@@ -714,15 +752,11 @@ document.addEventListener('DOMContentLoaded', () => {
                             </div>
                         </div>
                     </div>
-                    <div id="collab-feed-posts" class="space-y-4 mt-6"></div>
+                    <div id="collab-feed-posts" class="space-y-4"></div>
                 </div>
                 <div id="community-guidelines" class="community-content-panel hidden bg-white p-6 rounded-xl border shadow-sm">
                     <h3 class="text-xl font-bold mb-3">Community Guidelines</h3>
                     <p class="text-gray-700 whitespace-pre-wrap">${community.guidelines}</p>
-                </div>
-                <div id="community-trends" class="community-content-panel hidden bg-white p-6 rounded-xl border shadow-sm">
-                    <h3 class="text-xl font-bold mb-3">Current Trends from PubMed</h3>
-                    <p class="text-gray-700 whitespace-pre-wrap">${community.trends}</p>
                 </div>
             `;
             renderCollabPosts();
@@ -733,34 +767,40 @@ document.addEventListener('DOMContentLoaded', () => {
             const postList = document.getElementById('collab-feed-posts');
             if (!postList) return;
             postList.innerHTML = '';
-            appData.collabPosts.filter(p => p.community === activeCommunityId).forEach(p => {
-                postList.innerHTML += `
-                    <div class="bg-white p-4 rounded-xl border shadow-sm" data-post-id="${p.id}">
-                        <div class="flex items-start gap-3">
-                            <img src="${p.avatar}" class="w-10 h-10 rounded-full">
-                            <div class="flex-1">
-                                <div class="flex justify-between items-center">
-                                    <p class="font-semibold text-sm">${p.user}</p>
-                                    ${p.user === userData.fullName ? `<div class="flex gap-2"><button class="edit-post-btn text-xs text-gray-500 hover:text-blue-600">Edit</button><button class="delete-post-btn text-xs text-gray-500 hover:text-red-600">Delete</button></div>` : ''}
-                                </div>
-                                <p class="text-gray-700 mt-1">${p.text}</p>
-                                <div class="flex items-center gap-4 text-xs text-gray-500 mt-3">
-                                    <button class="reaction-btn flex items-center gap-1 hover:text-green-600" data-reaction="appreciate">👏 Appreciate (${p.reactions.appreciate})</button>
-                                    <button class="reaction-btn flex items-center gap-1 hover:text-blue-600" data-reaction="learn">🎓 Learn (${p.reactions.learn})</button>
-                                    <button class="reaction-btn flex items-center gap-1 hover:text-purple-600" data-reaction="understood">✅ Understood (${p.reactions.understood})</button>
-                                    <button class="reaction-btn flex items-center gap-1 hover:text-yellow-600" data-reaction="questions">❓ Have Questions (${p.reactions.questions})</button>
-                                </div>
-                                <div class="mt-4 border-t pt-2">
-                                    <button class="toggle-comments-btn text-sm font-semibold text-gray-600">Comments (${p.comments.length})</button>
-                                    <div class="comments-section hidden mt-2 space-y-3">
+            const posts = mockDatabase.get('collabPosts');
+            posts.filter(p => p.community === activeCommunityId).forEach(p => {
+                const postContainer = document.createElement('div');
+                postContainer.className = 'bg-white p-4 rounded-xl border shadow-sm';
+                postContainer.dataset.postId = p.id;
+                postContainer.innerHTML = `
+                    <div class="flex items-start gap-3">
+                        <img src="${p.avatar}" class="w-10 h-10 rounded-full">
+                        <div class="flex-1">
+                            <div class="flex justify-between items-center">
+                                <p class="font-semibold text-sm">${p.user}</p>
+                                ${p.user === userData.fullName ? `<div class="flex gap-2"><button class="edit-post-btn text-xs text-gray-500 hover:text-blue-600">Edit</button><button class="delete-post-btn text-xs text-gray-500 hover:text-red-600">Delete</button></div>` : ''}
+                            </div>
+                            <div class="post-content mt-1">
+                                <p class="text-gray-700 whitespace-pre-wrap">${p.text}</p>
+                            </div>
+                            <div class="flex items-center gap-4 text-xs text-gray-500 mt-3">
+                                <button class="reaction-btn flex items-center gap-1 hover:text-green-600" data-reaction="appreciate">👏 Appreciate (${p.reactions.appreciate})</button>
+                                <button class="reaction-btn flex items-center gap-1 hover:text-blue-600" data-reaction="learn">🎓 Learn (${p.reactions.learn})</button>
+                                <button class="reaction-btn flex items-center gap-1 hover:text-purple-600" data-reaction="understood">✅ Understood (${p.reactions.understood})</button>
+                                <button class="reaction-btn flex items-center gap-1 hover:text-yellow-600" data-reaction="questions">❓ Have Questions (${p.reactions.questions})</button>
+                            </div>
+                            <div class="mt-4 border-t pt-2">
+                                <button class="toggle-comments-btn text-sm font-semibold text-gray-600">Comments (${p.comments.length})</button>
+                                <div class="comments-section hidden mt-2 space-y-3">
+                                    <div class="comment-list">
                                         ${p.comments.map(c => `<div class="text-sm bg-gray-50 p-2 rounded-lg"><strong>${c.user}:</strong> ${c.text}</div>`).join('')}
-                                        <div class="flex items-start gap-2 pt-2">
-                                            <img src="${userData.avatarUrl}" class="w-8 h-8 rounded-full">
-                                            <div class="flex-1">
-                                                <input type="text" class="w-full border rounded-md p-1 text-sm comment-input" placeholder="Write a comment...">
-                                                <div class="flex items-center gap-2 mt-1 emoji-palette">
-                                                    <button class="emoji-btn">👍</button><button class="emoji-btn">🎉</button><button class="emoji-btn">❤️</button><button class="emoji-btn">💡</button>
-                                                </div>
+                                    </div>
+                                    <div class="flex items-start gap-2 pt-2">
+                                        <img src="${userData.avatarUrl}" class="w-8 h-8 rounded-full">
+                                        <div class="flex-1">
+                                            <input type="text" class="w-full border rounded-md p-1 text-sm comment-input" placeholder="Write a comment...">
+                                            <div class="flex items-center gap-2 mt-1 emoji-palette">
+                                                <button class="emoji-btn">👍</button><button class="emoji-btn">🎉</button><button class="emoji-btn">❤️</button><button class="emoji-btn">💡</button>
                                             </div>
                                         </div>
                                     </div>
@@ -769,6 +809,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         </div>
                     </div>
                 `;
+                postList.appendChild(postContainer);
             });
         }
 
@@ -785,43 +826,56 @@ document.addEventListener('DOMContentLoaded', () => {
                         id: Date.now(), community: activeCommunityId, user: userData.fullName, avatar: userData.avatarUrl, text: message,
                         reactions: { appreciate: 0, learn: 0, understood: 0, questions: 0 }, comments: []
                     };
-                    appData.collabPosts.unshift(newPost);
-                    localStorage.setItem('aetherCollabPosts', JSON.stringify(appData.collabPosts));
+                    const posts = mockDatabase.get('collabPosts');
+                    posts.unshift(newPost);
+                    mockDatabase.set('collabPosts', posts);
                     renderCollabPosts();
                     input.value = '';
                     showToast('Your post has been approved!');
                 }, 1500);
             });
             
-            document.querySelectorAll('.reaction-btn').forEach(btn => btn.addEventListener('click', e => {
-                // Reaction logic would go here
-                showToast('Reaction recorded!');
-            }));
+            document.getElementById('collab-feed-posts').addEventListener('click', e => {
+                const target = e.target;
+                const postEl = target.closest('[data-post-id]');
+                if (!postEl) return;
+                const postId = parseInt(postEl.dataset.postId);
 
-            document.querySelectorAll('.toggle-comments-btn').forEach(btn => btn.addEventListener('click', e => {
-                const commentsSection = e.target.closest('div').querySelector('.comments-section');
-                commentsSection.classList.toggle('hidden');
-            }));
-
-            document.querySelectorAll('.comment-input').forEach(input => input.addEventListener('keypress', e => {
-                if (e.key === 'Enter' && input.value.trim() !== '') {
-                    // Comment submission logic would go here
-                    showToast('Comment added!');
-                    input.value = '';
+                // Handle reactions, comments, etc.
+                if (target.closest('.toggle-comments-btn')) {
+                    postEl.querySelector('.comments-section').classList.toggle('hidden');
+                } else if (target.closest('.delete-post-btn')) {
+                    if (confirm('Are you sure you want to delete this post?')) {
+                        let posts = mockDatabase.get('collabPosts');
+                        posts = posts.filter(p => p.id !== postId);
+                        mockDatabase.set('collabPosts', posts);
+                        renderCollabPosts();
+                        showToast('Post deleted.');
+                    }
+                } else if (target.closest('.edit-post-btn')) {
+                    const contentDiv = postEl.querySelector('.post-content');
+                    const currentText = contentDiv.querySelector('p').innerText;
+                    contentDiv.innerHTML = `
+                        <textarea class="w-full border rounded-md p-2 text-sm">${currentText}</textarea>
+                        <div class="flex justify-end gap-2 mt-2">
+                            <button class="save-edit-btn px-3 py-1 bg-green-600 text-white text-xs font-bold rounded-md">Save</button>
+                            <button class="cancel-edit-btn px-3 py-1 bg-gray-500 text-white text-xs font-bold rounded-md">Cancel</button>
+                        </div>
+                    `;
+                } else if (target.closest('.save-edit-btn')) {
+                    const newText = postEl.querySelector('textarea').value;
+                    let posts = mockDatabase.get('collabPosts');
+                    const postIndex = posts.findIndex(p => p.id === postId);
+                    if (postIndex > -1) {
+                        posts[postIndex].text = newText;
+                        mockDatabase.set('collabPosts', posts);
+                        renderCollabPosts();
+                        showToast('Post updated.');
+                    }
+                } else if (target.closest('.cancel-edit-btn')) {
+                     renderCollabPosts();
                 }
-            }));
-            
-            document.querySelectorAll('.emoji-btn').forEach(btn => btn.addEventListener('click', e => {
-                const commentInput = e.target.closest('.flex-1').querySelector('.comment-input');
-                commentInput.value += e.target.textContent;
-            }));
-            
-            document.querySelectorAll('.community-main-tab').forEach(tab => tab.addEventListener('click', e => {
-                document.querySelectorAll('.community-main-tab').forEach(t => t.classList.remove('active'));
-                tab.classList.add('active');
-                document.querySelectorAll('.community-content-panel').forEach(p => p.classList.add('hidden'));
-                document.getElementById(`community-${tab.dataset.tab}`).classList.remove('hidden');
-            }));
+            });
         }
 
         const communityList = document.getElementById('community-list');
