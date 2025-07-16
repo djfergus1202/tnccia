@@ -67,34 +67,19 @@
             <p class="text-xl text-text-secondary mb-8 text-center">Your integrated career and learning journey begins here.</p>
             <form id="regForm" class="text-left" novalidate>
                  <div class="space-y-4">
-                     <div>
-                         <label for="fullName" class="block text-sm font-medium text-gray-700">Full Name<span class="required">*</span></label>
-                         <input type="text" id="fullName" name="fullName" required class="mt-1 w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-red-500">
-                     </div>
-                     <div>
-                         <label for="email" class="block text-sm font-medium text-gray-700">Email<span class="required">*</span></label>
-                         <input type="email" id="email" name="email" required class="mt-1 w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-red-500">
-                     </div>
-                     <div>
-                        <label for="headline" class="block text-sm font-medium text-gray-700">Headline</label>
-                        <input type="text" id="headline" name="headline" placeholder="e.g., PhD Candidate in Neuroscience" class="mt-1 w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-red-500">
-                     </div>
-                     <div>
-                         <label for="avatarReg" class="block text-sm font-medium text-gray-700">Avatar URL (Optional)</label>
-                         <input type="url" id="avatarReg" name="avatarReg" placeholder="Link to your profile photo" class="mt-1 w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-red-500">
-                     </div>
+                     <div><label for="fullName" class="block text-sm font-medium text-gray-700">Full Name<span class="required">*</span></label><input type="text" id="fullName" name="fullName" required class="mt-1 w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-red-500"></div>
+                     <div><label for="email" class="block text-sm font-medium text-gray-700">Email<span class="required">*</span></label><input type="email" id="email" name="email" required class="mt-1 w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-red-500"></div>
+                     <div><label for="headline" class="block text-sm font-medium text-gray-700">Headline</label><input type="text" id="headline" name="headline" placeholder="e.g., PhD Candidate in Neuroscience" class="mt-1 w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-red-500"></div>
+                     <div><label for="avatarReg" class="block text-sm font-medium text-gray-700">Avatar URL (Optional)</label><input type="url" id="avatarReg" name="avatarReg" placeholder="Link to your profile photo" class="mt-1 w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-red-500"></div>
                  </div>
                 <button type="submit" class="mt-6 w-full px-6 py-3 bg-red-600 text-white font-bold rounded-lg hover:bg-red-700 transition-colors">Create Profile & Enter</button>
-                <div class="text-center mt-4 text-sm text-gray-600">
-                    <a href="#" id="show-signin" class="font-medium text-red-600 hover:text-red-500">Already have an account? Sign In</a>
-                </div>
+                <div class="text-center mt-4 text-sm text-gray-600"><a href="#" id="show-signin" class="font-medium text-red-600 hover:text-red-500">Already have an account? Sign In</a></div>
             </form>
         </div>
     </div>
 
     <!-- Main App Container -->
     <div id="main-app-container" class="hidden">
-        <!-- Sidebar Navigation -->
         <aside id="sidebar" class="bg-gray-800 text-gray-300 h-screen sticky top-0 flex flex-col items-center py-4 space-y-4 overflow-hidden">
             <a href="#" class="text-red-500 font-black text-3xl mb-4">Æ</a>
             <nav id="main-nav" class="flex flex-col space-y-2 w-full">
@@ -105,7 +90,7 @@
                 <button data-target="envision" class="sidebar-item flex items-center py-3 px-5 rounded-md text-left w-full hover:bg-gray-700"><svg class="w-6 h-6 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg><span class="nav-text ml-4 font-semibold">Can You Envision It?</span></button>
             </nav>
             <div class="mt-auto w-full">
-                 <button data-target="profile" id="profile-nav-btn" class="sidebar-item flex items-center py-3 px-5 text-left w-full hover:bg-gray-700"><img id="nav-avatar" src="https://i.pravatar.cc/32" alt="Profile" class="w-8 h-8 rounded-full flex-shrink-0 object-cover"/><span class="nav-text ml-4 font-semibold" id="nav-name">Profile</span></button>
+                 <button data-target="profile" id="profile-nav-btn" class="sidebar-item flex items-center py-3 px-5 text-left w-full hover:bg-gray-700"><img id="nav-avatar" src="" alt="Profile" class="w-8 h-8 rounded-full flex-shrink-0 object-cover"/><span class="nav-text ml-4 font-semibold" id="nav-name">Profile</span></button>
                  <button id="sign-out-btn" class="sidebar-item flex items-center py-3 px-5 text-left w-full hover:bg-gray-700"><svg class="w-6 h-6 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg><span class="nav-text ml-4 font-semibold">Sign Out</span></button>
             </div>
         </aside>
@@ -129,12 +114,7 @@
     <div id="signin-modal" class="fixed inset-0 bg-gray-900 bg-opacity-50 flex items-center justify-center p-4 z-50" style="display: none;">
         <div class="bg-white rounded-lg shadow-xl w-full max-w-md p-8">
             <h2 class="text-2xl font-bold text-center mb-6">Sign In</h2>
-            <form id="signin-form">
-                <div class="space-y-4">
-                    <input type="email" id="signin-email" placeholder="Email" required class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-red-500">
-                    <button type="submit" class="w-full px-6 py-3 bg-red-600 text-white font-bold rounded-lg hover:bg-red-700">Sign In</button>
-                </div>
-            </form>
+            <form id="signin-form"><div class="space-y-4"><input type="email" id="signin-email" placeholder="Email" required class="w-full px-4 py-3 rounded-lg border focus:outline-none focus:ring-2 focus:ring-red-500"><button type="submit" class="w-full px-6 py-3 bg-red-600 text-white font-bold rounded-lg hover:bg-red-700">Sign In</button></div></form>
         </div>
     </div>
 
@@ -142,20 +122,10 @@
 document.addEventListener('DOMContentLoaded', () => {
 
     const mockDatabase = {
-        _data: {
-            currentUser: null,
-            allRegistrations: [],
-            connections: [],
-            feedPosts: [],
-            careerGoals: [],
-            flashcards: [],
-            collabSlides: [],
-            collabFeedPosts: [],
-            collabChatMessages: [],
-        },
+        _data: {},
         init() {
             const defaults = {
-                allRegistrations: [],
+                currentUser: null, allRegistrations: [],
                 connections: [{ name: 'Becca Chan', avatarUrl: 'https://i.pravatar.cc/150?u=becca', connectedAt: new Date(Date.now() - 86400000).toISOString() }, { name: 'Alex Ray', avatarUrl: 'https://i.pravatar.cc/150?u=alex', connectedAt: new Date(Date.now() - 172800000).toISOString() }],
                 feedPosts: [{ id: 1, fullName: 'Aether Team', avatarUrl: 'https://i.pravatar.cc/150?u=aether', message: 'Welcome to Aether! Explore the tabs to plan your career and collaborate.', timestamp: new Date().toISOString() }],
                 careerGoals: [{ id: 1, title: 'Master Advanced Python', description: 'Complete the "Fluent Python" book and build a complex project.', startDate: '2025-07-20', dueDate: '2025-10-31' }, { id: 2, title: 'Publish a Research Paper', description: 'Submit a paper on my current research to the IEEE conference.', startDate: '2025-11-01', dueDate: '2026-01-15' }],
@@ -164,16 +134,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 collabFeedPosts: [{ id: 1, author: 'Alex Ray', avatar: 'https://i.pravatar.cc/150?u=alex', text: 'Initial project proposal slide is up!', timestamp: new Date(Date.now() - 7200000).toISOString()}],
                 collabChatMessages: [{ user: 'Alex Ray', avatarUrl: 'https://i.pravatar.cc/150?u=alex', text: 'I\'m working on the proposal now.', timestamp: new Date().toISOString() }],
             };
-            for (const key in defaults) {
-                const storedData = localStorage.getItem(`aether_${key}`);
-                this._data[key] = storedData ? JSON.parse(storedData) : defaults[key];
-            }
+            for (const key in defaults) { this._data[key] = JSON.parse(localStorage.getItem(`aether_${key}`)) || defaults[key]; }
         },
         get(key) { return this._data[key] || []; },
-        set(key, value) {
-            this._data[key] = value;
-            localStorage.setItem(`aether_${key}`, JSON.stringify(value));
-        }
+        set(key, value) { this._data[key] = value; localStorage.setItem(`aether_${key}`, JSON.stringify(value)); }
     };
     mockDatabase.init();
 
@@ -182,11 +146,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const pageInitialized = {};
 
     function showApp(userData) {
-        const completeUserData = {
-            headline: "Aspiring Professional", bio: "Ready to learn and grow using Aether.", skills: ["Critical Thinking"], links: { linkedin: "", github: "" }, ...userData };
+        const completeUserData = { headline: "Aspiring Professional", bio: "Ready to learn and grow.", skills: [], links: { linkedin: "", github: "" }, ...userData };
         mockDatabase.set('currentUser', completeUserData);
-        landingPage.style.display = 'none';
-        mainAppContainer.style.display = 'flex';
+        landingPage.style.display = 'none'; mainAppContainer.style.display = 'flex';
         initializeMainApp(completeUserData);
     }
 
@@ -194,21 +156,17 @@ document.addEventListener('DOMContentLoaded', () => {
         e.preventDefault();
         const regForm = e.target;
         if (!regForm.fullName.value || !regForm.email.value) { showToast("Full Name and Email are required.", "info"); return; }
-        const userData = {
-            fullName: regForm.fullName.value, email: regForm.email.value, headline: regForm.headline.value || "New Aether User", avatarUrl: regForm.avatarReg.value || `https://i.pravatar.cc/150?u=${regForm.email.value}`, bio: "", skills: [], links: { linkedin: "", github: "" } };
+        const userData = { fullName: regForm.fullName.value, email: regForm.email.value, headline: regForm.headline.value || "New Aether User", avatarUrl: regForm.avatarReg.value || `https://i.pravatar.cc/150?u=${regForm.email.value}`, bio: "", skills: [], links: { linkedin: "", github: "" } };
         localStorage.setItem('aetherCurrentUser', JSON.stringify(userData));
         let allRegistrations = mockDatabase.get('allRegistrations');
         if (!allRegistrations.some(u => u.email === userData.email)) { allRegistrations.push(userData); mockDatabase.set('allRegistrations', allRegistrations); }
         showApp(userData);
     });
-
     document.getElementById('show-signin').addEventListener('click', (e) => { e.preventDefault(); document.getElementById('signin-modal').style.display = 'flex'; });
     document.getElementById('signin-modal').addEventListener('click', (e) => { if (e.target.id === 'signin-modal') e.target.style.display = 'none'; });
     document.getElementById('signin-form').addEventListener('submit', (e) => {
         e.preventDefault();
-        const emailToFind = document.getElementById('signin-email').value;
-        const allUsers = mockDatabase.get('allRegistrations');
-        const foundUser = allUsers.find(user => user.email === emailToFind);
+        const foundUser = mockDatabase.get('allRegistrations').find(user => user.email === document.getElementById('signin-email').value);
         if (foundUser) { localStorage.setItem('aetherCurrentUser', JSON.stringify(foundUser)); showApp(foundUser); } 
         else { showToast('No account found. Please register.', 'info'); }
     });
@@ -223,19 +181,14 @@ document.addEventListener('DOMContentLoaded', () => {
         const nav = document.getElementById('main-nav');
         const sections = document.querySelectorAll('.content-section');
         const initFunctions = { dashboard: initDashboard, strategy: initStrategyPage, canvas: initCareerMap, collaboration: initCollaborationPage, envision: initEnvisionPage, profile: initProfilePage };
-
         function navigateTo(targetId) {
             if (!targetId) return;
             nav.querySelectorAll('.sidebar-item').forEach(btn => btn.classList.toggle('active', btn.dataset.target === targetId));
             sections.forEach(section => section.classList.toggle('active', section.id === targetId));
-            if (!pageInitialized[targetId] || targetId === 'profile') {
-                initFunctions[targetId](mockDatabase.get('currentUser'));
-                pageInitialized[targetId] = true;
-            }
+            if (!pageInitialized[targetId] || targetId === 'profile') { initFunctions[targetId](mockDatabase.get('currentUser')); pageInitialized[targetId] = true; }
         }
-
         nav.addEventListener('click', (e) => { const button = e.target.closest('button[data-target]'); if (button) navigateTo(button.dataset.target); });
-        document.getElementById('sign-out-btn').addEventListener('click', () => { localStorage.removeItem('aetherCurrentUser'); window.location.reload(); });
+        document.getElementById('sign-out-btn').addEventListener('click', () => { localStorage.clear(); window.location.reload(); });
         navigateTo('dashboard');
     }
 
@@ -248,12 +201,216 @@ document.addEventListener('DOMContentLoaded', () => {
         toast.classList.add('show');
         setTimeout(() => toast.classList.remove('show'), 3000);
     }
-
+    
     // --- SECTION INITIALIZERS ---
-    function initDashboard(userData) { /* ... Full dashboard code from previous steps ... */ }
-    function initStrategyPage(userData) { /* ... Full strategy page code from previous steps ... */ }
-    function initCareerMap(userData) { /* ... Full career path code from previous steps ... */ }
-    function initCollaborationPage(userData) { /* ... Full collaboration page code from previous steps ... */ }
+    
+    function initDashboard(userData) {
+        const section = document.getElementById('dashboard');
+        section.innerHTML = `
+            <h1 class="text-3xl font-bold mb-6">Dashboard</h1>
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <div class="lg:col-span-2 space-y-6">
+                    <div class="bg-white p-6 rounded-xl border shadow-sm"><h2 class="text-xl font-bold mb-4">Universal Search</h2><input type="search" id="universal-search-bar" placeholder="Search across all platforms..." class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-red-500 bg-gray-50"/><div id="search-providers" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-2 mt-3">
+                        <button data-provider="google" class="flex items-center justify-center gap-2 px-3 py-2 text-sm font-semibold bg-gray-100 hover:bg-gray-200 rounded-md"><svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M21.35,11.1H12.18V13.83H18.69C18.36,17.64 15.19,19.27 12.19,19.27C8.36,19.27 5,16.25 5,12C5,7.75 8.36,4.73 12.19,4.73C15.28,4.73 17.27,6.82 17.27,6.82L19.05,5.27C19.05,5.27 16.76,3 12.19,3C6.42,3 2.03,7.27 2.03,12C2.03,16.73 6.42,21 12.19,21C18.08,21 21.54,16.65 21.54,12.24C21.54,11.64 21.48,11.37 21.35,11.1Z" /></svg>Google</button>
+                        <button data-provider="youtube" class="flex items-center justify-center gap-2 px-3 py-2 text-sm font-semibold bg-gray-100 hover:bg-gray-200 rounded-md"><svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M10,15L15.19,12L10,9V15M21.56,7.17C21.69,7.64 21.78,8.27 21.84,9.07C21.91,9.87 21.94,10.56 21.94,11.16L22,12C22,14.19 21.84,15.8 21.56,16.83C21.31,17.73 20.73,18.31 19.83,18.56C19.36,18.69 18.73,18.78 17.93,18.84C17.13,18.91 16.44,18.94 15.84,18.94L15,19H9C6.81,19 5.2,18.84 4.17,18.56C3.27,18.31 2.69,17.73 2.44,16.83C2.16,15.8 2,14.19 2,12L2.06,11.16C2.06,10.56 2.09,9.87 2.16,9.07C2.22,8.27 2.31,7.64 2.44,7.17C2.69,6.27 3.27,5.69 4.17,5.44C4.64,5.31 5.27,5.22 6.07,5.16C6.87,5.09 7.56,5.06 8.16,5.06L9,5H15C17.19,5 18.8,5.16 19.83,5.44C20.73,5.69 21.31,6.27 21.56,7.17Z"></svg>YouTube</button>
+                        <button data-provider="pubmed" class="flex items-center justify-center gap-2 px-3 py-2 text-sm font-semibold bg-gray-100 hover:bg-gray-200 rounded-md"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2h1a2 2 0 002-2v-1a2 2 0 012-2h1.945M7.8 19.8l.2-2.8m5.2 2.8l-.2-2.8"></path></svg>NLM/PubMed</button>
+                        <button data-provider="wos" class="flex items-center justify-center gap-2 px-3 py-2 text-sm font-semibold bg-gray-100 hover:bg-gray-200 rounded-md"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v11.494m-9-5.747h18"></path></svg>WoS</button>
+                        <button data-provider="proquest" class="flex items-center justify-center gap-2 px-3 py-2 text-sm font-semibold bg-gray-100 hover:bg-gray-200 rounded-md"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>ProQuest</button>
+                    </div></div>
+                    <div id="research-spotlight" class="bg-white p-6 rounded-xl border shadow-sm"><h2 class="text-xl font-bold mb-4">Spotlight: Recent Research</h2><div class="flex border-b mb-4"><button data-tab="biotech" class="tab-button flex-1 py-2 text-sm border-b-2 border-transparent active">Biotech</button><button data-tab="methods" class="tab-button flex-1 py-2 text-sm border-b-2 border-transparent">Methods</button><button data-tab="business" class="tab-button flex-1 py-2 text-sm border-b-2 border-transparent">Business</button></div><div id="research-content">
+                        <div id="biotech-content" class="research-panel space-y-3"><div class="p-3 bg-gray-50 rounded-lg"><p class="font-semibold text-sm">mRNA Therapeutics</p><p class="text-xs text-text-secondary mt-1">New lipid nanoparticle formulation improves delivery efficiency by 40%. <a href="#" class="text-accent-primary">Source</a></p></div><div class="p-3 bg-gray-50 rounded-lg"><p class="font-semibold text-sm">AI in Drug Discovery</p><p class="text-xs text-text-secondary mt-1">AlphaFold 3 predicts protein-ligand interactions with near-experimental accuracy. <a href="#" class="text-accent-primary">Source</a></p></div></div>
+                        <div id="methods-content" class="research-panel space-y-3 hidden"><div class="p-3 bg-gray-50 rounded-lg"><p class="font-semibold text-sm">Cryo-Electron Microscopy</p><p class="text-xs text-text-secondary mt-1">Resolution barrier broken with new direct electron detector. <a href="#" class="text-accent-primary">Source</a></p></div></div>
+                        <div id="business-content" class="research-panel space-y-3 hidden"><div class="p-3 bg-gray-50 rounded-lg"><p class="font-semibold text-sm">Platform Strategy</p><p class="text-xs text-text-secondary mt-1">Ecosystem platform models outperform traditional pipelines by 25% in 5-year growth. <a href="#" class="text-accent-primary">Source</a></p></div></div>
+                    </div></div>
+                    <div class="bg-white p-6 rounded-xl border shadow-sm"><h2 class="text-xl font-bold mb-4">Aether Feed</h2><div id="aether-feed-container"></div></div>
+                </div>
+                <div class="lg:col-span-1 space-y-6">
+                    <div class="bg-white p-6 rounded-xl border shadow-sm"><h2 class="text-xl font-bold mb-4">Connections Timeline</h2><div id="timeline-container" class="max-h-64 overflow-y-auto"></div></div>
+                    <div class="bg-white p-6 rounded-xl border shadow-sm"><h2 class="text-xl font-bold mb-4">Podcast Hub</h2><div id="podcast-container"></div></div>
+                </div>
+            </div>`;
+
+        section.querySelector('#search-providers').addEventListener('click', e => {
+            const button = e.target.closest('button[data-provider]');
+            if (!button) return;
+            const query = section.querySelector('#universal-search-bar').value;
+            if (!query) { showToast("Please enter a search query.", "info"); return; }
+            const urls = { google: `https://www.google.com/search?q=${encodeURIComponent(query)}`, youtube: `https://www.youtube.com/results?search_query=${encodeURIComponent(query)}`, pubmed: `https://pubmed.ncbi.nlm.nih.gov/?term=${encodeURIComponent(query)}`, wos: `https://www.webofscience.com/wos/woscc/basic-search?search_mode=BasicSearchForm&value(input1)=${encodeURIComponent(query)}`, proquest: `https://www.proquest.com/search?q=${encodeURIComponent(query)}`};
+            if (urls[button.dataset.provider]) window.open(urls[button.dataset.provider], '_blank');
+        });
+        
+        const spotlight = section.querySelector('#research-spotlight');
+        spotlight.addEventListener('click', e => {
+            const tabButton = e.target.closest('.tab-button');
+            if (tabButton) {
+                spotlight.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
+                tabButton.classList.add('active');
+                spotlight.querySelectorAll('.research-panel').forEach(panel => panel.classList.toggle('hidden', panel.id !== `${tabButton.dataset.tab}-content`));
+            }
+        });
+        
+        document.getElementById('aether-feed-container').innerHTML = mockDatabase.get('feedPosts').map(post => `<div class="border-t pt-3 mt-3"><p class="font-semibold text-sm">${post.fullName}</p><p class="text-sm text-gray-700">${post.message}</p></div>`).join('');
+        document.getElementById('timeline-container').innerHTML = mockDatabase.get('connections').map(conn => `<div class="flex items-center mt-2"><img src="${conn.avatarUrl}" class="w-8 h-8 rounded-full mr-3"><p class="text-sm">${conn.name} joined</p></div>`).join('');
+        document.getElementById('podcast-container').innerHTML = `<p class="text-sm text-gray-500">Podcast feature coming soon.</p>`;
+    }
+
+    function initStrategyPage(userData) {
+        const section = document.getElementById('strategy');
+        section.innerHTML = `
+            <h1 class="text-3xl font-bold mb-6">My Strategic Plan</h1>
+            <div id="ceo-career-map-container" class="bg-white p-6 rounded-xl border shadow-sm">
+                <h2 class="text-2xl font-bold mb-2">CEO Career Map: A Strategic Analysis</h2>
+                <p class="text-text-secondary mb-6">Analyze the career paths of top performers using Michael Porter's strategic frameworks.</p>
+                <div class="flex border-b mb-4"><button data-tab="presidents" class="tab-button flex-1 py-2 text-sm border-b-2 border-transparent active">US Presidents</button><button data-tab="tech" class="tab-button flex-1 py-2 text-sm border-b-2 border-transparent">Tech Leaders</button><button data-tab="biotech" class="tab-button flex-1 py-2 text-sm border-b-2 border-transparent">Biotech/Pharma</button></div>
+                <div id="ceo-map-content">
+                    <div id="presidents-content" class="career-map-content-panel space-y-3"><div class="accordion-item border rounded-lg"><button class="accordion-button w-full flex justify-between items-center p-4 text-left font-semibold">Career as a Value Chain<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg></button><div class="accordion-content p-4 pt-0 text-text-secondary"><p>Presidential careers often follow a 'value chain' of accumulating public trust via education, military service, holding lower offices, and extensive public campaigning.</p></div></div></div>
+                    <div id="tech-content" class="career-map-content-panel space-y-3 hidden"><div class="accordion-item border rounded-lg"><button class="accordion-button w-full flex justify-between items-center p-4 text-left font-semibold">Differentiation vs. Focus Strategy<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg></button><div class="accordion-content p-4 pt-0 text-text-secondary"><p><b>Differentiation (CEO Path):</b> Building broad skills across product, engineering, and business. <b>Focus (CTO Path):</b> Aiming for world-class depth in a specific technical domain like AI or distributed systems.</p></div></div></div>
+                    <div id="biotech-content" class="career-map-content-panel space-y-3 hidden"><div class="accordion-item border rounded-lg"><button class="accordion-button w-full flex justify-between items-center p-4 text-left font-semibold">The Dual Value Chain<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg></button><div class="accordion-content p-4 pt-0 text-text-secondary"><p>Leaders must bridge the scientific chain (research, trials) and the business chain (development, commercialization). The most successful pair an MD/PhD with an MBA or significant operational experience.</p></div></div></div>
+                </div>
+            </div>`;
+        const ceoMapContainer = section.querySelector('#ceo-career-map-container');
+        ceoMapContainer.addEventListener('click', e => {
+            const tabButton = e.target.closest('.tab-button');
+            if (tabButton) {
+                ceoMapContainer.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
+                tabButton.classList.add('active');
+                ceoMapContainer.querySelectorAll('.career-map-content-panel').forEach(panel => panel.classList.toggle('hidden', panel.id !== `${tabButton.dataset.tab}-content`));
+            }
+            const accordionButton = e.target.closest('.accordion-button');
+            if (accordionButton) {
+                accordionButton.classList.toggle('open');
+                const content = accordionButton.nextElementSibling;
+                content.style.maxHeight = content.style.maxHeight ? null : content.scrollHeight + "px";
+            }
+        });
+    }
+
+    function initCareerMap(userData) {
+        const section = document.getElementById('canvas');
+        let goals, flashcards, currentGoalIndex, currentCardIndex, ganttChartInstance;
+        const today = new Date().toISOString().split('T')[0];
+
+        function setupState() {
+            goals = mockDatabase.get('careerGoals');
+            flashcards = mockDatabase.get('flashcards');
+            currentGoalIndex = 0;
+            currentCardIndex = 0;
+        }
+
+        function render() {
+            section.innerHTML = `
+                <h1 class="text-3xl font-bold mb-6">Career Path & Goal Setting</h1>
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <div class="lg:col-span-2 space-y-6">
+                        <div class="bg-white p-6 rounded-xl border shadow-sm"><div class="flex justify-between items-center mb-4"><h2 class="text-xl font-bold">My Goals Presentation</h2><button id="add-goal-btn" class="px-4 py-2 bg-accent-primary text-white font-semibold text-sm rounded-lg hover:bg-accent-secondary">Add Goal</button></div><div class="flex flex-col md:flex-row gap-4"><div id="goal-slide-display" class="flex-1 bg-gray-50 border rounded-lg p-6 min-h-[250px]"></div><div id="goal-slide-sorter" class="flex md:flex-col gap-2 overflow-x-auto md:overflow-y-auto pb-2 md:pb-0 md:pr-2"></div></div></div>
+                        <div class="bg-white p-6 rounded-xl border shadow-sm"><h2 class="text-xl font-bold mb-4">Goals Timeline</h2><canvas id="careerGanttChart"></canvas></div>
+                    </div>
+                    <div class="lg:col-span-1 space-y-6">
+                        <div class="bg-white p-6 rounded-xl border shadow-sm"><h2 class="text-xl font-bold mb-4">Knowledge Cards</h2><div id="flashcard-ui-container"></div><div class="flex justify-between items-center mt-4"><button id="prev-card-btn" class="px-3 py-1 bg-gray-200 text-sm font-semibold rounded-md hover:bg-gray-300">Prev</button><div id="card-counter" class="text-sm text-gray-500"></div><button id="next-card-btn" class="px-3 py-1 bg-gray-200 text-sm font-semibold rounded-md hover:bg-gray-300">Next</button></div></div>
+                    </div>
+                </div>`;
+            renderGoalPresentation();
+            renderFlashcard();
+            renderGanttChart();
+        }
+
+        function renderGoalPresentation() {
+            const display = document.getElementById('goal-slide-display'), sorter = document.getElementById('goal-slide-sorter');
+            if (!display || !sorter || goals.length === 0) { if(display) display.innerHTML = `<div class="text-center p-8 text-gray-500">No goals yet.</div>`; return; }
+            const goal = goals[currentGoalIndex];
+            display.innerHTML = `<input data-id="${goal.id}" data-field="title" class="text-2xl font-bold bg-transparent w-full mb-2 p-1" value="${goal.title}"><textarea data-id="${goal.id}" data-field="description" class="text-base text-gray-700 bg-transparent w-full h-32 mb-4 p-1 resize-none">${goal.description}</textarea><div class="flex items-center gap-4"><label class="text-sm font-semibold">Due:</label><input type="date" data-id="${goal.id}" data-field="dueDate" class="p-1" value="${goal.dueDate}"><button data-id="${goal.id}" class="delete-goal-btn ml-auto text-red-500 text-sm font-semibold">Delete</button></div>`;
+            sorter.innerHTML = goals.map((g, i) => `<div data-index="${i}" class="slide-thumbnail w-full md:w-32 h-20 bg-gray-100 p-2 text-center ${i === currentGoalIndex ? 'active' : ''}"><p class="text-xs font-semibold truncate">${g.title}</p></div>`).join('');
+        }
+
+        function renderGanttChart() {
+            const ctx = document.getElementById('careerGanttChart')?.getContext('2d');
+            if (!ctx) return;
+            if (ganttChartInstance) ganttChartInstance.destroy();
+            ganttChartInstance = new Chart(ctx, { type: 'bar', data: { labels: goals.map(g => g.title), datasets: [{ data: goals.map(g => [new Date(g.startDate || today), new Date(g.dueDate)]), backgroundColor: '#DC2626' }] }, options: { indexAxis: 'y', scales: { x: { min: new Date(today), type: 'time', time: { unit: 'month' } } }, plugins: { legend: { display: false } } } });
+        }
+
+        function renderFlashcard() {
+             const container = document.getElementById('flashcard-ui-container'), counter = document.getElementById('card-counter');
+             if(!container || !counter) return;
+             if (flashcards.length === 0) { container.innerHTML = `<div class="h-[180px] flex items-center justify-center text-gray-500">No cards.</div>`; counter.textContent = '0 / 0'; return; }
+             const card = flashcards[currentCardIndex];
+             container.innerHTML = `<div class="flashcard-container"><div class="flashcard-inner"><div class="flashcard-front">${card.front}</div><div class="flashcard-back">${card.back}</div></div></div>`;
+             counter.textContent = `${currentCardIndex + 1} / ${flashcards.length}`;
+        }
+        
+        section.addEventListener('click', e => {
+            const handlers = {
+                'add-goal-btn': () => { goals.push({ id: Date.now(), title: 'New Goal', description: '', startDate: today, dueDate: today }); currentGoalIndex = goals.length - 1; },
+                'delete-goal-btn': () => { goals = goals.filter(g => g.id !== parseInt(e.target.dataset.id)); currentGoalIndex = Math.max(0, currentGoalIndex - 1); },
+                'prev-card-btn': () => { currentCardIndex = (currentCardIndex - 1 + flashcards.length) % flashcards.length; renderFlashcard(); },
+                'next-card-btn': () => { currentCardIndex = (currentCardIndex + 1) % flashcards.length; renderFlashcard(); },
+            };
+            if(handlers[e.target.id]) handlers[e.target.id]();
+            if(e.target.closest('.slide-thumbnail')) { currentGoalIndex = parseInt(e.target.closest('.slide-thumbnail').dataset.index); }
+            if(e.target.closest('.flashcard-container')) { e.target.closest('.flashcard-container').classList.toggle('is-flipped'); }
+            mockDatabase.set('careerGoals', goals); renderGoalPresentation(); renderGanttChart();
+        });
+        section.addEventListener('change', e => {
+            if(e.target.dataset.id && e.target.dataset.field) {
+                const goal = goals.find(g => g.id === parseInt(e.target.dataset.id));
+                if (goal) { goal[e.target.dataset.field] = e.target.value; mockDatabase.set('careerGoals', goals); renderGanttChart(); renderGoalPresentation(); }
+            }
+        });
+
+        setupState();
+        render();
+    }
+    
+    function initCollaborationPage(userData) {
+        const section = document.getElementById('collaboration');
+        let slides, feedPosts, chatMessages, currentSlideIndex, slideEditor;
+
+        function setupState() {
+            slides = mockDatabase.get('collabSlides');
+            feedPosts = mockDatabase.get('collabFeedPosts');
+            chatMessages = mockDatabase.get('collabChatMessages');
+            currentSlideIndex = 0;
+        }
+
+        function render() {
+            section.innerHTML = `
+                <h1 class="text-3xl font-bold mb-6">Strategic Workspace</h1>
+                <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+                    <div class="lg:col-span-1 bg-white p-4 rounded-xl border shadow-sm h-fit"><div class="flex justify-between items-center mb-4"><h3 class="font-bold">Slides</h3><button id="add-slide-btn" class="text-sm font-semibold text-accent-primary hover:text-accent-secondary">New</button></div><div id="collab-slide-sorter" class="space-y-2"></div></div>
+                    <div class="lg:col-span-2"><div class="bg-white p-6 rounded-xl border shadow-sm"><div class="flex border-b mb-4"><button data-view="presentation" class="tab-button flex-1 py-2 text-sm active">Presentation</button><button data-view="feed" class="tab-button flex-1 py-2 text-sm">Feed</button></div><div id="collab-presentation-view"></div><div id="collab-feed-view" class="hidden"></div></div></div>
+                    <div class="lg:col-span-1 bg-white p-4 rounded-xl border shadow-sm flex flex-col h-[70vh]"><h3 class="font-bold mb-4 border-b pb-2">Team Chat</h3><div id="collab-chat-messages" class="flex-1 space-y-4 overflow-y-auto pr-2"></div><div class="mt-4 pt-4 border-t"><textarea id="collab-chat-input" placeholder="Type..." rows="2" class="w-full p-2 border rounded-lg text-sm"></textarea><button id="collab-chat-send" class="mt-2 w-full px-4 py-2 bg-accent-primary text-white text-sm rounded-lg">Send</button></div></div>
+                </div>`;
+            renderAllSubmodules();
+        }
+        function renderAllSubmodules() { renderSlideSorter(); renderMainView(); renderChat(); }
+        function renderSlideSorter() { document.getElementById('collab-slide-sorter').innerHTML = slides.map((s, i) => `<div data-index="${i}" class="slide-thumbnail bg-gray-50 p-3 rounded-md ${i === currentSlideIndex ? 'active' : ''}"><p class="font-semibold text-sm truncate">${s.title}</p><p class="text-xs text-gray-500">By ${s.author}</p></div>`).join(''); }
+        function renderMainView() {
+            document.getElementById('collab-presentation-view').innerHTML = `<input class="text-2xl font-bold w-full p-1" id="slide-title-input" value="${slides[currentSlideIndex].title}"><div id="slide-editor" class="mt-4"></div>`;
+            slideEditor = new Quill('#slide-editor', { theme: 'snow' });
+            slideEditor.root.innerHTML = slides[currentSlideIndex].content;
+            document.getElementById('collab-feed-view').innerHTML = `<div class="flex gap-3"><img src="${userData.avatarUrl}" class="w-10 h-10 rounded-full"><div class="flex-1"><textarea id="collab-feed-input" class="w-full p-2 border rounded-lg text-sm" placeholder="Post an update..."></textarea><div class="text-right mt-2"><button id="collab-feed-post-btn" class="px-4 py-1.5 bg-red-600 text-white font-bold text-sm rounded-full">Post</button></div></div></div><div id="collab-feed-posts-container" class="mt-6 space-y-4 border-t pt-4">${feedPosts.map(p => `<div class="flex gap-3"><img src="${p.avatar}" class="w-10 h-10 rounded-full"><div class="flex-1"><p class="font-semibold text-sm">${p.author}</p><p class="text-gray-700 mt-1 text-sm">${p.text}</p></div></div>`).join('')}</div>`;
+        }
+        function renderChat() {
+            const chatContainer = document.getElementById('collab-chat-messages');
+            chatContainer.innerHTML = chatMessages.map(m => `<div class="flex gap-2 ${m.user === userData.fullName ? 'justify-end' : ''}"><div class="p-2 rounded-lg text-sm ${m.user === userData.fullName ? 'bg-red-100' : 'bg-gray-100'}">${m.text}</div></div>`).join('');
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+        }
+
+        section.addEventListener('click', e => {
+            const slideThumb = e.target.closest('.slide-thumbnail');
+            if(slideThumb) { currentSlideIndex = parseInt(slideThumb.dataset.index); renderAllSubmodules(); document.querySelector('.tab-button[data-view="presentation"]').click(); }
+            if(e.target.id === 'add-slide-btn') { slides.push({id: Date.now(), title: 'New Slide', content: '', author: userData.fullName}); currentSlideIndex = slides.length - 1; mockDatabase.set('collabSlides', slides); render(); }
+            const viewTab = e.target.closest('.tab-button');
+            if(viewTab) { section.querySelectorAll('.tab-button').forEach(b => b.classList.remove('active')); viewTab.classList.add('active'); const isFeed = viewTab.dataset.view === 'feed'; document.getElementById('collab-presentation-view').classList.toggle('hidden', isFeed); document.getElementById('collab-feed-view').classList.toggle('hidden', !isFeed); }
+            if(e.target.id === 'collab-feed-post-btn') { const input = document.getElementById('collab-feed-input'); if(input.value.trim()){ feedPosts.unshift({id: Date.now(), author: userData.fullName, avatar: userData.avatarUrl, text: input.value.trim()}); mockDatabase.set('collabFeedPosts', feedPosts); renderMainView(); } }
+            if(e.target.id === 'collab-chat-send') { const input = document.getElementById('collab-chat-input'); if(input.value.trim()){ chatMessages.push({user: userData.fullName, text: input.value.trim()}); mockDatabase.set('collabChatMessages', chatMessages); renderChat(); input.value = ''; } }
+        });
+        section.addEventListener('input', e => { if(e.target.id === 'slide-title-input') { slides[currentSlideIndex].title = e.target.value; mockDatabase.set('collabSlides', slides); renderSlideSorter(); } });
+        section.addEventListener('focusout', e => { if(slideEditor && slideEditor.hasFocus()){ slides[currentSlideIndex].content = slideEditor.root.innerHTML; mockDatabase.set('collabSlides', slides); } });
+
+        setupState();
+        render();
+    }
     
     function initEnvisionPage(userData) {
         const section = document.getElementById('envision');
@@ -261,89 +418,47 @@ document.addEventListener('DOMContentLoaded', () => {
             { name: 'Satya Nadella', title: 'CEO', company: 'Microsoft', industry: 'Business', profileUrl: '#' },
             { name: 'Tim Cook', title: 'CEO', company: 'Apple', industry: 'Business', profileUrl: '#' },
             { name: 'Jensen Huang', title: 'CEO', company: 'NVIDIA', industry: 'Business', profileUrl: '#' },
-            { name: 'Susan Wojcicki', title: 'CEO', company: 'YouTube', industry: 'Business', profileUrl: '#' },
-            { name: 'Mary Barra', title: 'CEO', company: 'General Motors', industry: 'Business', profileUrl: '#' },
             { name: 'Reshma Kewalramani', title: 'CEO & President', company: 'Vertex Pharmaceuticals', industry: 'Biotech', profileUrl: '#' },
             { name: 'Stéphane Bancel', title: 'CEO', company: 'Moderna', industry: 'Biotech', profileUrl: '#' },
-            { name: 'Albert Bourla', title: 'CEO', company: 'Pfizer', industry: 'Biotech', profileUrl: '#' },
             { name: 'Jennifer Doudna', title: 'Co-inventor of CRISPR', company: 'UC Berkeley', industry: 'Biotech', profileUrl: '#' },
-            { name: 'George Yancopoulos', title: 'President & CSO', company: 'Regeneron', industry: 'Biotech', profileUrl: '#' },
             { name: 'Sally Kornbluth', title: 'President', company: 'MIT', industry: 'University', profileUrl: '#' },
             { name: 'Carol Christ', title: 'Chancellor', company: 'UC Berkeley', industry: 'University', profileUrl: '#' },
-            { name: 'Lawrence Bacow', title: 'President', company: 'Harvard University', industry: 'University', profileUrl: '#' },
-            // Add 287 more entries to reach 300
-        ].concat(Array.from({length: 287}, (_, i) => ({ name: `Leader ${i+1}`, title: 'Executive', company: `Company ${i+1}`, industry: ['Business', 'Biotech', 'University'][i%3], profileUrl: '#' })));
+        ].concat(Array.from({length: 292}, (_, i) => ({ name: `Leader ${i+1}`, title: 'Executive', company: `Company ${i+1}`, industry: ['Business', 'Biotech', 'University'][i%3], profileUrl: '#' })));
 
         let currentSort = { key: 'name', order: 'asc' };
         let currentFilter = '';
 
         const renderCatalog = () => {
             let filteredLeaders = leaders.filter(leader => leader.name.toLowerCase().includes(currentFilter) || leader.company.toLowerCase().includes(currentFilter));
-            
             filteredLeaders.sort((a, b) => {
-                let valA = a[currentSort.key].toLowerCase();
-                let valB = b[currentSort.key].toLowerCase();
+                let valA = a[currentSort.key].toLowerCase(); let valB = b[currentSort.key].toLowerCase();
                 if (valA < valB) return currentSort.order === 'asc' ? -1 : 1;
                 if (valA > valB) return currentSort.order === 'asc' ? 1 : -1;
                 return 0;
             });
-
             const tableBody = section.querySelector('#catalog-body');
-            if (tableBody) {
-                tableBody.innerHTML = filteredLeaders.map(leader => `
-                    <tr class="border-b border-gray-200 hover:bg-gray-50">
-                        <td class="p-4"><a href="${leader.profileUrl}" class="font-semibold text-accent-primary hover:underline">${leader.name}</a></td>
-                        <td class="p-4 text-text-secondary">${leader.title}</td>
-                        <td class="p-4 text-text-secondary">${leader.company}</td>
-                        <td class="p-4"><span class="px-2 py-1 text-xs font-semibold rounded-full ${leader.industry === 'Business' ? 'bg-blue-100 text-blue-800' : leader.industry === 'Biotech' ? 'bg-green-100 text-green-800' : 'bg-purple-100 text-purple-800'}">${leader.industry}</span></td>
-                    </tr>
-                `).join('');
-            }
+            if (tableBody) tableBody.innerHTML = filteredLeaders.map(leader => `<tr class="border-b border-gray-200 hover:bg-gray-50"><td class="p-4"><a href="${leader.profileUrl}" class="font-semibold text-accent-primary hover:underline">${leader.name}</a></td><td class="p-4 text-text-secondary">${leader.title}</td><td class="p-4 text-text-secondary">${leader.company}</td><td class="p-4"><span class="px-2 py-1 text-xs font-semibold rounded-full ${leader.industry === 'Business' ? 'bg-blue-100 text-blue-800' : leader.industry === 'Biotech' ? 'bg-green-100 text-green-800' : 'bg-purple-100 text-purple-800'}">${leader.industry}</span></td></tr>`).join('');
         }
 
         section.innerHTML = `
             <h1 class="text-3xl font-bold mb-2">Can You Envision It?</h1>
             <p class="text-text-secondary mb-6">A catalog of influential leaders in business, biotech, and academia.</p>
             <div class="bg-white rounded-xl border shadow-sm">
-                <div class="p-4 border-b">
-                    <input type="search" id="catalog-search" placeholder="Filter by name or company..." class="w-full max-w-sm px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-red-500">
-                </div>
-                <div class="overflow-x-auto">
-                    <table class="w-full text-sm text-left">
-                        <thead class="bg-gray-50 text-xs text-gray-700 uppercase">
-                            <tr>
-                                <th class="p-4 catalog-header-cell" data-sort="name">Name <span class="sort-indicator">↕️</span></th>
-                                <th class="p-4 catalog-header-cell" data-sort="title">Title <span class="sort-indicator">↕️</span></th>
-                                <th class="p-4 catalog-header-cell" data-sort="company">Company / Institution <span class="sort-indicator">↕️</span></th>
-                                <th class="p-4 catalog-header-cell" data-sort="industry">Industry <span class="sort-indicator">↕️</span></th>
-                            </tr>
-                        </thead>
-                        <tbody id="catalog-body"></tbody>
-                    </table>
-                </div>
-            </div>
-        `;
+                <div class="p-4 border-b"><input type="search" id="catalog-search" placeholder="Filter by name or company..." class="w-full max-w-sm px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-red-500"></div>
+                <div class="overflow-x-auto"><table class="w-full text-sm text-left"><thead class="bg-gray-50 text-xs text-gray-700 uppercase"><tr><th class="p-4 catalog-header-cell" data-sort="name">Name <span class="sort-indicator">↕️</span></th><th class="p-4 catalog-header-cell" data-sort="title">Title <span class="sort-indicator">↕️</span></th><th class="p-4 catalog-header-cell" data-sort="company">Company / Institution <span class="sort-indicator">↕️</span></th><th class="p-4 catalog-header-cell" data-sort="industry">Industry <span class="sort-indicator">↕️</span></th></tr></thead><tbody id="catalog-body"></tbody></table></div>
+            </div>`;
         
-        section.querySelector('#catalog-search').addEventListener('input', e => {
-            currentFilter = e.target.value.toLowerCase();
-            renderCatalog();
-        });
-
+        section.querySelector('#catalog-search').addEventListener('input', e => { currentFilter = e.target.value.toLowerCase(); renderCatalog(); });
         section.querySelectorAll('.catalog-header-cell').forEach(cell => {
             cell.addEventListener('click', () => {
                 const sortKey = cell.dataset.sort;
-                if (currentSort.key === sortKey) {
-                    currentSort.order = currentSort.order === 'asc' ? 'desc' : 'asc';
-                } else {
-                    currentSort.key = sortKey;
-                    currentSort.order = 'asc';
-                }
+                if (currentSort.key === sortKey) { currentSort.order = currentSort.order === 'asc' ? 'desc' : 'asc'; } 
+                else { currentSort.key = sortKey; currentSort.order = 'asc'; }
                 section.querySelectorAll('.catalog-header-cell').forEach(c => c.classList.remove('active'));
                 cell.classList.add('active');
                 renderCatalog();
             });
         });
-
         renderCatalog();
     }
 
@@ -424,17 +539,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
         render();
     }
-    
-    // Dummy functions for brevity. In a real app, these would be fully implemented.
-    ['initDashboard', 'initStrategyPage', 'initCareerMap', 'initCollaborationPage'].forEach(funcName => {
-        if (!window[funcName]) {
-            window[funcName] = (userData) => {
-                const sectionId = funcName.replace('init', '').replace('Page', '').toLowerCase();
-                const section = document.getElementById(sectionId === 'careermap' ? 'canvas' : sectionId);
-                if (section) section.innerHTML = `<h1 class="text-3xl font-bold">${sectionId.charAt(0).toUpperCase() + sectionId.slice(1)}</h1><p>This section is under construction.</p>`;
-            };
-        }
-    });
 });
 </script>
 </body>
