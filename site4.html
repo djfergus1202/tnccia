@@ -417,15 +417,33 @@ document.addEventListener('DOMContentLoaded', () => {
     function initEnvisionPage(userData) {
         const section = document.getElementById('envision');
         const leaders = [
-            { name: 'Satya Nadella', title: 'CEO', company: 'Microsoft', industry: 'Business', profileUrl: '#' },
-            { name: 'Tim Cook', title: 'CEO', company: 'Apple', industry: 'Business', profileUrl: '#' },
-            { name: 'Jensen Huang', title: 'CEO', company: 'NVIDIA', industry: 'Business', profileUrl: '#' },
-            { name: 'Reshma Kewalramani', title: 'CEO & President', company: 'Vertex Pharmaceuticals', industry: 'Biotech', profileUrl: '#' },
-            { name: 'Stéphane Bancel', title: 'CEO', company: 'Moderna', industry: 'Biotech', profileUrl: '#' },
-            { name: 'Jennifer Doudna', title: 'Co-inventor of CRISPR', company: 'UC Berkeley', industry: 'Biotech', profileUrl: '#' },
-            { name: 'Sally Kornbluth', title: 'President', company: 'MIT', industry: 'University', profileUrl: '#' },
-            { name: 'Carol Christ', title: 'Chancellor', company: 'UC Berkeley', industry: 'University', profileUrl: '#' },
-        ].concat(Array.from({length: 292}, (_, i) => ({ name: `Leader ${i+1}`, title: 'Executive', company: `Company ${i+1}`, industry: ['Business', 'Biotech', 'University'][i%3], profileUrl: '#' })));
+            // Business Leaders
+            { name: 'Satya Nadella', title: 'CEO', company: 'Microsoft', industry: 'Business', profileUrl: 'https://en.wikipedia.org/wiki/Satya_Nadella' },
+            { name: 'Tim Cook', title: 'CEO', company: 'Apple', industry: 'Business', profileUrl: 'https://en.wikipedia.org/wiki/Tim_Cook' },
+            { name: 'Jensen Huang', title: 'CEO', company: 'NVIDIA', industry: 'Business', profileUrl: 'https://en.wikipedia.org/wiki/Jensen_Huang' },
+            { name: 'Sundar Pichai', title: 'CEO', company: 'Alphabet', industry: 'Business', profileUrl: 'https://en.wikipedia.org/wiki/Sundar_Pichai' },
+            { name: 'Mary Barra', title: 'CEO', company: 'General Motors', industry: 'Business', profileUrl: 'https://en.wikipedia.org/wiki/Mary_Barra' },
+            { name: 'Lisa Su', title: 'CEO', company: 'AMD', industry: 'Business', profileUrl: 'https://en.wikipedia.org/wiki/Lisa_Su' },
+            // Biotech Leaders
+            { name: 'Reshma Kewalramani', title: 'CEO & President', company: 'Vertex Pharmaceuticals', industry: 'Biotech', profileUrl: 'https://en.wikipedia.org/wiki/Reshma_Kewalramani' },
+            { name: 'Stéphane Bancel', title: 'CEO', company: 'Moderna', industry: 'Biotech', profileUrl: 'https://en.wikipedia.org/wiki/St%C3%A9phane_Bancel' },
+            { name: 'Albert Bourla', title: 'CEO', company: 'Pfizer', industry: 'Biotech', profileUrl: 'https://en.wikipedia.org/wiki/Albert_Bourla' },
+            { name: 'Robert Davis', title: 'CEO', company: 'Merck & Co.', industry: 'Biotech', profileUrl: 'https://en.wikipedia.org/wiki/Robert_M._Davis' },
+            { name: 'Tim Van Hauwermeiren', title: 'CEO', company: 'argenx', industry: 'Biotech', profileUrl: 'https://www.bloomberg.com/profile/person/16972434' },
+            // University Presidents
+            { name: 'Sally Kornbluth', title: 'President', company: 'MIT', industry: 'University', profileUrl: 'https://en.wikipedia.org/wiki/Sally_Kornbluth' },
+            { name: 'Alan M. Garber', title: 'Interim President', company: 'Harvard University', industry: 'University', profileUrl: 'https://en.wikipedia.org/wiki/Alan_Garber' },
+            { name: 'Minouche Shafik', title: 'President', company: 'Columbia University', industry: 'University', profileUrl: 'https://en.wikipedia.org/wiki/Minouche_Shafik' },
+            { name: 'Peter Salovey', title: 'President', company: 'Yale University', industry: 'University', profileUrl: 'https://en.wikipedia.org/wiki/Peter_Salovey' },
+            // Nobel Laureates
+            { name: 'Katalin Karikó', title: 'Nobel Laureate in Medicine', company: 'Penn Medicine', industry: 'Nobel Laureate', profileUrl: 'https://en.wikipedia.org/wiki/Katalin_Karik%C3%B3' },
+            { name: 'Drew Weissman', title: 'Nobel Laureate in Medicine', company: 'Penn Medicine', industry: 'Nobel Laureate', profileUrl: 'https://en.wikipedia.org/wiki/Drew_Weissman' },
+            { name: 'Jennifer Doudna', title: 'Nobel Laureate in Chemistry', company: 'UC Berkeley', industry: 'Nobel Laureate', profileUrl: 'https://en.wikipedia.org/wiki/Jennifer_Doudna' },
+            { name: 'Emmanuelle Charpentier', title: 'Nobel Laureate in Chemistry', company: 'Max Planck Unit', industry: 'Nobel Laureate', profileUrl: 'https://en.wikipedia.org/wiki/Emmanuelle_Charpentier' },
+            { name: 'Claudia Goldin', title: 'Nobel Laureate in Economics', company: 'Harvard University', industry: 'Nobel Laureate', profileUrl: 'https://en.wikipedia.org/wiki/Claudia_Goldin' },
+            { name: 'David Baker', title: 'Nobel Laureate in Chemistry', company: 'University of Washington', industry: 'Nobel Laureate', profileUrl: 'https://en.wikipedia.org/wiki/David_Baker_(biochemist)' },
+            { name: 'Demis Hassabis', title: 'Nobel Laureate in Chemistry', company: 'Google DeepMind', industry: 'Nobel Laureate', profileUrl: 'https://en.wikipedia.org/wiki/Demis_Hassabis' },
+        ];
 
         let currentSort = { key: 'name', order: 'asc' };
         let currentFilter = '';
@@ -439,7 +457,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 return 0;
             });
             const tableBody = section.querySelector('#catalog-body');
-            if (tableBody) tableBody.innerHTML = filteredLeaders.map(leader => `<tr class="border-b border-gray-200 hover:bg-gray-50"><td class="p-4"><a href="${leader.profileUrl}" class="font-semibold text-accent-primary hover:underline">${leader.name}</a></td><td class="p-4 text-text-secondary">${leader.title}</td><td class="p-4 text-text-secondary">${leader.company}</td><td class="p-4"><span class="px-2 py-1 text-xs font-semibold rounded-full ${leader.industry === 'Business' ? 'bg-blue-100 text-blue-800' : leader.industry === 'Biotech' ? 'bg-green-100 text-green-800' : 'bg-purple-100 text-purple-800'}">${leader.industry}</span></td></tr>`).join('');
+            if (tableBody) tableBody.innerHTML = filteredLeaders.map(leader => `<tr class="border-b border-gray-200 hover:bg-gray-50"><td class="p-4"><a href="${leader.profileUrl}" target="_blank" class="font-semibold text-accent-primary hover:underline">${leader.name}</a></td><td class="p-4 text-text-secondary">${leader.title}</td><td class="p-4 text-text-secondary">${leader.company}</td><td class="p-4"><span class="px-2 py-1 text-xs font-semibold rounded-full ${leader.industry === 'Business' ? 'bg-blue-100 text-blue-800' : leader.industry === 'Biotech' ? 'bg-green-100 text-green-800' : leader.industry === 'University' ? 'bg-indigo-100 text-indigo-800' : 'bg-yellow-100 text-yellow-800'}">${leader.industry}</span></td></tr>`).join('');
         }
 
         section.innerHTML = `
@@ -447,7 +465,7 @@ document.addEventListener('DOMContentLoaded', () => {
             <p class="text-text-secondary mb-6">A catalog of influential leaders in business, biotech, and academia.</p>
             <div class="bg-white rounded-xl border shadow-sm">
                 <div class="p-4 border-b"><input type="search" id="catalog-search" placeholder="Filter by name or company..." class="w-full max-w-sm px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-red-500"></div>
-                <div class="overflow-x-auto"><table class="w-full text-sm text-left"><thead class="bg-gray-50 text-xs text-gray-700 uppercase"><tr><th class="p-4 catalog-header-cell" data-sort="name">Name <span class="sort-indicator">↕️</span></th><th class="p-4 catalog-header-cell" data-sort="title">Title <span class="sort-indicator">↕️</span></th><th class="p-4 catalog-header-cell" data-sort="company">Company / Institution <span class="sort-indicator">↕️</span></th><th class="p-4 catalog-header-cell" data-sort="industry">Industry <span class="sort-indicator">↕️</span></th></tr></thead><tbody id="catalog-body"></tbody></table></div>
+                <div class="overflow-x-auto"><table class="w-full text-sm text-left"><thead class="bg-gray-50 text-xs text-gray-700 uppercase"><tr><th class="p-4 catalog-header-cell active" data-sort="name">Name <span class="sort-indicator">↕️</span></th><th class="p-4 catalog-header-cell" data-sort="title">Title <span class="sort-indicator">↕️</span></th><th class="p-4 catalog-header-cell" data-sort="company">Company / Institution <span class="sort-indicator">↕️</span></th><th class="p-4 catalog-header-cell" data-sort="industry">Industry <span class="sort-indicator">↕️</span></th></tr></thead><tbody id="catalog-body"></tbody></table></div>
             </div>`;
         
         section.querySelector('#catalog-search').addEventListener('input', e => { currentFilter = e.target.value.toLowerCase(); renderCatalog(); });
