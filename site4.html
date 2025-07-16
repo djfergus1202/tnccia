@@ -6,6 +6,7 @@
     <title>Aether: Interactive Career & Study Hub</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns"></script>
     <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
     <script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
     <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
@@ -24,7 +25,7 @@
         body { font-family: 'Inter', sans-serif; background-color: var(--bg-main); color: var(--text-primary); }
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
         
-        /* New Layout Styles */
+        /* Layout Styles */
         #main-app-container { display: flex; }
         #sidebar {
             width: 68px;
@@ -43,35 +44,32 @@
         .content-section { display: none; }
         .content-section.active { display: block; }
 
-        /* Canvas & Gantt Chart Styles */
-        .interactive-canvas { 
-            background-color: #F9FAFB; 
-            background-image: 
-                linear-gradient(var(--border-color) 1px, transparent 1px), 
-                linear-gradient(to right, var(--border-color) 1px, #F9FAFB 1px); 
-            background-size: 25px 25px;
-            cursor: grab;
-            border-radius: 0.5rem;
-            border: 1px solid var(--border-color);
-        }
-        .interactive-canvas.linking-mode { cursor: crosshair; }
-        .interactive-canvas:active { cursor: grabbing; }
-        
-        /* General Component Styles */
-        #notes-editor, #career-notes-editor { height: 200px; background-color: white; }
+        /* Component Styles */
+        .ql-editor { min-height: 150px; }
         .flashcard-container { perspective: 1000px; cursor: pointer; height: 180px;}
         .flashcard-inner { position: relative; width: 100%; height: 100%; transition: transform 0.6s; transform-style: preserve-3d; }
         .flashcard-container.is-flipped .flashcard-inner { transform: rotateY(180deg); }
         .flashcard-front, .flashcard-back { position: absolute; width: 100%; height: 100%; -webkit-backface-visibility: hidden; backface-visibility: hidden; display: flex; align-items: center; justify-content: center; text-align: center; padding: 1rem; border-radius: 0.5rem; border: 1px solid var(--border-color); background-color: #F9FAFB; }
         .flashcard-back { transform: rotateY(180deg); background-color: #FEF2F2; }
         .accordion-content { max-height: 0; overflow: hidden; transition: max-height 0.3s ease-out; }
-        .drag-drop-zone { border: 2px dashed var(--border-color); border-radius: 0.5rem; padding: 1rem; text-align: center; cursor: pointer; transition: background-color 0.2s; }
-        .drag-drop-zone.drag-over { background: #fee2e2; border-color: var(--accent-primary); }
         .required { color: var(--accent-primary); }
-        .disclaimer { font-size: 0.8em; color: #555; margin-top: 8px; }
-        .timeline-container { max-height: 400px; overflow-y: auto; }
-        .timeline-avatar { width: 40px; height: 40px; border-radius: 50%; margin-right: 12px; object-fit: cover; }
         .toggle-button.active { background-color: var(--accent-primary); color: white; }
+        .tab-button.active {
+            border-bottom-color: var(--accent-primary);
+            color: var(--accent-primary);
+            font-weight: 600;
+        }
+        .accordion-button svg { transition: transform 0.3s; }
+        .accordion-button.open svg { transform: rotate(180deg); }
+        .slide-thumbnail {
+            cursor: pointer;
+            transition: all 0.2s;
+            border: 2px solid transparent;
+        }
+        .slide-thumbnail.active {
+            border-color: var(--accent-primary);
+            transform: scale(1.05);
+        }
         
         /* Toast Notification */
         #toast-notification {
@@ -82,41 +80,7 @@
             transition: bottom 0.5s ease-in-out;
             z-index: 100;
         }
-        #toast-notification.show {
-            bottom: 20px;
-        }
-        .podcast-tab.active, .community-main-tab.active, .career-map-tab.active, .logbook-tab.active {
-            border-bottom-color: var(--accent-primary);
-            color: var(--accent-primary);
-            font-weight: 600;
-        }
-        .emoji-btn { transition: transform 0.1s ease-in-out; }
-        .emoji-btn:hover { transform: scale(1.2); }
-        
-        /* Quill Editor specific styles for collaboration tab */
-        #collab-editor {
-            height: 600px;
-            background-color: white;
-            transition: transform 0.3s ease;
-            transform-origin: top left;
-        }
-        .ql-toolbar {
-             background: #f9fafb;
-             border-top-left-radius: 0.5rem;
-             border-top-right-radius: 0.5rem;
-             border-bottom: 1px solid var(--border-color) !important;
-        }
-        .accordion-button svg { transition: transform 0.3s; }
-        .accordion-button.open svg { transform: rotate(180deg); }
-        .goal-slide-thumbnail {
-            cursor: pointer;
-            transition: all 0.2s;
-            border: 2px solid transparent;
-        }
-        .goal-slide-thumbnail.active {
-            border-color: var(--accent-primary);
-            transform: scale(1.05);
-        }
+        #toast-notification.show { bottom: 20px; }
     </style>
 </head>
 <body class="antialiased">
@@ -140,24 +104,13 @@
                          <input type="password" id="password" name="password" required class="mt-1 w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-red-500">
                      </div>
                      <div>
-                         <label for="headline" class="block text-sm font-medium text-gray-700">Headline</label>
-                         <input type="text" id="headline" name="headline" placeholder="e.g. Aspiring AI Researcher" class="mt-1 w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-red-500">
-                     </div>
-                     <div>
-                         <label for="bioReg" class="block text-sm font-medium text-gray-700">Bio</label>
-                         <textarea id="bioReg" name="bioReg" rows="3" placeholder="Tell us about your goals and interests..." class="mt-1 w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-red-500"></textarea>
-                     </div>
-                     <div>
                          <label for="avatarReg" class="block text-sm font-medium text-gray-700">Avatar URL</label>
                          <input type="url" id="avatarReg" name="avatarReg" placeholder="Link to your photo" class="mt-1 w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-red-500">
                      </div>
                  </div>
                 <button type="submit" class="mt-6 w-full px-6 py-3 bg-red-600 text-white font-bold rounded-lg hover:bg-red-700 transition-colors">Create Profile & Enter</button>
-                <p class="disclaimer mt-4">By registering, you acknowledge that your data may be used for research purposes to improve career and economic outcomes for students, and will be de-identified before any analysis or publication.</p>
                 <div class="text-center mt-4 text-sm text-gray-600">
                     <a href="#" id="show-signin" class="font-medium text-red-600 hover:text-red-500">Already have an account? Sign In</a>
-                    <span class="mx-2">|</span>
-                    <a href="#" id="show-admin-signin" class="font-medium text-gray-600 hover:text-gray-800">Admin Sign-In</a>
                 </div>
             </form>
         </div>
@@ -183,10 +136,6 @@
                     <svg class="w-6 h-6 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
                     <span class="nav-text ml-4 font-semibold">Strategic Collaboration</span>
                 </button>
-                <button data-target="admin" id="admin-nav-btn" class="sidebar-item flex items-center py-3 px-5 rounded-md text-left w-full hover:bg-gray-700 hidden">
-                    <svg class="w-6 h-6 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
-                    <span class="nav-text ml-4 font-semibold">Admin</span>
-                </button>
             </nav>
             <div class="mt-auto w-full">
                  <button data-target="profile" id="profile-nav-btn" class="sidebar-item flex items-center py-3 px-5 text-left w-full hover:bg-gray-700">
@@ -200,89 +149,12 @@
             </div>
         </aside>
 
-        <div class="flex-1">
+        <div class="flex-1 overflow-x-hidden">
             <main class="p-6 sm:p-8">
-                <section id="dashboard" class="content-section active">
-                    <h1 class="text-3xl font-bold mb-6">Dashboard</h1>
-                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                        <div class="lg:col-span-2 space-y-6">
-                            <div class="bg-white p-6 rounded-xl border shadow-sm">
-                                <h2 class="text-xl font-bold mb-4">Universal Search</h2>
-                                <div class="flex items-center gap-2">
-                                    <input type="search" id="universal-search-bar" placeholder="Search across platforms..." class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-red-500 bg-gray-50"/>
-                                </div>
-                                <div id="search-providers" class="flex flex-wrap items-center gap-2 mt-3">
-                                    <button data-provider="google" class="flex-1 flex items-center justify-center gap-2 px-3 py-2 text-sm font-semibold bg-gray-100 hover:bg-gray-200 rounded-md">
-                                        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M21.35,11.1H12.18V13.83H18.69C18.36,17.64 15.19,19.27 12.19,19.27C8.36,19.27 5,16.25 5,12C5,7.75 8.36,4.73 12.19,4.73C15.28,4.73 17.27,6.82 17.27,6.82L19.05,5.27C19.05,5.27 16.76,3 12.19,3C6.42,3 2.03,7.27 2.03,12C2.03,16.73 6.42,21 12.19,21C18.08,21 21.54,16.65 21.54,12.24C21.54,11.64 21.48,11.37 21.35,11.1Z" /></svg>
-                                        Internet
-                                    </button>
-                                    <button data-provider="wos" class="flex-1 flex items-center justify-center gap-2 px-3 py-2 text-sm font-semibold bg-gray-100 hover:bg-gray-200 rounded-md">
-                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v11.494m-9-5.747h18"></path></svg>
-                                        Web of Science
-                                    </button>
-                                    <button data-provider="wikipedia" class="flex-1 flex items-center justify-center gap-2 px-3 py-2 text-sm font-semibold bg-gray-100 hover:bg-gray-200 rounded-md">
-                                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M12.1,2.9C6.5,2.9,2,7.4,2,13c0,5.6,4.5,10.1,10.1,10.1c5.6,0,10.1-4.5,10.1-10.1C22.2,7.4,17.7,2.9,12.1,2.9z M11,5.9h2v1.5h-2V5.9z M11,8.9h2v8.5h-2V8.9z M5.1,13c0-1,0.2-2,0.5-2.9l1.5,0.9c-0.2,0.6-0.3,1.3-0.3,2c0,0.7,0.1,1.4,0.3,2l-1.5,0.9C5.3,15,5.1,14,5.1,13z M18.1,13c0,1-0.2,2-0.5,2.9l-1.5-0.9c0.2-0.6,0.3-1.3,0.3-2c0-0.7-0.1-1.4-0.3-2l1.5-0.9C17.9,11,18.1,12,18.1,13z"/></svg>
-                                        Wikipedia
-                                    </button>
-                                    <button data-provider="pubmed" class="flex-1 flex items-center justify-center gap-2 px-3 py-2 text-sm font-semibold bg-gray-100 hover:bg-gray-200 rounded-md">
-                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2h1a2 2 0 002-2v-1a2 2 0 012-2h1.945M7.8 19.8l.2-2.8m5.2 2.8l-.2-2.8m-2.2 0l-.2-2.8m-2.2 0l.2-2.8m2.2 0l.2-2.8m2.2 0l-.2-2.8M15 3.2l-3 4-3-4M9 11h6"></path></svg>
-                                        PubMed
-                                    </button>
-                                </div>
-                            </div>
-                            <div class="bg-white p-6 rounded-xl border shadow-sm">
-                                <h2 class="text-xl font-bold mb-4">Aether Feed</h2>
-                                <div class="flex items-start gap-3">
-                                    <img id="feed-avatar" src="" class="w-10 h-10 rounded-full">
-                                    <div class="flex-1">
-                                        <textarea id="feed-post-input" class="w-full p-2 border rounded-lg" rows="3" placeholder="What's on your mind?"></textarea>
-                                        <div class="flex justify-between items-center mt-2">
-                                            <label class="flex items-center text-sm text-gray-600">
-                                                <input type="checkbox" id="feed-notify-email" class="h-4 w-4 text-red-600 border-gray-300 rounded focus:ring-red-500 mr-2">
-                                                Notify via Email
-                                            </label>
-                                            <button id="feed-post-btn" class="px-4 py-2 bg-accent-primary text-white font-bold rounded-lg hover:bg-accent-secondary">Post</button>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div id="aether-feed-posts" class="mt-6 space-y-4"></div>
-                            </div>
-                        </div>
-                        <div class="lg:col-span-1 space-y-6">
-                             <div class="bg-white p-6 rounded-xl border shadow-sm">
-                                <h2 class="text-xl font-bold mb-4">⏳ Connections Timeline</h2>
-                                <div class="timeline-container">
-                                    <ul id="timelineList" class="space-y-3"></ul>
-                                </div>
-                            </div>
-                            <div class="bg-white p-6 rounded-xl border shadow-sm">
-                                <h2 class="text-xl font-bold mb-4">🎙️ Podcast Hub</h2>
-                                <div class="flex border-b mb-3">
-                                    <button class="podcast-tab flex-1 py-2 text-sm font-semibold border-b-2 border-transparent active" data-tab="rss">From RSS</button>
-                                    <button class="podcast-tab flex-1 py-2 text-sm font-semibold border-b-2 border-transparent" data-tab="uploads">My Uploads</button>
-                                </div>
-                                <div id="podcast-rss-content">
-                                    <div class="flex gap-2 mb-4">
-                                        <input id="feedUrl" type="url" placeholder="Podcast RSS feed..." class="w-full p-2 border border-border-color rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500">
-                                        <button id="fetchFeed" class="px-3 py-2 bg-accent-primary text-white font-bold rounded-lg hover:bg-accent-secondary flex-shrink-0">Load</button>
-                                    </div>
-                                    <ul id="episodeFeed" class="space-y-4 max-h-64 overflow-y-auto"></ul>
-                                </div>
-                                <div id="podcast-uploads-content" class="hidden">
-                                    <label for="podcast-upload-input" class="w-full cursor-pointer text-center block bg-gray-100 hover:bg-gray-200 text-sm font-semibold py-2 px-4 rounded-lg">Upload Audio File</label>
-                                    <input type="file" id="podcast-upload-input" class="hidden" accept="audio/*">
-                                    <ul id="uploaded-episodes" class="space-y-4 max-h-64 overflow-y-auto mt-4"></ul>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </section>
-                
+                <section id="dashboard" class="content-section active"></section>
                 <section id="strategy" class="content-section"></section>
                 <section id="canvas" class="content-section"></section>
-                <section id="learning" class="content-section"></section>
                 <section id="collaboration" class="content-section"></section>
-                <section id="admin" class="content-section"></section>
                 <section id="profile" class="content-section"></section>
             </main>
         </div>
@@ -290,12 +162,6 @@
 
     <div id="toast-notification" class="bg-gray-900 text-white text-sm font-semibold py-2 px-4 rounded-full shadow-lg">
         <p id="toast-message"></p>
-    </div>
-    <div id="profile-search-modal" class="fixed inset-0 bg-gray-900 bg-opacity-50 flex items-center justify-center p-4 z-50" style="display: none;">
-         <div class="bg-white rounded-lg shadow-xl w-full max-w-3xl max-h-[80vh] flex flex-col">
-            <div class="p-4 border-b flex justify-between items-center"><h3 class="text-lg font-bold">AI-Generated Dream Job Profiles</h3><button id="close-search-modal" class="text-gray-500 hover:text-gray-800 text-2xl">&times;</button></div>
-            <div id="profile-results-content" class="p-6 overflow-y-auto"></div>
-        </div>
     </div>
     <div id="signin-modal" class="fixed inset-0 bg-gray-900 bg-opacity-50 flex items-center justify-center p-4 z-50" style="display: none;">
         <div class="bg-white rounded-lg shadow-xl w-full max-w-md p-8">
@@ -308,61 +174,38 @@
             </form>
         </div>
     </div>
-    <div id="admin-signin-modal" class="fixed inset-0 bg-gray-900 bg-opacity-50 flex items-center justify-center p-4 z-50" style="display: none;">
-        <div class="bg-white rounded-lg shadow-xl w-full max-w-md p-8">
-            <h2 class="text-2xl font-bold text-center mb-6">Admin Access</h2>
-            <form id="admin-signin-form">
-                <div class="space-y-4">
-                    <input type="password" id="admin-pin" placeholder="Enter Admin PIN" required class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-red-500">
-                    <button type="submit" class="w-full px-6 py-3 bg-gray-800 text-white font-bold rounded-lg hover:bg-gray-900">Authenticate</button>
-                </div>
-            </form>
-        </div>
-    </div>
-    <div id="add-community-modal" class="fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center p-4 z-50 hidden">
-        <div class="bg-white rounded-lg shadow-xl w-full max-w-2xl max-h-[80vh] flex flex-col">
-            <div class="p-4 border-b flex justify-between items-center">
-                <h3 class="text-lg font-bold">Create a New Discussion Channel</h3>
-                <button id="close-community-modal" class="text-gray-500 hover:text-gray-800 text-2xl">&times;</button>
-            </div>
-            <div id="new-community-list" class="p-6 overflow-y-auto">
-                </div>
-        </div>
-    </div>
 
 <script>
 document.addEventListener('DOMContentLoaded', () => {
 
-    const ADMIN_PIN = '373202';
-
     // --- MOCK DATABASE ---
     const mockDatabase = {
         _data: {
-            feedPosts: [],
-            projects: [],
+            currentUser: null,
             careerGoals: [
                 { id: 1, title: 'Master Advanced Python', description: 'Complete the "Fluent Python" book and build a complex project using metaclasses or async features.', startDate: '2025-07-20', dueDate: '2025-10-31' },
-                { id: 2, title: 'Publish a Research Paper', description: 'Submit a paper on my current research to the IEEE conference. Focus on the data visualization aspect.', startDate: '2025-11-01', dueDate: '2026-01-15' },
-                { id: 3, title: 'Network with 5 Industry Leaders', description: 'Identify and connect with 5 senior data scientists or engineering managers at top tech companies.', startDate: '2025-09-01', dueDate: '2025-12-31' }
+                { id: 2, title: 'Publish a Research Paper', description: 'Submit a paper on my current research to the IEEE conference. Focus on the data visualization aspect.', startDate: '2025-11-01', dueDate: '2026-01-15' }
             ],
             flashcards: [
                 { id: 1, front: 'What is the primary purpose of Python\'s `__init__` method?', back: 'To initialize the state of a newly created object. It runs as soon as an object of a class is instantiated.' },
-                { id: 2, front: 'What does the `*args` syntax in a Python function definition do?', back: 'It allows a function to accept any number of positional arguments, which are then available as a tuple named `args`.' },
-                { id: 3, front: 'What is a decorator in Python?', back: 'A function that takes another function as input, adds some functionality to it, and returns the modified function, without changing the original function\'s code.' }
+                { id: 2, front: 'What is a decorator in Python?', back: 'A function that takes another function as input, adds some functionality to it, and returns the modified function.' }
             ],
-            canvasConnections: [ { from: 'n1', to: 'n2' }, { from: 'n1', to: 'n3' } ],
             ganttTasks: [
                 { id: 1, name: 'Initial Research', start: '2025-07-15', end: '2025-07-25', color: '#3B82F6' },
                 { id: 2, name: 'Develop Prototype', start: '2025-07-26', end: '2025-08-15', color: '#10B981' }
             ],
-            collabPosts: [],
-            chatMessages: [
-                 { user: 'Becca Chan', avatarUrl: 'https://i.pravatar.cc/150?u=becca', text: 'Hey team, I started the outline for our project proposal in the canvas. Let me know what you think!', timestamp: new Date().toISOString() },
-                 { user: 'Alex Ray', avatarUrl: 'https://i.pravatar.cc/150?u=alex', text: 'Looks like a great start! I added a section for the literature review.', timestamp: new Date().toISOString() }
+            collabSlides: [
+                {id: 1, title: 'Q3 Project Proposal', content: '<h1>Project Phoenix: Overview</h1><p>This document outlines the goals and scope for Project Phoenix...</p>', author: 'Alex Ray'},
+                {id: 2, title: 'Competitive Analysis', content: '<h2>Key Competitors</h2><ol><li>Company A</li><li>Company B</li></ol>', author: 'Becca Chan'}
+            ],
+            collabFeedPosts: [
+                { id: 2, author: 'Becca Chan', avatar: 'https://i.pravatar.cc/150?u=becca', text: 'I\'ve added the competitive analysis slide. Please review when you have a moment.', timestamp: new Date(Date.now() - 3600000).toISOString()},
+                { id: 1, author: 'Alex Ray', avatar: 'https://i.pravatar.cc/150?u=alex', text: 'Initial project proposal slide is up! Let\'s get this rolling.', timestamp: new Date(Date.now() - 7200000).toISOString()},
+            ],
+            collabChatMessages: [
+                 { user: 'Alex Ray', avatarUrl: 'https://i.pravatar.cc/150?u=alex', text: 'I\'m working on the proposal now.', timestamp: new Date().toISOString() }
             ],
             allRegistrations: [],
-            connections: [],
-            uploadedEpisodes: []
         },
         init() {
             for (const key in this._data) {
@@ -370,15 +213,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (storedData) {
                     try {
                         this._data[key] = JSON.parse(storedData);
-                    } catch (e) {
-                        console.error(`Error parsing localStorage for key ${key}:`, e);
-                    }
+                    } catch (e) { console.error(`Error parsing localStorage for key ${key}:`, e); }
                 }
             }
         },
-        get(key) {
-            return this._data[key] || [];
-        },
+        get(key) { return this._data[key] || []; },
         set(key, value) {
             this._data[key] = value;
             localStorage.setItem(`aether_${key}`, JSON.stringify(value));
@@ -388,39 +227,30 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const mainAppContainer = document.getElementById('main-app-container');
     const landingPage = document.getElementById('registration-page');
-    
-    // --- Page Initialization State ---
-    const pageInitialized = {
-        dashboard: false, strategy: false, canvas: false, learning: false, collaboration: false, admin: false, profile: false
-    };
+    const pageInitialized = { dashboard: false, strategy: false, canvas: false, collaboration: false, profile: false };
 
     // --- Authentication & Initialization ---
-    function showApp(userData, isAdmin = false) {
+    function showApp(userData) {
+        mockDatabase.set('currentUser', userData);
         landingPage.style.display = 'none';
         mainAppContainer.style.display = 'flex';
-        initializeMainApp(userData, isAdmin);
+        initializeMainApp(userData);
     }
 
     document.getElementById('regForm').addEventListener('submit', (e) => {
         e.preventDefault();
         const regForm = e.target;
         const userData = {
-            fullName: regForm.fullName.value, email: regForm.email.value, headline: regForm.headline.value,
-            bio: regForm.bioReg.value, avatarUrl: regForm.avatarReg.value || `https://i.pravatar.cc/150?u=${regForm.email.value}`
+            fullName: regForm.fullName.value,
+            email: regForm.email.value,
+            avatarUrl: regForm.avatarReg.value || `https://i.pravatar.cc/150?u=${regForm.email.value}`
         };
         localStorage.setItem('aetherCurrentUser', JSON.stringify(userData));
-        
         const allRegistrations = mockDatabase.get('allRegistrations');
-        // Prevent duplicate registrations
         if (!allRegistrations.some(u => u.email === userData.email)) {
             allRegistrations.push(userData);
             mockDatabase.set('allRegistrations', allRegistrations);
         }
-
-        const connections = mockDatabase.get('connections');
-        connections.unshift({ name: userData.fullName, avatarUrl: userData.avatarUrl, connectedAt: new Date().toISOString() });
-        mockDatabase.set('connections', connections.slice(0, 100));
-        
         showApp(userData);
     });
 
@@ -436,34 +266,9 @@ document.addEventListener('DOMContentLoaded', () => {
             localStorage.setItem('aetherCurrentUser', JSON.stringify(foundUser));
             showApp(foundUser);
         } else {
-            alert('No account found with that email. Please register.');
+            showToast('No account found with that email. Please register.', 'info');
         }
     });
-    
-    document.getElementById('show-admin-signin').addEventListener('click', (e) => {
-        e.preventDefault();
-        document.getElementById('admin-signin-modal').style.display = 'flex';
-    });
-    document.getElementById('admin-signin-modal').addEventListener('click', (e) => {
-        if (e.target.id === 'admin-signin-modal') e.target.style.display = 'none';
-    });
-    document.getElementById('admin-signin-form').addEventListener('submit', (e) => {
-        e.preventDefault();
-        const pin = document.getElementById('admin-pin').value;
-        if (pin === ADMIN_PIN) {
-            const adminUser = {
-                fullName: "Admin",
-                email: "admin@aether.com",
-                avatarUrl: "https://i.pravatar.cc/150?u=admin"
-            };
-            localStorage.setItem('aetherCurrentUser', JSON.stringify(adminUser));
-            document.getElementById('admin-signin-modal').style.display = 'none';
-            showApp(adminUser, true);
-        } else {
-            alert('Invalid Admin PIN.');
-        }
-    });
-
 
     const storedUser = localStorage.getItem('aetherCurrentUser');
     if (storedUser) {
@@ -473,22 +278,14 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // --- Main App Logic ---
-    function initializeMainApp(userData, isAdmin = false) {
+    function initializeMainApp(userData) {
         document.getElementById('nav-avatar').src = userData.avatarUrl;
-        
         const nav = document.getElementById('main-nav');
-        const profileNavBtn = document.getElementById('profile-nav-btn');
         const sections = document.querySelectorAll('.content-section');
-        
-        if(isAdmin) {
-            document.getElementById('admin-nav-btn').classList.remove('hidden');
-        }
 
         function navigateTo(targetId) {
             if (!targetId) return;
             nav.querySelectorAll('.sidebar-item').forEach(btn => btn.classList.toggle('active', btn.dataset.target === targetId));
-            profileNavBtn.classList.toggle('active', 'profile' === targetId);
-
             sections.forEach(section => section.classList.toggle('active', section.id === targetId));
             
             if (!pageInitialized[targetId]) {
@@ -496,9 +293,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     dashboard: initDashboard,
                     strategy: initStrategyPage,
                     canvas: initCareerMap,
-                    learning: initLearningHub,
                     collaboration: initCollaborationPage,
-                    admin: initAdminPage,
                     profile: initProfilePage
                 };
                 if (initFunctions[targetId]) initFunctions[targetId](userData);
@@ -510,7 +305,6 @@ document.addEventListener('DOMContentLoaded', () => {
             const button = e.target.closest('button[data-target]');
             if (button) navigateTo(button.dataset.target);
         });
-        profileNavBtn.addEventListener('click', () => navigateTo('profile'));
 
         document.getElementById('sign-out-btn').addEventListener('click', () => {
             localStorage.removeItem('aetherCurrentUser');
@@ -520,318 +314,382 @@ document.addEventListener('DOMContentLoaded', () => {
         navigateTo('dashboard');
     }
 
-    // --- Toast Notification ---
     function showToast(message, type = 'success') {
         const toast = document.getElementById('toast-notification');
         const toastMessage = document.getElementById('toast-message');
         toastMessage.textContent = message;
-        
-        toast.classList.remove('bg-gray-900', 'bg-blue-600');
-        if (type === 'info') {
-            toast.classList.add('bg-blue-600');
-        } else {
-            toast.classList.add('bg-gray-900');
-        }
-
+        toast.className = `bg-gray-900 text-white text-sm font-semibold py-2 px-4 rounded-full shadow-lg`; // Reset
+        if (type === 'info') toast.classList.replace('bg-gray-900', 'bg-blue-600');
         toast.classList.add('show');
-        setTimeout(() => {
-            toast.classList.remove('show');
-        }, 3000);
+        setTimeout(() => toast.classList.remove('show'), 3000);
     }
 
     // --- SECTION INITIALIZERS ---
-
     function initDashboard(userData) {
-        // ... (Dashboard logic remains the same)
+        const section = document.getElementById('dashboard');
+        section.innerHTML = `<h1 class="text-3xl font-bold">Welcome, ${userData.fullName}</h1><p class="mt-2 text-text-secondary">Dashboard is under construction. Select another tab to view content.</p>`;
     }
-    
-    function initStrategyPage() {
-        // ... (Strategy page logic remains the same)
-    }
-    
-    function initCareerMap(userData) {
-        const canvasSection = document.getElementById('canvas');
 
-        // State
+    function initStrategyPage() {
+        const strategySection = document.getElementById('strategy');
+        strategySection.innerHTML = `
+            <h1 class="text-3xl font-bold mb-6">My Strategic Plan</h1>
+            <div id="ceo-career-map-container" class="bg-white p-6 rounded-xl border shadow-sm">
+                <h2 class="text-2xl font-bold mb-2">CEO Career Map: A Strategic Analysis</h2>
+                <p class="text-text-secondary mb-6">Analyze the career paths of top performers by applying Michael Porter's strategic frameworks. Understand how leaders build a competitive advantage in their careers.</p>
+                <div class="flex border-b mb-4" id="ceo-map-tabs">
+                    <button data-tab="presidents" class="tab-button flex-1 py-2 text-sm font-semibold border-b-2 border-transparent active">US Presidents</button>
+                    <button data-tab="tech" class="tab-button flex-1 py-2 text-sm font-semibold border-b-2 border-transparent">Tech/Computing Leaders</button>
+                    <button data-tab="biotech" class="tab-button flex-1 py-2 text-sm font-semibold border-b-2 border-transparent">Biotech/Pharma Leaders</button>
+                </div>
+                <div id="ceo-map-content">
+                    <div id="presidents-content" class="career-map-content-panel space-y-3">
+                        <div class="accordion-item border rounded-lg">
+                           <button class="accordion-button w-full flex justify-between items-center p-4 text-left font-semibold">Career as a Value Chain<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg></button>
+                           <div class="accordion-content p-4 pt-0 text-text-secondary"><p>Presidential careers often follow a distinct 'value chain' of accumulating public trust and experience. Key activities include education (often law), military service, holding lower offices (Governor, Senator), and extensive public campaigning.</p></div>
+                        </div>
+                         <div class="accordion-item border rounded-lg">
+                           <button class="accordion-button w-full flex justify-between items-center p-4 text-left font-semibold">Strategic Differentiation<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg></button>
+                           <div class="accordion-content p-4 pt-0 text-text-secondary"><p>Successful candidates differentiate themselves through a unique brand or coalition, such as being an 'outsider' or having a sharp focus on a specific policy (e.g., economic reform), resonating with the national mood.</p></div>
+                        </div>
+                    </div>
+                    <div id="tech-content" class="career-map-content-panel space-y-3 hidden">
+                        <div class="accordion-item border rounded-lg">
+                           <button class="accordion-button w-full flex justify-between items-center p-4 text-left font-semibold">Differentiation vs. Focus Strategy<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg></button>
+                           <div class="accordion-content p-4 pt-0 text-text-secondary"><p><b>Differentiation (CEO Path):</b> Building broad skills across product, engineering, and business. <b>Focus (CTO Path):</b> Aiming for world-class depth in a specific technical domain like AI or distributed systems.</p></div>
+                        </div>
+                    </div>
+                    <div id="biotech-content" class="career-map-content-panel space-y-3 hidden">
+                       <div class="accordion-item border rounded-lg">
+                           <button class="accordion-button w-full flex justify-between items-center p-4 text-left font-semibold">The Dual Value Chain: Science and Business<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg></button>
+                           <div class="accordion-content p-4 pt-0 text-text-secondary"><p>Leaders must add value across two parallel chains: the scientific (research, clinical trials) and the business (development, commercialization). The most successful leaders bridge these two, often pairing an MD/PhD with an MBA or significant operational experience.</p></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        const ceoMapContainer = document.getElementById('ceo-career-map-container');
+        ceoMapContainer.addEventListener('click', e => {
+            const tabButton = e.target.closest('.tab-button');
+            if (tabButton) {
+                const targetTab = tabButton.dataset.tab;
+                ceoMapContainer.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
+                tabButton.classList.add('active');
+                ceoMapContainer.querySelectorAll('.career-map-content-panel').forEach(panel => {
+                    panel.classList.toggle('hidden', panel.id !== `${targetTab}-content`);
+                });
+            }
+            const accordionButton = e.target.closest('.accordion-button');
+            if (accordionButton) {
+                const content = accordionButton.nextElementSibling;
+                accordionButton.classList.toggle('open');
+                content.style.maxHeight = content.style.maxHeight ? null : content.scrollHeight + "px";
+            }
+        });
+    }
+
+    function initCareerMap(userData) {
+        const section = document.getElementById('canvas');
         let goals = mockDatabase.get('careerGoals');
         let flashcards = mockDatabase.get('flashcards');
         let currentGoalIndex = 0;
         let currentCardIndex = 0;
         let ganttChartInstance = null;
-        
         const today = new Date().toISOString().split('T')[0];
 
-        function renderAll() {
-            canvasSection.innerHTML = `
-                <h1 class="text-3xl font-bold mb-6">Career Path &amp; Goal Setting</h1>
+        function render() {
+            section.innerHTML = `
+                <h1 class="text-3xl font-bold mb-6">Career Path & Goal Setting</h1>
                 <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
                     <div class="lg:col-span-2 space-y-6">
                         <div class="bg-white p-6 rounded-xl border shadow-sm">
-                            <div class="flex justify-between items-center mb-4">
-                                <h2 class="text-xl font-bold">My Goals Presentation</h2>
-                                <button id="add-goal-btn" class="px-4 py-2 bg-accent-primary text-white font-semibold text-sm rounded-lg hover:bg-accent-secondary">Add New Goal</button>
-                            </div>
-                            <div class="flex flex-col md:flex-row gap-4">
-                                <div id="goal-slide-display" class="flex-1 bg-gray-50 border rounded-lg p-6">
-                                    </div>
-                                <div id="goal-slide-sorter" class="flex md:flex-col gap-2 overflow-x-auto md:overflow-y-auto pb-2 md:pb-0 md:pr-2">
-                                    </div>
-                            </div>
+                            <div class="flex justify-between items-center mb-4"><h2 class="text-xl font-bold">My Goals Presentation</h2><button id="add-goal-btn" class="px-4 py-2 bg-accent-primary text-white font-semibold text-sm rounded-lg hover:bg-accent-secondary">Add New Goal</button></div>
+                            <div class="flex flex-col md:flex-row gap-4"><div id="goal-slide-display" class="flex-1 bg-gray-50 border rounded-lg p-6"></div><div id="goal-slide-sorter" class="flex md:flex-col gap-2 overflow-x-auto md:overflow-y-auto pb-2 md:pb-0 md:pr-2"></div></div>
                         </div>
-
-                        <div class="bg-white p-6 rounded-xl border shadow-sm">
-                            <h2 class="text-xl font-bold mb-4">Goals Timeline</h2>
-                            <canvas id="careerGanttChart"></canvas>
-                        </div>
+                        <div class="bg-white p-6 rounded-xl border shadow-sm"><h2 class="text-xl font-bold mb-4">Goals Timeline</h2><canvas id="careerGanttChart"></canvas></div>
                     </div>
                     <div class="lg:col-span-1 space-y-6">
+                        <div class="bg-white p-6 rounded-xl border shadow-sm"><h2 class="text-xl font-bold mb-4">Notepad</h2><div id="career-notes-editor"></div></div>
                         <div class="bg-white p-6 rounded-xl border shadow-sm">
-                            <div class="flex border-b mb-4">
-                                <button data-tab="notes" class="logbook-tab flex-1 py-2 text-sm font-semibold border-b-2 border-transparent active">Notes</button>
-                                <button data-tab="messages" class="logbook-tab flex-1 py-2 text-sm font-semibold border-b-2 border-transparent">Messages</button>
-                            </div>
-                            <div id="logbook-notes-content" class="logbook-content">
-                                <div id="career-notes-editor"></div>
-                            </div>
-                            <div id="logbook-messages-content" class="logbook-content hidden">
-                                <p class="text-sm text-gray-500">Messaging feature coming soon.</p>
-                            </div>
-                        </div>
-                        <div class="bg-white p-6 rounded-xl border shadow-sm">
-                             <div class="flex justify-between items-center mb-4">
-                                <h2 class="text-xl font-bold">Knowledge Cards</h2>
-                                <button id="new-flashcard-btn" class="text-sm font-semibold text-accent-primary hover:text-accent-secondary">New Card</button>
-                            </div>
-                            <div id="flashcard-ui-container">
-                                </div>
-                             <div class="flex justify-between items-center mt-4">
-                                <button id="prev-card-btn" class="px-3 py-1 bg-gray-200 text-sm font-semibold rounded-md hover:bg-gray-300">Prev</button>
-                                <p id="card-counter" class="text-sm text-gray-500"></p>
-                                <button id="next-card-btn" class="px-3 py-1 bg-gray-200 text-sm font-semibold rounded-md hover:bg-gray-300">Next</button>
-                            </div>
+                            <div class="flex justify-between items-center mb-4"><h2 class="text-xl font-bold">Knowledge Cards</h2><button id="new-flashcard-btn" class="text-sm font-semibold text-accent-primary hover:text-accent-secondary">New Card</button></div>
+                            <div id="flashcard-ui-container"></div>
+                            <div class="flex justify-between items-center mt-4"><button id="prev-card-btn" class="px-3 py-1 bg-gray-200 text-sm font-semibold rounded-md hover:bg-gray-300">Prev</button><p id="card-counter" class="text-sm text-gray-500"></p><button id="next-card-btn" class="px-3 py-1 bg-gray-200 text-sm font-semibold rounded-md hover:bg-gray-300">Next</button></div>
                         </div>
                     </div>
-                </div>
-            `;
+                </div>`;
             renderGoalPresentation();
             renderFlashcard();
             renderGanttChart();
-            setupEventListeners();
-            
             new Quill('#career-notes-editor', { theme: 'snow', placeholder: 'Log your thoughts and progress...' });
         }
 
         function renderGoalPresentation() {
             const display = document.getElementById('goal-slide-display');
             const sorter = document.getElementById('goal-slide-sorter');
-            
+            if (!display || !sorter) return;
             if (goals.length === 0) {
                 display.innerHTML = `<div class="text-center p-8 text-gray-500">No goals yet. Click 'Add New Goal' to start.</div>`;
-                sorter.innerHTML = '';
-                return;
+                sorter.innerHTML = ''; return;
             }
-
             const goal = goals[currentGoalIndex];
-            display.innerHTML = `
-                <input data-id="${goal.id}" data-field="title" class="text-2xl font-bold bg-transparent w-full mb-2 focus:outline-none focus:bg-white p-1 rounded" value="${goal.title}">
-                <textarea data-id="${goal.id}" data-field="description" class="text-base text-gray-700 bg-transparent w-full h-32 mb-4 focus:outline-none focus:bg-white p-1 rounded resize-none">${goal.description}</textarea>
-                <div class="flex items-center gap-4">
-                    <label class="text-sm font-semibold">Due Date:</label>
-                    <input type="date" data-id="${goal.id}" data-field="dueDate" class="bg-transparent border-b-2 p-1 rounded" value="${goal.dueDate}">
-                    <button data-id="${goal.id}" class="delete-goal-btn ml-auto text-red-500 hover:text-red-700 text-sm font-semibold">Delete</button>
-                </div>
-            `;
-
-            sorter.innerHTML = goals.map((g, index) => `
-                <div data-index="${index}" class="goal-slide-thumbnail w-full md:w-32 h-20 bg-gray-100 border rounded-md p-2 flex flex-col justify-center text-center ${index === currentGoalIndex ? 'active' : ''}">
-                    <p class="text-xs font-semibold truncate">${g.title}</p>
-                    <p class="text-xs text-gray-500">${g.dueDate}</p>
-                </div>
-            `).join('');
+            display.innerHTML = `<input data-id="${goal.id}" data-field="title" class="text-2xl font-bold bg-transparent w-full mb-2 focus:outline-none focus:bg-white p-1 rounded" value="${goal.title}"><textarea data-id="${goal.id}" data-field="description" class="text-base text-gray-700 bg-transparent w-full h-32 mb-4 focus:outline-none focus:bg-white p-1 rounded resize-none">${goal.description}</textarea><div class="flex items-center gap-4"><label class="text-sm font-semibold">Due Date:</label><input type="date" data-id="${goal.id}" data-field="dueDate" class="bg-transparent border-b-2 p-1 rounded" value="${goal.dueDate}"><button data-id="${goal.id}" class="delete-goal-btn ml-auto text-red-500 hover:text-red-700 text-sm font-semibold">Delete</button></div>`;
+            sorter.innerHTML = goals.map((g, index) => `<div data-index="${index}" class="slide-thumbnail w-full md:w-32 h-20 bg-gray-100 border rounded-md p-2 flex flex-col justify-center text-center ${index === currentGoalIndex ? 'active' : ''}"><p class="text-xs font-semibold truncate">${g.title}</p><p class="text-xs text-gray-500">${g.dueDate}</p></div>`).join('');
         }
-        
+
         function renderGanttChart() {
             const container = document.getElementById('careerGanttChart');
             if (!container) return;
-            const ctx = container.getContext('2d');
-            if (ganttChartInstance) {
-                ganttChartInstance.destroy();
-            }
-
-            const chartData = goals.map(goal => ({
-                name: goal.title,
-                start: goal.startDate || today,
-                end: goal.dueDate
-            }));
-
-            ganttChartInstance = new Chart(ctx, {
+            if (ganttChartInstance) ganttChartInstance.destroy();
+            ganttChartInstance = new Chart(container.getContext('2d'), {
                 type: 'bar',
                 data: {
-                    labels: chartData.map(d => d.name),
+                    labels: goals.map(g => g.title),
                     datasets: [{
                         label: 'Duration',
-                        data: chartData.map(d => [new Date(d.start).getTime(), new Date(d.end).getTime()]),
-                        backgroundColor: '#DC2626',
-                        borderRadius: 2,
-                        barPercentage: 0.5,
+                        data: goals.map(g => [new Date(g.startDate || today).getTime(), new Date(g.dueDate).getTime()]),
+                        backgroundColor: '#DC2626', borderRadius: 2, barPercentage: 0.5,
                     }]
                 },
-                options: {
-                    indexAxis: 'y',
-                    scales: {
-                        x: {
-                            min: new Date(today).getTime(),
-                            type: 'time',
-                            time: { unit: 'month' }
-                        }
-                    },
-                    plugins: { legend: { display: false } }
-                }
+                options: { indexAxis: 'y', scales: { x: { min: new Date(today).getTime(), type: 'time', time: { unit: 'month' } } }, plugins: { legend: { display: false } } }
             });
         }
 
         function renderFlashcard() {
              const container = document.getElementById('flashcard-ui-container');
              const counter = document.getElementById('card-counter');
+             if(!container) return;
              if (flashcards.length === 0) {
                  container.innerHTML = `<div class="h-[180px] flex items-center justify-center text-gray-500">No cards. Click 'New Card' to create one.</div>`;
-                 counter.textContent = '0 / 0';
-                 return;
+                 counter.textContent = '0 / 0'; return;
              }
              const card = flashcards[currentCardIndex];
-             container.innerHTML = `
-                <div class="flashcard-container" id="flashcard-container-${card.id}">
-                    <div class="flashcard-inner">
-                        <div class="flashcard-front">${card.front}</div>
-                        <div class="flashcard-back">${card.back}</div>
-                    </div>
-                </div>
-             `;
+             container.innerHTML = `<div class="flashcard-container" id="flashcard-container-${card.id}"><div class="flashcard-inner"><div class="flashcard-front">${card.front}</div><div class="flashcard-back">${card.back}</div></div></div>`;
              counter.textContent = `${currentCardIndex + 1} / ${flashcards.length}`;
         }
-
-        function setupEventListeners() {
-            canvasSection.addEventListener('click', e => {
-                // Add Goal
-                if (e.target.id === 'add-goal-btn') {
-                    const newGoal = { id: Date.now(), title: 'New Goal', description: 'Describe your goal here.', startDate: today, dueDate: today };
-                    goals.push(newGoal);
-                    currentGoalIndex = goals.length - 1;
-                    mockDatabase.set('careerGoals', goals);
-                    renderGoalPresentation();
-                    renderGanttChart();
-                }
-                // Delete Goal
-                if (e.target.classList.contains('delete-goal-btn')) {
-                    const goalId = parseInt(e.target.dataset.id);
-                    goals = goals.filter(g => g.id !== goalId);
-                    currentGoalIndex = Math.max(0, currentGoalIndex - 1);
-                    mockDatabase.set('careerGoals', goals);
-                    renderGoalPresentation();
-                    renderGanttChart();
-                }
-                // Select Goal
-                const sorterThumb = e.target.closest('.goal-slide-thumbnail');
-                if (sorterThumb) {
-                    currentGoalIndex = parseInt(sorterThumb.dataset.index);
-                    renderGoalPresentation();
-                }
-
-                // Logbook Tabs
-                const logbookTab = e.target.closest('.logbook-tab');
-                if (logbookTab) {
-                    const targetTab = logbookTab.dataset.tab;
-                    document.querySelectorAll('.logbook-tab').forEach(t => t.classList.remove('active'));
-                    logbookTab.classList.add('active');
-                    document.querySelectorAll('.logbook-content').forEach(c => c.classList.add('hidden'));
-                    document.getElementById(`logbook-${targetTab}-content`).classList.remove('hidden');
-                }
-
-                // Flashcard Flip
-                const flashcardContainer = e.target.closest('.flashcard-container');
-                if (flashcardContainer) {
-                    flashcardContainer.classList.toggle('is-flipped');
-                }
-
-                // Flashcard Nav
-                if (e.target.id === 'next-card-btn') {
-                    currentCardIndex = (currentCardIndex + 1) % flashcards.length;
-                    renderFlashcard();
-                }
-                 if (e.target.id === 'prev-card-btn') {
-                    currentCardIndex = (currentCardIndex - 1 + flashcards.length) % flashcards.length;
-                    renderFlashcard();
-                }
-
-                // New Flashcard
-                if (e.target.id === 'new-flashcard-btn') {
-                    const front = prompt("Enter the front of the card (question):");
-                    if (front) {
-                        const back = prompt("Enter the back of the card (answer):");
-                        if (back) {
-                            const newCard = { id: Date.now(), front: front, back: back };
-                            flashcards.push(newCard);
-                            mockDatabase.set('flashcards', flashcards);
-                            currentCardIndex = flashcards.length - 1;
-                            renderFlashcard();
-                        }
-                    }
-                }
-            });
-
-            // Update Goal on input change
-            canvasSection.addEventListener('change', e => {
-                if(e.target.dataset.id && e.target.dataset.field) {
-                    const goalId = parseInt(e.target.dataset.id);
-                    const field = e.target.dataset.field;
-                    const value = e.target.value;
-                    const goal = goals.find(g => g.id === goalId);
-                    if (goal) {
-                        goal[field] = value;
-                        mockDatabase.set('careerGoals', goals);
-                        renderGanttChart(); // Re-render gantt if dates change
-                        // Also update sorter view
-                        const sorterThumb = document.querySelector(`.goal-slide-thumbnail[data-index="${currentGoalIndex}"]`);
-                        if(sorterThumb) {
-                             sorterThumb.querySelector('p:first-child').textContent = goal.title;
-                             sorterThumb.querySelector('p:last-child').textContent = goal.dueDate;
-                        }
-                    }
-                }
-            });
-        }
         
-        renderAll();
+        section.addEventListener('click', e => {
+            if (e.target.id === 'add-goal-btn') {
+                const newGoal = { id: Date.now(), title: 'New Goal', description: 'Describe your goal here.', startDate: today, dueDate: today };
+                goals.push(newGoal); currentGoalIndex = goals.length - 1; mockDatabase.set('careerGoals', goals); renderGoalPresentation(); renderGanttChart();
+            } else if (e.target.classList.contains('delete-goal-btn')) {
+                goals = goals.filter(g => g.id !== parseInt(e.target.dataset.id)); currentGoalIndex = Math.max(0, currentGoalIndex - 1); mockDatabase.set('careerGoals', goals); renderGoalPresentation(); renderGanttChart();
+            } else if (e.target.closest('.slide-thumbnail')) {
+                currentGoalIndex = parseInt(e.target.closest('.slide-thumbnail').dataset.index); renderGoalPresentation();
+            } else if (e.target.closest('.flashcard-container')) {
+                e.target.closest('.flashcard-container').classList.toggle('is-flipped');
+            } else if (e.target.id === 'next-card-btn') {
+                currentCardIndex = (currentCardIndex + 1) % flashcards.length; renderFlashcard();
+            } else if (e.target.id === 'prev-card-btn') {
+                currentCardIndex = (currentCardIndex - 1 + flashcards.length) % flashcards.length; renderFlashcard();
+            } else if (e.target.id === 'new-flashcard-btn') {
+                const front = prompt("Enter the front of the card (question):");
+                if (front) {
+                    const back = prompt("Enter the back of the card (answer):");
+                    if (back) {
+                        flashcards.push({ id: Date.now(), front, back }); mockDatabase.set('flashcards', flashcards); currentCardIndex = flashcards.length - 1; renderFlashcard();
+                    }
+                }
+            }
+        });
+        section.addEventListener('change', e => {
+            if(e.target.dataset.id && e.target.dataset.field) {
+                const goal = goals.find(g => g.id === parseInt(e.target.dataset.id));
+                if (goal) {
+                    goal[e.target.dataset.field] = e.target.value;
+                    mockDatabase.set('careerGoals', goals);
+                    renderGanttChart(); renderGoalPresentation();
+                }
+            }
+        });
+        render();
     }
     
-    function initLearningHub(userData) {
-        // ... (All learning hub logic would go here)
-    }
-
     function initCollaborationPage(userData) {
-        // ... (Collaboration page logic remains the same)
-    }
+        const section = document.getElementById('collaboration');
+        let slides = mockDatabase.get('collabSlides');
+        let feedPosts = mockDatabase.get('collabFeedPosts');
+        let chatMessages = mockDatabase.get('collabChatMessages');
+        let currentSlideIndex = 0;
+        let slideEditor;
 
-    function initAdminPage() {
-        // ... (All admin logic would go here)
+        function render() {
+            section.innerHTML = `
+                <h1 class="text-3xl font-bold mb-6">Strategic Workspace</h1>
+                <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+                    <div class="lg:col-span-1 bg-white p-4 rounded-xl border shadow-sm h-fit">
+                        <div class="flex justify-between items-center mb-4">
+                            <h3 class="font-bold">Slides</h3>
+                            <button id="add-slide-btn" class="text-sm font-semibold text-accent-primary hover:text-accent-secondary">New Slide</button>
+                        </div>
+                        <div id="collab-slide-sorter" class="space-y-2"></div>
+                    </div>
+                    <div class="lg:col-span-2 space-y-6">
+                        <div class="bg-white p-4 sm:p-6 rounded-xl border shadow-sm">
+                            <div class="flex border-b mb-4">
+                                <button data-view="presentation" class="collab-view-tab tab-button flex-1 py-2 text-sm font-semibold border-b-2 border-transparent active">Presentation View</button>
+                                <button data-view="feed" class="collab-view-tab tab-button flex-1 py-2 text-sm font-semibold border-b-2 border-transparent">Feed View</button>
+                            </div>
+                            <div id="collab-presentation-view"></div>
+                            <div id="collab-feed-view" class="hidden"></div>
+                        </div>
+                    </div>
+                    <div class="lg:col-span-1 bg-white p-4 rounded-xl border shadow-sm flex flex-col h-[70vh]">
+                        <h3 class="font-bold mb-4 border-b pb-2">Team Chat</h3>
+                        <div id="collab-chat-messages" class="flex-1 space-y-4 overflow-y-auto pr-2"></div>
+                        <div class="mt-4 pt-4 border-t">
+                            <textarea id="collab-chat-input" placeholder="Type message..." rows="2" class="w-full p-2 border rounded-lg text-sm focus:outline-none focus:ring-1 focus:ring-red-500"></textarea>
+                            <button id="collab-chat-send" class="mt-2 w-full px-4 py-2 bg-accent-primary text-white font-semibold text-sm rounded-lg hover:bg-accent-secondary">Send</button>
+                        </div>
+                    </div>
+                </div>
+            `;
+            renderSlideSorter();
+            renderMainView();
+            renderChat();
+        }
+
+        function renderSlideSorter() {
+            const sorter = document.getElementById('collab-slide-sorter');
+            if(!sorter) return;
+            sorter.innerHTML = slides.map((slide, index) => `
+                <div data-index="${index}" class="slide-thumbnail bg-gray-50 p-3 rounded-md ${index === currentSlideIndex ? 'active' : ''}">
+                    <p class="font-semibold text-sm truncate">${slide.title}</p>
+                    <p class="text-xs text-gray-500">By ${slide.author}</p>
+                </div>
+            `).join('');
+        }
+        
+        function renderMainView() {
+            const presentationView = document.getElementById('collab-presentation-view');
+            const feedView = document.getElementById('collab-feed-view');
+            if(!presentationView || !feedView) return;
+
+            // Render Presentation View
+            const slide = slides[currentSlideIndex];
+            presentationView.innerHTML = `
+                <div class="flex justify-between items-baseline">
+                    <input class="text-2xl font-bold bg-transparent w-full focus:outline-none focus:bg-gray-100 p-1 rounded" id="slide-title-input" value="${slide.title}">
+                    <button data-id="${slide.id}" class="delete-slide-btn text-red-500 hover:text-red-700 text-xs font-semibold">DELETE</button>
+                </div>
+                <div id="slide-editor" class="mt-4"></div>
+            `;
+            slideEditor = new Quill('#slide-editor', { theme: 'snow', modules: { toolbar: true } });
+            slideEditor.root.innerHTML = slide.content;
+            slideEditor.on('text-change', () => {
+                slides[currentSlideIndex].content = slideEditor.root.innerHTML;
+                mockDatabase.set('collabSlides', slides);
+            });
+
+            // Render Feed View
+            feedView.innerHTML = `
+                <div class="flex items-start gap-3">
+                    <img src="${userData.avatarUrl}" class="w-10 h-10 rounded-full">
+                    <div class="flex-1">
+                        <textarea id="collab-feed-input" class="w-full p-2 border rounded-lg text-sm" rows="3" placeholder="Post an update to the team..."></textarea>
+                        <div class="text-right mt-2"><button id="collab-feed-post-btn" class="px-4 py-1.5 bg-red-600 text-white font-bold text-sm rounded-full hover:bg-red-700">Post</button></div>
+                    </div>
+                </div>
+                <div id="collab-feed-posts-container" class="mt-6 space-y-4 border-t pt-4"></div>
+            `;
+            renderFeed();
+        }
+
+        function renderFeed(){
+            const postsContainer = document.getElementById('collab-feed-posts-container');
+            if(!postsContainer) return;
+            postsContainer.innerHTML = feedPosts.map(post => `
+                <div class="flex items-start gap-3">
+                    <img src="${post.avatar}" class="w-10 h-10 rounded-full">
+                    <div class="flex-1">
+                        <p class="font-semibold text-sm">${post.author} <span class="text-gray-400 font-normal ml-2 text-xs">${new Date(post.timestamp).toLocaleString()}</span></p>
+                        <p class="text-gray-700 mt-1 text-sm whitespace-pre-wrap">${post.text}</p>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function renderChat() {
+            const messagesContainer = document.getElementById('collab-chat-messages');
+            if(!messagesContainer) return;
+            messagesContainer.innerHTML = chatMessages.map(msg => `
+                <div class="flex items-start gap-2 ${msg.user === userData.fullName ? 'justify-end' : ''}">
+                    ${msg.user !== userData.fullName ? `<img src="${msg.avatarUrl}" class="w-8 h-8 rounded-full">` : ''}
+                    <div class="max-w-xs"><div class="p-2 rounded-lg text-sm ${msg.user === userData.fullName ? 'bg-red-100' : 'bg-gray-100'}">${msg.text}</div></div>
+                </div>
+            `).join('');
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+
+        section.addEventListener('click', e => {
+            // Sorter
+            const thumb = e.target.closest('.slide-thumbnail');
+            if(thumb) {
+                currentSlideIndex = parseInt(thumb.dataset.index);
+                renderSlideSorter();
+                renderMainView();
+                document.querySelector('.collab-view-tab[data-view="presentation"]').click(); // Switch to presentation view
+            }
+            // Add/Delete Slide
+            if(e.target.id === 'add-slide-btn') {
+                const newSlide = {id: Date.now(), title: 'New Slide', content: '<p>Start writing here...</p>', author: userData.fullName};
+                slides.push(newSlide);
+                mockDatabase.set('collabSlides', slides);
+                currentSlideIndex = slides.length - 1;
+                render();
+            }
+             if(e.target.classList.contains('delete-slide-btn') && slides.length > 1) {
+                slides.splice(currentSlideIndex, 1);
+                mockDatabase.set('collabSlides', slides);
+                currentSlideIndex = Math.max(0, currentSlideIndex - 1);
+                render();
+            }
+            // View Tabs
+            const viewTab = e.target.closest('.collab-view-tab');
+            if(viewTab) {
+                document.querySelectorAll('.collab-view-tab').forEach(b => b.classList.remove('active'));
+                viewTab.classList.add('active');
+                const isFeed = viewTab.dataset.view === 'feed';
+                document.getElementById('collab-presentation-view').classList.toggle('hidden', isFeed);
+                document.getElementById('collab-feed-view').classList.toggle('hidden', !isFeed);
+            }
+            // Feed Post
+            if(e.target.id === 'collab-feed-post-btn') {
+                const input = document.getElementById('collab-feed-input');
+                if(input.value.trim()){
+                    feedPosts.unshift({id: Date.now(), author: userData.fullName, avatar: userData.avatarUrl, text: input.value.trim(), timestamp: new Date().toISOString()});
+                    mockDatabase.set('collabFeedPosts', feedPosts);
+                    renderFeed();
+                    input.value = '';
+                }
+            }
+            // Chat Post
+            if(e.target.id === 'collab-chat-send') {
+                 const input = document.getElementById('collab-chat-input');
+                if(input.value.trim()){
+                    chatMessages.push({user: userData.fullName, avatarUrl: userData.avatarUrl, text: input.value.trim(), timestamp: new Date().toISOString()});
+                    mockDatabase.set('collabChatMessages', chatMessages);
+                    renderChat();
+                    input.value = '';
+                }
+            }
+        });
+        section.addEventListener('input', e => {
+            // Slide Title
+            if(e.target.id === 'slide-title-input'){
+                slides[currentSlideIndex].title = e.target.value;
+                mockDatabase.set('collabSlides', slides);
+                renderSlideSorter(); // Update title in sorter
+            }
+        });
+
+        render();
     }
     
     function initProfilePage(userData) {
-        // ... (All profile logic would go here)
+        const section = document.getElementById('profile');
+        section.innerHTML = `<h1 class="text-3xl font-bold">Profile</h1><p class="mt-2 text-text-secondary">Profile page is under construction.</p>`;
     }
-    
-    // --- AI Search Functionality (Gemini) ---
-    async function performProfileSearch(term) {
-        // ... (AI Search Modal Logic would go here)
-    }
-    
-    async function fetchIdealProfiles(term) {
-        // IMPORTANT: Replace "" with your actual Google AI Gemini API key.
-        const apiKey = ""; 
-        if (!apiKey) { throw new Error("API key is not set."); }
-        // ... (Rest of fetch logic would go here)
-    }
-    // ... (renderProfileResults and other helper functions would go here)
 });
 </script>
 </body>
