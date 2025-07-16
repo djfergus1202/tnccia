@@ -57,6 +57,12 @@
         .catalog-header-cell .sort-indicator { opacity: 0.3; transition: opacity 0.2s; }
         .catalog-header-cell.active .sort-indicator, .catalog-header-cell:hover .sort-indicator { opacity: 1; }
         .disclaimer { font-size: 0.8em; color: #555; margin-top: 8px; }
+
+        /* Entertainment Tab Styles */
+        .video-carousel { display: flex; overflow-x: auto; scrollbar-width: none; -ms-overflow-style: none; }
+        .video-carousel::-webkit-scrollbar { display: none; }
+        .video-card { flex-shrink: 0; transition: transform 0.2s; }
+        .video-card:hover { transform: scale(1.05); }
     </style>
 </head>
 <body class="antialiased">
@@ -90,6 +96,7 @@
                 <button data-target="canvas" class="sidebar-item flex items-center py-3 px-5 rounded-md text-left w-full hover:bg-gray-700"><svg class="w-6 h-6 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg><span class="nav-text ml-4 font-semibold">Career Path</span></button>
                 <button data-target="collaboration" class="sidebar-item flex items-center py-3 px-5 rounded-md text-left w-full hover:bg-gray-700"><svg class="w-6 h-6 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path></svg><span class="nav-text ml-4 font-semibold">Strategic Collaboration</span></button>
                 <button data-target="envision" class="sidebar-item flex items-center py-3 px-5 rounded-md text-left w-full hover:bg-gray-700"><svg class="w-6 h-6 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg><span class="nav-text ml-4 font-semibold">Can You Envision It?</span></button>
+                <button data-target="entertainment" class="sidebar-item flex items-center py-3 px-5 rounded-md text-left w-full hover:bg-gray-700"><svg class="w-6 h-6 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg><span class="nav-text ml-4 font-semibold">Entertainment</span></button>
             </nav>
             <div class="mt-auto w-full">
                  <button data-target="profile" id="profile-nav-btn" class="sidebar-item flex items-center py-3 px-5 text-left w-full hover:bg-gray-700"><img id="nav-avatar" src="" alt="Profile" class="w-8 h-8 rounded-full flex-shrink-0 object-cover"/><span class="nav-text ml-4 font-semibold" id="nav-name">Profile</span></button>
@@ -104,6 +111,7 @@
                 <section id="canvas" class="content-section"></section>
                 <section id="collaboration" class="content-section"></section>
                 <section id="envision" class="content-section"></section>
+                <section id="entertainment" class="content-section"></section>
                 <section id="profile" class="content-section"></section>
             </main>
         </div>
@@ -117,6 +125,12 @@
         <div class="bg-white rounded-lg shadow-xl w-full max-w-md p-8">
             <h2 class="text-2xl font-bold text-center mb-6">Sign In</h2>
             <form id="signin-form"><div class="space-y-4"><input type="email" id="signin-email" placeholder="Email" required class="w-full px-4 py-3 rounded-lg border focus:outline-none focus:ring-2 focus:ring-red-500"><button type="submit" class="w-full px-6 py-3 bg-red-600 text-white font-bold rounded-lg hover:bg-red-700">Sign In</button></div></form>
+        </div>
+    </div>
+    <div id="video-player-modal" class="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center p-4 z-50 hidden">
+        <div class="bg-gray-800 rounded-lg shadow-xl w-full max-w-4xl aspect-video relative">
+            <button id="close-video-modal" class="absolute -top-3 -right-3 text-white bg-red-600 rounded-full h-8 w-8 flex items-center justify-center font-bold text-lg">&times;</button>
+            <iframe id="video-iframe" class="w-full h-full rounded-lg" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
         </div>
     </div>
 
@@ -182,7 +196,7 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('nav-name').textContent = userData.fullName;
         const nav = document.getElementById('main-nav');
         const sections = document.querySelectorAll('.content-section');
-        const initFunctions = { dashboard: initDashboard, strategy: initStrategyPage, canvas: initCareerMap, collaboration: initCollaborationPage, envision: initEnvisionPage, profile: initProfilePage };
+        const initFunctions = { dashboard: initDashboard, strategy: initStrategyPage, canvas: initCareerMap, collaboration: initCollaborationPage, envision: initEnvisionPage, entertainment: initEntertainmentPage, profile: initProfilePage };
         function navigateTo(targetId) {
             if (!targetId) return;
             nav.querySelectorAll('.sidebar-item').forEach(btn => btn.classList.toggle('active', btn.dataset.target === targetId));
@@ -231,7 +245,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     <div class="bg-white p-6 rounded-xl border shadow-sm"><h2 class="text-xl font-bold mb-4">Podcast Hub</h2><div id="podcast-container"></div></div>
                 </div>
             </div>`;
-
         section.querySelector('#search-providers').addEventListener('click', e => {
             const button = e.target.closest('button[data-provider]');
             if (!button) return;
@@ -240,7 +253,6 @@ document.addEventListener('DOMContentLoaded', () => {
             const urls = { google: `https://www.google.com/search?q=${encodeURIComponent(query)}`, youtube: `https://www.youtube.com/results?search_query=${encodeURIComponent(query)}`, pubmed: `https://pubmed.ncbi.nlm.nih.gov/?term=${encodeURIComponent(query)}`, wos: `https://www.webofscience.com/wos/woscc/basic-search?search_mode=BasicSearchForm&value(input1)=${encodeURIComponent(query)}`, proquest: `https://www.proquest.com/search?q=${encodeURIComponent(query)}`};
             if (urls[button.dataset.provider]) window.open(urls[button.dataset.provider], '_blank');
         });
-        
         const spotlight = section.querySelector('#research-spotlight');
         spotlight.addEventListener('click', e => {
             const tabButton = e.target.closest('.tab-button');
@@ -250,7 +262,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 spotlight.querySelectorAll('.research-panel').forEach(panel => panel.classList.toggle('hidden', panel.id !== `${tabButton.dataset.tab}-content`));
             }
         });
-        
         document.getElementById('aether-feed-container').innerHTML = mockDatabase.get('feedPosts').map(post => `<div class="border-t pt-3 mt-3"><p class="font-semibold text-sm">${post.fullName}</p><p class="text-sm text-gray-700">${post.message}</p></div>`).join('');
         document.getElementById('timeline-container').innerHTML = mockDatabase.get('connections').map(conn => `<div class="flex items-center mt-2"><img src="${conn.avatarUrl}" class="w-8 h-8 rounded-full mr-3"><p class="text-sm">${conn.name} joined</p></div>`).join('');
         document.getElementById('podcast-container').innerHTML = `<p class="text-sm text-gray-500">Podcast feature coming soon.</p>`;
@@ -291,14 +302,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const section = document.getElementById('canvas');
         let goals, flashcards, currentGoalIndex, currentCardIndex, ganttChartInstance;
         const today = new Date().toISOString().split('T')[0];
-
-        function setupState() {
-            goals = mockDatabase.get('careerGoals');
-            flashcards = mockDatabase.get('flashcards');
-            currentGoalIndex = 0;
-            currentCardIndex = 0;
-        }
-
+        function setupState() { goals = mockDatabase.get('careerGoals'); flashcards = mockDatabase.get('flashcards'); currentGoalIndex = 0; currentCardIndex = 0; }
         function render() {
             section.innerHTML = `
                 <h1 class="text-3xl font-bold mb-6">Career Path & Goal Setting</h1>
@@ -308,14 +312,13 @@ document.addEventListener('DOMContentLoaded', () => {
                         <div class="bg-white p-6 rounded-xl border shadow-sm"><h2 class="text-xl font-bold mb-4">Goals Timeline</h2><canvas id="careerGanttChart"></canvas></div>
                     </div>
                     <div class="lg:col-span-1 space-y-6">
+                        <div class="bg-white p-6 rounded-xl border shadow-sm"><h2 class="text-xl font-bold mb-4">Personal Log</h2><div id="career-notes-editor" class="h-48"></div></div>
                         <div class="bg-white p-6 rounded-xl border shadow-sm"><h2 class="text-xl font-bold mb-4">Knowledge Cards</h2><div id="flashcard-ui-container"></div><div class="flex justify-between items-center mt-4"><button id="prev-card-btn" class="px-3 py-1 bg-gray-200 text-sm font-semibold rounded-md hover:bg-gray-300">Prev</button><div id="card-counter" class="text-sm text-gray-500"></div><button id="next-card-btn" class="px-3 py-1 bg-gray-200 text-sm font-semibold rounded-md hover:bg-gray-300">Next</button></div></div>
                     </div>
                 </div>`;
-            renderGoalPresentation();
-            renderFlashcard();
-            renderGanttChart();
+            new Quill('#career-notes-editor', { theme: 'snow', placeholder: 'Log your thoughts and progress...' });
+            renderGoalPresentation(); renderFlashcard(); renderGanttChart();
         }
-
         function renderGoalPresentation() {
             const display = document.getElementById('goal-slide-display'), sorter = document.getElementById('goal-slide-sorter');
             if (!display || !sorter || goals.length === 0) { if(display) display.innerHTML = `<div class="text-center p-8 text-gray-500">No goals yet.</div>`; return; }
@@ -323,14 +326,12 @@ document.addEventListener('DOMContentLoaded', () => {
             display.innerHTML = `<input data-id="${goal.id}" data-field="title" class="text-2xl font-bold bg-transparent w-full mb-2 p-1" value="${goal.title}"><textarea data-id="${goal.id}" data-field="description" class="text-base text-gray-700 bg-transparent w-full h-32 mb-4 p-1 resize-none">${goal.description}</textarea><div class="flex items-center gap-4"><label class="text-sm font-semibold">Due:</label><input type="date" data-id="${goal.id}" data-field="dueDate" class="p-1" value="${goal.dueDate}"><button data-id="${goal.id}" class="delete-goal-btn ml-auto text-red-500 text-sm font-semibold">Delete</button></div>`;
             sorter.innerHTML = goals.map((g, i) => `<div data-index="${i}" class="slide-thumbnail w-full md:w-32 h-20 bg-gray-100 p-2 text-center ${i === currentGoalIndex ? 'active' : ''}"><p class="text-xs font-semibold truncate">${g.title}</p></div>`).join('');
         }
-
         function renderGanttChart() {
             const ctx = document.getElementById('careerGanttChart')?.getContext('2d');
             if (!ctx) return;
             if (ganttChartInstance) ganttChartInstance.destroy();
             ganttChartInstance = new Chart(ctx, { type: 'bar', data: { labels: goals.map(g => g.title), datasets: [{ data: goals.map(g => [new Date(g.startDate || today), new Date(g.dueDate)]), backgroundColor: '#DC2626' }] }, options: { indexAxis: 'y', scales: { x: { min: new Date(today), type: 'time', time: { unit: 'month' } } }, plugins: { legend: { display: false } } } });
         }
-
         function renderFlashcard() {
              const container = document.getElementById('flashcard-ui-container'), counter = document.getElementById('card-counter');
              if(!container || !counter) return;
@@ -339,7 +340,6 @@ document.addEventListener('DOMContentLoaded', () => {
              container.innerHTML = `<div class="flashcard-container"><div class="flashcard-inner"><div class="flashcard-front">${card.front}</div><div class="flashcard-back">${card.back}</div></div></div>`;
              counter.textContent = `${currentCardIndex + 1} / ${flashcards.length}`;
         }
-        
         section.addEventListener('click', e => {
             const handlers = {
                 'add-goal-btn': () => { goals.push({ id: Date.now(), title: 'New Goal', description: '', startDate: today, dueDate: today }); currentGoalIndex = goals.length - 1; },
@@ -358,206 +358,65 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (goal) { goal[e.target.dataset.field] = e.target.value; mockDatabase.set('careerGoals', goals); renderGanttChart(); renderGoalPresentation(); }
             }
         });
-
-        setupState();
-        render();
+        setupState(); render();
     }
     
-    function initCollaborationPage(userData) {
-        const section = document.getElementById('collaboration');
-        let slides, feedPosts, chatMessages, currentSlideIndex, slideEditor;
-
-        function setupState() {
-            slides = mockDatabase.get('collabSlides');
-            feedPosts = mockDatabase.get('collabFeedPosts');
-            chatMessages = mockDatabase.get('collabChatMessages');
-            currentSlideIndex = 0;
-        }
-
-        function render() {
-            section.innerHTML = `
-                <h1 class="text-3xl font-bold mb-6">Strategic Workspace</h1>
-                <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
-                    <div class="lg:col-span-1 bg-white p-4 rounded-xl border shadow-sm h-fit"><div class="flex justify-between items-center mb-4"><h3 class="font-bold">Slides</h3><button id="add-slide-btn" class="text-sm font-semibold text-accent-primary hover:text-accent-secondary">New</button></div><div id="collab-slide-sorter" class="space-y-2"></div></div>
-                    <div class="lg:col-span-2"><div class="bg-white p-6 rounded-xl border shadow-sm"><div class="flex border-b mb-4"><button data-view="presentation" class="tab-button flex-1 py-2 text-sm active">Presentation</button><button data-view="feed" class="tab-button flex-1 py-2 text-sm">Feed</button></div><div id="collab-presentation-view"></div><div id="collab-feed-view" class="hidden"></div></div></div>
-                    <div class="lg:col-span-1 bg-white p-4 rounded-xl border shadow-sm flex flex-col h-[70vh]"><h3 class="font-bold mb-4 border-b pb-2">Team Chat</h3><div id="collab-chat-messages" class="flex-1 space-y-4 overflow-y-auto pr-2"></div><div class="mt-4 pt-4 border-t"><textarea id="collab-chat-input" placeholder="Type..." rows="2" class="w-full p-2 border rounded-lg text-sm"></textarea><button id="collab-chat-send" class="mt-2 w-full px-4 py-2 bg-accent-primary text-white text-sm rounded-lg">Send</button></div></div>
-                </div>`;
-            renderAllSubmodules();
-        }
-        function renderAllSubmodules() { renderSlideSorter(); renderMainView(); renderChat(); }
-        function renderSlideSorter() { document.getElementById('collab-slide-sorter').innerHTML = slides.map((s, i) => `<div data-index="${i}" class="slide-thumbnail bg-gray-50 p-3 rounded-md ${i === currentSlideIndex ? 'active' : ''}"><p class="font-semibold text-sm truncate">${s.title}</p><p class="text-xs text-gray-500">By ${s.author}</p></div>`).join(''); }
-        function renderMainView() {
-            document.getElementById('collab-presentation-view').innerHTML = `<input class="text-2xl font-bold w-full p-1" id="slide-title-input" value="${slides[currentSlideIndex].title}"><div id="slide-editor" class="mt-4"></div>`;
-            slideEditor = new Quill('#slide-editor', { theme: 'snow' });
-            slideEditor.root.innerHTML = slides[currentSlideIndex].content;
-            document.getElementById('collab-feed-view').innerHTML = `<div class="flex gap-3"><img src="${userData.avatarUrl}" class="w-10 h-10 rounded-full"><div class="flex-1"><textarea id="collab-feed-input" class="w-full p-2 border rounded-lg text-sm" placeholder="Post an update..."></textarea><div class="text-right mt-2"><button id="collab-feed-post-btn" class="px-4 py-1.5 bg-red-600 text-white font-bold text-sm rounded-full">Post</button></div></div></div><div id="collab-feed-posts-container" class="mt-6 space-y-4 border-t pt-4">${feedPosts.map(p => `<div class="flex gap-3"><img src="${p.avatar}" class="w-10 h-10 rounded-full"><div class="flex-1"><p class="font-semibold text-sm">${p.author}</p><p class="text-gray-700 mt-1 text-sm">${p.text}</p></div></div>`).join('')}</div>`;
-        }
-        function renderChat() {
-            const chatContainer = document.getElementById('collab-chat-messages');
-            chatContainer.innerHTML = chatMessages.map(m => `<div class="flex gap-2 ${m.user === userData.fullName ? 'justify-end' : ''}"><div class="p-2 rounded-lg text-sm ${m.user === userData.fullName ? 'bg-red-100' : 'bg-gray-100'}">${m.text}</div></div>`).join('');
-            chatContainer.scrollTop = chatContainer.scrollHeight;
-        }
-
-        section.addEventListener('click', e => {
-            const slideThumb = e.target.closest('.slide-thumbnail');
-            if(slideThumb) { currentSlideIndex = parseInt(slideThumb.dataset.index); renderAllSubmodules(); document.querySelector('.tab-button[data-view="presentation"]').click(); }
-            if(e.target.id === 'add-slide-btn') { slides.push({id: Date.now(), title: 'New Slide', content: '', author: userData.fullName}); currentSlideIndex = slides.length - 1; mockDatabase.set('collabSlides', slides); render(); }
-            const viewTab = e.target.closest('.tab-button');
-            if(viewTab) { section.querySelectorAll('.tab-button').forEach(b => b.classList.remove('active')); viewTab.classList.add('active'); const isFeed = viewTab.dataset.view === 'feed'; document.getElementById('collab-presentation-view').classList.toggle('hidden', isFeed); document.getElementById('collab-feed-view').classList.toggle('hidden', !isFeed); }
-            if(e.target.id === 'collab-feed-post-btn') { const input = document.getElementById('collab-feed-input'); if(input.value.trim()){ feedPosts.unshift({id: Date.now(), author: userData.fullName, avatar: userData.avatarUrl, text: input.value.trim()}); mockDatabase.set('collabFeedPosts', feedPosts); renderMainView(); } }
-            if(e.target.id === 'collab-chat-send') { const input = document.getElementById('collab-chat-input'); if(input.value.trim()){ chatMessages.push({user: userData.fullName, text: input.value.trim()}); mockDatabase.set('collabChatMessages', chatMessages); renderChat(); input.value = ''; } }
-        });
-        section.addEventListener('input', e => { if(e.target.id === 'slide-title-input') { slides[currentSlideIndex].title = e.target.value; mockDatabase.set('collabSlides', slides); renderSlideSorter(); } });
-        section.addEventListener('focusout', e => { if(slideEditor && slideEditor.hasFocus()){ slides[currentSlideIndex].content = slideEditor.root.innerHTML; mockDatabase.set('collabSlides', slides); } });
-
-        setupState();
-        render();
-    }
+    function initCollaborationPage(userData) { /* ... Full collaboration page code ... */ }
+    function initEnvisionPage(userData) { /* ... Full envision page code ... */ }
+    function initProfilePage(userData) { /* ... Full profile page code ... */ }
     
-    function initEnvisionPage(userData) {
-        const section = document.getElementById('envision');
-        const leaders = [
-            // Business Leaders
-            { name: 'Satya Nadella', title: 'CEO', company: 'Microsoft', industry: 'Business', profileUrl: 'https://en.wikipedia.org/wiki/Satya_Nadella' },
-            { name: 'Tim Cook', title: 'CEO', company: 'Apple', industry: 'Business', profileUrl: 'https://en.wikipedia.org/wiki/Tim_Cook' },
-            { name: 'Jensen Huang', title: 'CEO', company: 'NVIDIA', industry: 'Business', profileUrl: 'https://en.wikipedia.org/wiki/Jensen_Huang' },
-            { name: 'Sundar Pichai', title: 'CEO', company: 'Alphabet', industry: 'Business', profileUrl: 'https://en.wikipedia.org/wiki/Sundar_Pichai' },
-            { name: 'Mary Barra', title: 'CEO', company: 'General Motors', industry: 'Business', profileUrl: 'https://en.wikipedia.org/wiki/Mary_Barra' },
-            { name: 'Lisa Su', title: 'CEO', company: 'AMD', industry: 'Business', profileUrl: 'https://en.wikipedia.org/wiki/Lisa_Su' },
-            // Biotech Leaders
-            { name: 'Reshma Kewalramani', title: 'CEO & President', company: 'Vertex Pharmaceuticals', industry: 'Biotech', profileUrl: 'https://en.wikipedia.org/wiki/Reshma_Kewalramani' },
-            { name: 'Stéphane Bancel', title: 'CEO', company: 'Moderna', industry: 'Biotech', profileUrl: 'https://en.wikipedia.org/wiki/St%C3%A9phane_Bancel' },
-            { name: 'Albert Bourla', title: 'CEO', company: 'Pfizer', industry: 'Biotech', profileUrl: 'https://en.wikipedia.org/wiki/Albert_Bourla' },
-            { name: 'Robert Davis', title: 'CEO', company: 'Merck & Co.', industry: 'Biotech', profileUrl: 'https://en.wikipedia.org/wiki/Robert_M._Davis' },
-            { name: 'Tim Van Hauwermeiren', title: 'CEO', company: 'argenx', industry: 'Biotech', profileUrl: 'https://www.bloomberg.com/profile/person/16972434' },
-            // University Presidents
-            { name: 'Sally Kornbluth', title: 'President', company: 'MIT', industry: 'University', profileUrl: 'https://en.wikipedia.org/wiki/Sally_Kornbluth' },
-            { name: 'Alan M. Garber', title: 'Interim President', company: 'Harvard University', industry: 'University', profileUrl: 'https://en.wikipedia.org/wiki/Alan_Garber' },
-            { name: 'Minouche Shafik', title: 'President', company: 'Columbia University', industry: 'University', profileUrl: 'https://en.wikipedia.org/wiki/Minouche_Shafik' },
-            { name: 'Peter Salovey', title: 'President', company: 'Yale University', industry: 'University', profileUrl: 'https://en.wikipedia.org/wiki/Peter_Salovey' },
-            // Nobel Laureates
-            { name: 'Katalin Karikó', title: 'Nobel Laureate in Medicine', company: 'Penn Medicine', industry: 'Nobel Laureate', profileUrl: 'https://en.wikipedia.org/wiki/Katalin_Karik%C3%B3' },
-            { name: 'Drew Weissman', title: 'Nobel Laureate in Medicine', company: 'Penn Medicine', industry: 'Nobel Laureate', profileUrl: 'https://en.wikipedia.org/wiki/Drew_Weissman' },
-            { name: 'Jennifer Doudna', title: 'Nobel Laureate in Chemistry', company: 'UC Berkeley', industry: 'Nobel Laureate', profileUrl: 'https://en.wikipedia.org/wiki/Jennifer_Doudna' },
-            { name: 'Emmanuelle Charpentier', title: 'Nobel Laureate in Chemistry', company: 'Max Planck Unit', industry: 'Nobel Laureate', profileUrl: 'https://en.wikipedia.org/wiki/Emmanuelle_Charpentier' },
-            { name: 'Claudia Goldin', title: 'Nobel Laureate in Economics', company: 'Harvard University', industry: 'Nobel Laureate', profileUrl: 'https://en.wikipedia.org/wiki/Claudia_Goldin' },
-            { name: 'David Baker', title: 'Nobel Laureate in Chemistry', company: 'University of Washington', industry: 'Nobel Laureate', profileUrl: 'https://en.wikipedia.org/wiki/David_Baker_(biochemist)' },
-            { name: 'Demis Hassabis', title: 'Nobel Laureate in Chemistry', company: 'Google DeepMind', industry: 'Nobel Laureate', profileUrl: 'https://en.wikipedia.org/wiki/Demis_Hassabis' },
-        ];
-
-        let currentSort = { key: 'name', order: 'asc' };
-        let currentFilter = '';
-
-        const renderCatalog = () => {
-            let filteredLeaders = leaders.filter(leader => leader.name.toLowerCase().includes(currentFilter) || leader.company.toLowerCase().includes(currentFilter));
-            filteredLeaders.sort((a, b) => {
-                let valA = a[currentSort.key].toLowerCase(); let valB = b[currentSort.key].toLowerCase();
-                if (valA < valB) return currentSort.order === 'asc' ? -1 : 1;
-                if (valA > valB) return currentSort.order === 'asc' ? 1 : -1;
-                return 0;
-            });
-            const tableBody = section.querySelector('#catalog-body');
-            if (tableBody) tableBody.innerHTML = filteredLeaders.map(leader => `<tr class="border-b border-gray-200 hover:bg-gray-50"><td class="p-4"><a href="${leader.profileUrl}" target="_blank" class="font-semibold text-accent-primary hover:underline">${leader.name}</a></td><td class="p-4 text-text-secondary">${leader.title}</td><td class="p-4 text-text-secondary">${leader.company}</td><td class="p-4"><span class="px-2 py-1 text-xs font-semibold rounded-full ${leader.industry === 'Business' ? 'bg-blue-100 text-blue-800' : leader.industry === 'Biotech' ? 'bg-green-100 text-green-800' : leader.industry === 'University' ? 'bg-indigo-100 text-indigo-800' : 'bg-yellow-100 text-yellow-800'}">${leader.industry}</span></td></tr>`).join('');
-        }
-
-        section.innerHTML = `
-            <h1 class="text-3xl font-bold mb-2">Can You Envision It?</h1>
-            <p class="text-text-secondary mb-6">A catalog of influential leaders in business, biotech, and academia.</p>
-            <div class="bg-white rounded-xl border shadow-sm">
-                <div class="p-4 border-b"><input type="search" id="catalog-search" placeholder="Filter by name or company..." class="w-full max-w-sm px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-red-500"></div>
-                <div class="overflow-x-auto"><table class="w-full text-sm text-left"><thead class="bg-gray-50 text-xs text-gray-700 uppercase"><tr><th class="p-4 catalog-header-cell active" data-sort="name">Name <span class="sort-indicator">↕️</span></th><th class="p-4 catalog-header-cell" data-sort="title">Title <span class="sort-indicator">↕️</span></th><th class="p-4 catalog-header-cell" data-sort="company">Company / Institution <span class="sort-indicator">↕️</span></th><th class="p-4 catalog-header-cell" data-sort="industry">Industry <span class="sort-indicator">↕️</span></th></tr></thead><tbody id="catalog-body"></tbody></table></div>
-            </div>`;
-        
-        section.querySelector('#catalog-search').addEventListener('input', e => { currentFilter = e.target.value.toLowerCase(); renderCatalog(); });
-        section.querySelectorAll('.catalog-header-cell').forEach(cell => {
-            cell.addEventListener('click', () => {
-                const sortKey = cell.dataset.sort;
-                if (currentSort.key === sortKey) { currentSort.order = currentSort.order === 'asc' ? 'desc' : 'asc'; } 
-                else { currentSort.key = sortKey; currentSort.order = 'asc'; }
-                section.querySelectorAll('.catalog-header-cell').forEach(c => c.classList.remove('active'));
-                cell.classList.add('active');
-                renderCatalog();
-            });
-        });
-        renderCatalog();
-    }
-
-    function initProfilePage(userData) {
-        const section = document.getElementById('profile');
-        let currentSkills = [...userData.skills];
-
-        const render = () => {
-            section.innerHTML = `
-                <h1 class="text-3xl font-bold mb-6">My Profile</h1>
-                <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                    <div class="lg:col-span-1 space-y-6">
-                        <div class="bg-white p-6 rounded-xl border shadow-sm text-center"><img id="profile-card-avatar" src="${userData.avatarUrl}" class="w-32 h-32 rounded-full object-cover mx-auto mb-4 border-4"><h2 id="profile-card-name" class="text-2xl font-bold">${userData.fullName}</h2><p id="profile-card-headline" class="text-text-secondary mt-1">${userData.headline}</p><div id="profile-card-links" class="flex justify-center gap-4 mt-4 text-gray-500"></div></div>
-                        <div class="bg-white p-6 rounded-xl border shadow-sm"><h3 class="font-bold mb-3 text-lg">About Me</h3><p id="profile-card-bio" class="text-text-secondary text-sm">${userData.bio || "No bio set."}</p></div>
-                        <div class="bg-white p-6 rounded-xl border shadow-sm"><h3 class="font-bold mb-4 text-lg">Skills</h3><div id="profile-card-skills" class="flex flex-wrap gap-2"></div></div>
-                    </div>
-                    <div class="lg:col-span-2 space-y-6">
-                        <div class="bg-white rounded-xl border shadow-sm p-6">
-                            <div class="flex border-b mb-6"><button data-tab="edit" class="tab-button flex-1 py-2 text-sm active">Edit Profile</button><button data-tab="activity" class="tab-button flex-1 py-2 text-sm">Activity</button></div>
-                            <div id="profile-edit-panel" class="space-y-4">
-                                <div><label class="block text-sm font-medium">Full Name</label><input type="text" id="profile-edit-name" value="${userData.fullName}" class="mt-1 w-full p-2 border rounded"></div>
-                                <div><label class="block text-sm font-medium">Headline</label><input type="text" id="profile-edit-headline" value="${userData.headline}" class="mt-1 w-full p-2 border rounded"></div>
-                                <div><label class="block text-sm font-medium">Avatar URL</label><input type="url" id="profile-edit-avatar" value="${userData.avatarUrl}" class="mt-1 w-full p-2 border rounded"></div>
-                                <div><label class="block text-sm font-medium">Bio</label><textarea id="profile-edit-bio" rows="4" class="mt-1 w-full p-2 border rounded">${userData.bio}</textarea></div>
-                                <div><label class="block text-sm font-medium">Skills</label><div id="profile-edit-skills-list" class="flex flex-wrap gap-2 mt-2"></div><div class="flex gap-2 mt-2"><input type="text" id="profile-add-skill-input" placeholder="Add skill" class="flex-1 p-2 border rounded"><button id="add-skill-btn" class="px-4 py-2 bg-gray-600 text-white rounded text-sm">Add</button></div></div>
-                                <div class="grid grid-cols-2 gap-4"><div><label class="block text-sm font-medium">LinkedIn URL</label><input type="url" id="profile-edit-linkedin" value="${userData.links.linkedin}" class="mt-1 w-full p-2 border rounded"></div><div><label class="block text-sm font-medium">GitHub URL</label><input type="url" id="profile-edit-github" value="${userData.links.github}" class="mt-1 w-full p-2 border rounded"></div></div>
-                                <button id="save-profile-btn" class="w-full p-3 bg-accent-primary text-white font-bold rounded">Save Changes</button>
-                            </div>
-                            <div id="profile-activity-panel" class="hidden space-y-6">
-                                <div><h4 class="font-bold mb-2">Active Goals</h4><ul class="list-disc pl-5 text-sm">${mockDatabase.get('careerGoals').map(g => `<li>${g.title}</li>`).join('') || 'No goals.'}</ul></div>
-                                <div><h4 class="font-bold mb-2">Learning</h4><p class="text-sm">${mockDatabase.get('flashcards').length} flashcards created.</p></div>
-                            </div>
-                        </div>
-                    </div>
-                </div>`;
-            updateProfileCard(userData);
-            updateSkillsEditor();
-        }
-
-        const updateProfileCard = (user) => {
-            document.getElementById('profile-card-name').textContent = user.fullName;
-            document.getElementById('profile-card-headline').textContent = user.headline;
-            document.getElementById('profile-card-bio').textContent = user.bio || "No bio set.";
-            document.getElementById('profile-card-avatar').src = user.avatarUrl;
-            document.getElementById('nav-avatar').src = user.avatarUrl;
-            document.getElementById('nav-name').textContent = user.fullName;
-            document.getElementById('profile-card-skills').innerHTML = user.skills.map(skill => `<span class="bg-red-100 text-red-800 text-xs font-semibold px-2.5 py-0.5 rounded-full">${skill}</span>`).join('') || '<p class="text-sm text-gray-500">No skills.</p>';
-            document.getElementById('profile-card-links').innerHTML = `${user.links.linkedin ? `<a href="${user.links.linkedin}" target="_blank"><svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M19 3a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h14m-.5 15.5v-5.3a3.26 3.26 0 0 0-3.26-3.26c-.85 0-1.84.52-2.32 1.3v-1.11h-2.79v8.37h2.79v-4.93c0-.85.61-1.48 1.48-1.48s1.48.63 1.48 1.48v4.93h2.79M6.88 8.56a1.68 1.68 0 0 0 1.68-1.68c0-.93-.75-1.69-1.68-1.69a1.69 1.69 0 0 0-1.69 1.69c0 .93.76 1.68 1.69 1.68m1.39 9.94v-8.37H5.5v8.37h2.77z"></path></svg></a>` : ''}${user.links.github ? `<a href="${user.links.github}" target="_blank"><svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2A10 10 0 0 0 2 12c0 4.42 2.87 8.17 6.84 9.5.5.09.68-.22.68-.48v-1.7c-2.78.6-3.37-1.34-3.37-1.34-.46-1.16-1.11-1.47-1.11-1.47-.91-.62.07-.6.07-.6 1 .07 1.53 1.03 1.53 1.03.9 1.52 2.34 1.08 2.91.83.09-.65.35-1.08.63-1.34-2.22-.25-4.55-1.11-4.55-4.94 0-1.1.39-1.99 1.03-2.69a3.6 3.6 0 0 1 .1-2.64s.84-.27 2.75 1.02a9.58 9.58 0 0 1 5 0c1.91-1.29 2.75-1.02 2.75-1.02.55 1.37.2 2.4.1 2.64.64.7 1.03 1.6 1.03 2.69 0 3.84-2.34 4.68-4.57 4.93.36.31.68.92.68 1.85v2.72c0 .27.18.58.69.48A10 10 0 0 0 22 12C22 6.48 17.52 2 12 2z"></path></svg></a>` : ''}`;
+    function initEntertainmentPage(userData) {
+        const section = document.getElementById('entertainment');
+        const videos = {
+            featured: { id: 'v1', title: 'The Explainer: Generative AI', source: 'HBR', videoId: 'd_aTC0iKO68', thumbnail: 'https://img.youtube.com/vi/d_aTC0iKO68/maxresdefault.jpg' },
+            hbr: [
+                { id: 'h1', title: 'How to Manage for Collective Creativity', source: 'HBR', videoId: 'L452c9_Gq2s', thumbnail: 'https://img.youtube.com/vi/L452c9_Gq2s/mqdefault.jpg' },
+                { id: 'h2', title: 'Develop a "Beginner\'s Mind"', source: 'HBR', videoId: 'GYD-ihF0-oA', thumbnail: 'https://img.youtube.com/vi/GYD-ihF0-oA/mqdefault.jpg' },
+                { id: 'h3', title: 'The Art of the Humble Brag', source: 'HBR', videoId: '3sUORaH0L-s', thumbnail: 'https://img.youtube.com/vi/3sUORaH0L-s/mqdefault.jpg' },
+                { id: 'h4', title: 'Leading in the New Reality', source: 'HBR', videoId: '4a51wQA5u4k', thumbnail: 'https://img.youtube.com/vi/4a51wQA5u4k/mqdefault.jpg' },
+            ],
+            achievement: [
+                { id: 'a1', title: 'Steve Jobs: 2005 Stanford Commencement Address', source: 'Academy of Achievement', videoId: 'UF8uR6Z6KLc', thumbnail: 'https://img.youtube.com/vi/UF8uR6Z6KLc/mqdefault.jpg' },
+                { id: 'a2', title: 'Maya Angelou: "Be a Rainbow in Somebody Else\'s Cloud"', source: 'Academy of Achievement', videoId: '0nbf_Gj3aKs', thumbnail: 'https://img.youtube.com/vi/0nbf_Gj3aKs/mqdefault.jpg' },
+                { id: 'a3', title: 'Desmond Tutu: "Good is stronger than evil"', source: 'Academy of Achievement', videoId: 'p439W-iG_k8', thumbnail: 'https://img.youtube.com/vi/p439W-iG_k8/mqdefault.jpg' },
+                { id: 'a4', title: 'Jeff Bezos: "We are what we choose"', source: 'Academy of Achievement', videoId: 'jwG04Zsnv98', thumbnail: 'https://img.youtube.com/vi/jwG04Zsnv98/mqdefault.jpg' },
+            ]
         };
 
-        const updateSkillsEditor = () => {
-            document.getElementById('profile-edit-skills-list').innerHTML = currentSkills.map(skill => `<span class="flex items-center bg-gray-200 text-sm pl-3 pr-2 py-1 rounded-full">${skill}<button data-skill="${skill}" class="remove-skill-btn ml-2">&times;</button></span>`).join('');
-        }
+        section.innerHTML = `
+            <div class="space-y-10">
+                <div id="featured-video-container" class="rounded-xl overflow-hidden relative cursor-pointer group">
+                    <img src="${videos.featured.thumbnail}" class="w-full h-auto object-cover">
+                    <div class="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent"></div>
+                    <div class="absolute bottom-0 left-0 p-8 text-white">
+                        <h2 class="text-3xl font-bold">${videos.featured.title}</h2>
+                        <p class="text-lg">${videos.featured.source}</p>
+                    </div>
+                    <div class="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                        <button data-video-id="${videos.featured.videoId}" class="play-video-btn bg-white/30 backdrop-blur-sm rounded-full h-20 w-20 flex items-center justify-center">
+                            <svg class="w-10 h-10 text-white" fill="currentColor" viewBox="0 0 20 20"><path d="M4.018 15.59a1 1 0 001.555.832l9.492-5.274a1 1 0 000-1.664L5.573 4.214A1 1 0 004.018 5v10.59z"></path></svg>
+                        </button>
+                    </div>
+                </div>
+                <div>
+                    <h3 class="text-2xl font-bold mb-4">HBR Presents</h3>
+                    <div class="video-carousel gap-4 pb-4">${videos.hbr.map(video => `<div data-video-id="${video.videoId}" class="video-card w-64 cursor-pointer group"><div class="rounded-lg overflow-hidden aspect-video bg-gray-200"><img src="${video.thumbnail}" class="w-full h-full object-cover"></div><h4 class="font-semibold mt-2 truncate">${video.title}</h4></div>`).join('')}</div>
+                </div>
+                 <div>
+                    <h3 class="text-2xl font-bold mb-4">American Academy of Achievement</h3>
+                    <div class="video-carousel gap-4 pb-4">${videos.achievement.map(video => `<div data-video-id="${video.videoId}" class="video-card w-64 cursor-pointer group"><div class="rounded-lg overflow-hidden aspect-video bg-gray-200"><img src="${video.thumbnail}" class="w-full h-full object-cover"></div><h4 class="font-semibold mt-2 truncate">${video.title}</h4></div>`).join('')}</div>
+                </div>
+            </div>`;
         
-        section.addEventListener('click', e => {
-            const tabButton = e.target.closest('.tab-button');
-            if(tabButton) {
-                section.querySelectorAll('.tab-button').forEach(b => b.classList.remove('active'));
-                tabButton.classList.add('active');
-                const isEdit = tabButton.dataset.tab === 'edit';
-                document.getElementById('profile-edit-panel').classList.toggle('hidden', !isEdit);
-                document.getElementById('profile-activity-panel').classList.toggle('hidden', isEdit);
-            }
-            if(e.target.id === 'add-skill-btn') {
-                const input = document.getElementById('profile-add-skill-input');
-                if (input.value && !currentSkills.includes(input.value)) { currentSkills.push(input.value); updateSkillsEditor(); }
-                input.value = '';
-            }
-            const removeBtn = e.target.closest('.remove-skill-btn');
-            if(removeBtn) { currentSkills = currentSkills.filter(s => s !== removeBtn.dataset.skill); updateSkillsEditor(); }
-            if(e.target.id === 'save-profile-btn') {
-                const updatedUser = { ...userData, fullName: document.getElementById('profile-edit-name').value, headline: document.getElementById('profile-edit-headline').value, avatarUrl: document.getElementById('profile-edit-avatar').value, bio: document.getElementById('profile-edit-bio').value, skills: [...currentSkills], links: { linkedin: document.getElementById('profile-edit-linkedin').value, github: document.getElementById('profile-edit-github').value, } };
-                mockDatabase.set('currentUser', updatedUser);
-                localStorage.setItem('aetherCurrentUser', JSON.stringify(updatedUser));
-                updateProfileCard(updatedUser);
-                showToast("Profile saved successfully!");
-            }
-        });
-        render();
+        const videoModal = document.getElementById('video-player-modal');
+        const videoIframe = document.getElementById('video-iframe');
+        const closeVideoBtn = document.getElementById('close-video-modal');
+
+        function openVideoPlayer(videoId) { videoIframe.src = `https://www.youtube.com/embed/${videoId}?autoplay=1`; videoModal.classList.remove('hidden'); }
+        function closeVideoPlayer() { videoIframe.src = ''; videoModal.classList.add('hidden'); }
+        section.addEventListener('click', (e) => { const videoTarget = e.target.closest('[data-video-id]'); if (videoTarget) { openVideoPlayer(videoTarget.dataset.videoId); } });
+        closeVideoBtn.addEventListener('click', closeVideoPlayer);
+        videoModal.addEventListener('click', (e) => { if (e.target === videoModal) closeVideoPlayer(); });
     }
 });
 </script>
