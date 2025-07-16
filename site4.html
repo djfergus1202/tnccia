@@ -105,6 +105,8 @@
              border-top-right-radius: 0.5rem;
              border-bottom: 1px solid var(--border-color) !important;
         }
+        .accordion-button svg { transition: transform 0.3s; }
+        .accordion-button.open svg { transform: rotate(180deg); }
     </style>
 </head>
 <body class="antialiased">
@@ -705,7 +707,191 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     
     function initStrategyPage() {
-        // ... (All strategy and Gantt logic would go here)
+        const strategySection = document.getElementById('strategy');
+        strategySection.innerHTML = `
+            <h1 class="text-3xl font-bold mb-6">My Strategic Plan</h1>
+            <div class="bg-white p-6 rounded-xl border shadow-sm mb-8">
+                <h2 class="text-xl font-bold mb-4">Project Timeline (Gantt Chart)</h2>
+                 <canvas id="ganttChart" height="100"></canvas>
+            </div>
+            
+            <div id="ceo-career-map-container" class="bg-white p-6 rounded-xl border shadow-sm">
+                <h2 class="text-2xl font-bold mb-2">CEO Career Map: A Strategic Analysis</h2>
+                <p class="text-text-secondary mb-6">Analyze the career paths of top performers by applying Michael Porter's strategic frameworks. Understand how leaders build a competitive advantage in their careers.</p>
+                
+                <div class="flex border-b mb-4" id="ceo-map-tabs">
+                    <button data-tab="presidents" class="career-map-tab flex-1 py-2 text-sm font-semibold border-b-2 border-transparent active">US Presidents</button>
+                    <button data-tab="tech" class="career-map-tab flex-1 py-2 text-sm font-semibold border-b-2 border-transparent">Tech/Computing Leaders</button>
+                    <button data-tab="biotech" class="career-map-tab flex-1 py-2 text-sm font-semibold border-b-2 border-transparent">Biotech/Pharma Leaders</button>
+                </div>
+
+                <div id="ceo-map-content">
+                    <div id="presidents-content" class="career-map-content-panel space-y-3">
+                        <div class="accordion-item border rounded-lg">
+                           <button class="accordion-button w-full flex justify-between items-center p-4 text-left font-semibold">
+                                Career as a Value Chain
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                           </button>
+                           <div class="accordion-content p-4 pt-0 text-text-secondary">
+                                <p>Presidential careers often follow a distinct 'value chain' of accumulating public trust and experience. Key activities include:</p>
+                                <ul class="list-disc pl-5 mt-2 space-y-1">
+                                    <li><b>Inbound Logistics:</b> Foundational education (often in law) and military service provide initial credibility and discipline.</li>
+                                    <li><b>Operations:</b> Holding lower offices (e.g., Governor, Senator) serves as the core 'operational' experience in governance.</li>
+                                    <li><b>Marketing & Sales:</b> Campaigning, fundraising, and public speaking are critical for 'selling' their vision to the electorate.</li>
+                                    <li><b>Service:</b> Public service initiatives, policy advocacy, and diplomatic efforts build a track record and demonstrate capability.</li>
+                                </ul>
+                           </div>
+                        </div>
+                         <div class="accordion-item border rounded-lg">
+                           <button class="accordion-button w-full flex justify-between items-center p-4 text-left font-semibold">
+                                Strategic Differentiation
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                           </button>
+                           <div class="accordion-content p-4 pt-0 text-text-secondary">
+                                <p>Successful candidates differentiate themselves through a unique brand or coalition. Examples include the 'outsider' status, a specific policy focus (e.g., economic reform, healthcare), or a persona that resonates with the current national mood (e.g., unifier, strong leader). This is less about being better at every aspect of politics and more about being uniquely suited for a specific moment in time.</p>
+                           </div>
+                        </div>
+                    </div>
+
+                    <div id="tech-content" class="career-map-content-panel space-y-3 hidden">
+                        <div class="accordion-item border rounded-lg">
+                           <button class="accordion-button w-full flex justify-between items-center p-4 text-left font-semibold">
+                                Differentiation vs. Focus Strategy
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                           </button>
+                           <div class="accordion-content p-4 pt-0 text-text-secondary">
+                                <p>Tech leadership paths showcase two of Porter's generic strategies:</p>
+                                <ul class="list-disc pl-5 mt-2 space-y-1">
+                                    <li><b>Differentiation (CEO Path):</b> Aspiring CEOs often build a broad skillset across product, engineering, and business (e.g., the 'product-minded engineer' who gets an MBA). They differentiate by integrating technical depth with market vision. Many found their own companies to create a unique value proposition from scratch.</li>
+                                    <li><b>Focus (CTO Path):</b> CTOs often pursue a focus strategy, aiming to be the world's best in a specific, high-leverage technical domain (e.g., distributed systems, AI/ML, cybersecurity). Their competitive advantage is unparalleled depth, not breadth.</li>
+                                </ul>
+                           </div>
+                        </div>
+                         <div class="accordion-item border rounded-lg">
+                           <button class="accordion-button w-full flex justify-between items-center p-4 text-left font-semibold">
+                                Five Forces Analysis of the Tech Talent Market
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                           </button>
+                           <div class="accordion-content p-4 pt-0 text-text-secondary">
+                               <p>An individual's career 'profitability' (i.e., compensation and influence) is shaped by market forces:</p>
+                               <ul class="list-disc pl-5 mt-2 space-y-1">
+                                   <li><b>Threat of New Entrants:</b> High, due to global talent pools and online learning, but barriers exist in the form of elite credentials and experience.</li>
+                                   <li><b>Bargaining Power of Buyers (Employers):</b> High, but top talent can command premium due to scarcity.</li>
+                                   <li><b>Threat of Substitute Products (Automation/AI):</b> Increasing for routine tasks, pushing talent towards strategic, creative, and leadership roles.</li>
+                               </ul>
+                           </div>
+                        </div>
+                    </div>
+                    
+                    <div id="biotech-content" class="career-map-content-panel space-y-3 hidden">
+                        <div class="accordion-item border rounded-lg">
+                           <button class="accordion-button w-full flex justify-between items-center p-4 text-left font-semibold">
+                                The Dual Value Chain: Science and Business
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                           </button>
+                           <div class="accordion-content p-4 pt-0 text-text-secondary">
+                                <p>Biotech/Pharma leaders manage a career that must add value across two parallel chains:</p>
+                                <ul class="list-disc pl-5 mt-2 space-y-1">
+                                    <li><b>Scientific Chain:</b> Bench research (PhD/Postdoc) -> Clinical trial management -> R&D leadership. Value is created through discovery and data.</li>
+                                    <li><b>Business Chain:</b> Business development -> M&A -> P&L management -> Corporate leadership. Value is created through commercialization and market access.</li>
+                                    <li class="font-semibold mt-1">The most successful leaders are those who can bridge these two chains, often by pairing a deep science background (MD or PhD) with an MBA or significant operational experience.</li>
+                                </ul>
+                           </div>
+                        </div>
+                         <div class="accordion-item border rounded-lg">
+                           <button class="accordion-button w-full flex justify-between items-center p-4 text-left font-semibold">
+                                Niche Focus Strategy (Biotech)
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                           </button>
+                           <div class="accordion-content p-4 pt-0 text-text-secondary">
+                               <p>Especially in biotech, many successful careers are built on a "Focus" strategy. A scientist may spend decades becoming the world's expert on a single protein pathway or therapeutic modality (e.g., mRNA, CRISPR). This deep focus makes them indispensable for companies operating in that niche, allowing them to found companies or rise to Chief Scientific Officer roles based on their unique, defensible expertise.</p>
+                           </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        `;
+        
+        // Gantt Chart Logic (simplified for demonstration)
+        const ganttCtx = document.getElementById('ganttChart').getContext('2d');
+        new Chart(ganttCtx, {
+            type: 'bar',
+            data: {
+                labels: mockDatabase.get('ganttTasks').map(t => t.name),
+                datasets: [{
+                    label: 'Start Date',
+                    data: mockDatabase.get('ganttTasks').map(t => new Date(t.start).getTime()),
+                    backgroundColor: 'rgba(0,0,0,0)',
+                    barPercentage: 0.5,
+                }, {
+                    label: 'End Date',
+                    data: mockDatabase.get('ganttTasks').map(t => new Date(t.end).getTime() - new Date(t.start).getTime()),
+                    backgroundColor: mockDatabase.get('ganttTasks').map(t => t.color || '#DC2626'),
+                    barPercentage: 0.5,
+                }]
+            },
+            options: {
+                indexAxis: 'y',
+                scales: {
+                    x: {
+                        position: 'top',
+                        min: new Date('2025-07-01').getTime(),
+                        ticks: {
+                            callback: value => new Date(value).toLocaleDateString()
+                        }
+                    },
+                    y: { stacked: true }
+                },
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                         callbacks: {
+                            label: function(context) {
+                                const task = mockDatabase.get('ganttTasks')[context.dataIndex];
+                                return `${task.name}: ${task.start} to ${task.end}`;
+                            }
+                        }
+                    }
+                }
+            }
+        });
+
+        // Event listeners for Career Map section
+        const ceoMapContainer = document.getElementById('ceo-career-map-container');
+        
+        ceoMapContainer.addEventListener('click', e => {
+            // Handle Tab Switching
+            const tabButton = e.target.closest('.career-map-tab');
+            if (tabButton) {
+                const targetTab = tabButton.dataset.tab;
+                
+                ceoMapContainer.querySelectorAll('.career-map-tab').forEach(btn => btn.classList.remove('active'));
+                tabButton.classList.add('active');
+                
+                ceoMapContainer.querySelectorAll('.career-map-content-panel').forEach(panel => {
+                    panel.classList.toggle('hidden', panel.id !== `${targetTab}-content`);
+                });
+            }
+
+            // Handle Accordion
+            const accordionButton = e.target.closest('.accordion-button');
+            if (accordionButton) {
+                const content = accordionButton.nextElementSibling;
+                accordionButton.classList.toggle('open');
+                if (content.style.maxHeight) {
+                    content.style.maxHeight = null;
+                } else {
+                    content.style.maxHeight = content.scrollHeight + "px";
+                }
+            }
+        });
+
+        // Style the active tab correctly
+        document.querySelectorAll('.career-map-tab.active').forEach(tab => {
+             tab.style.borderBottomColor = 'var(--accent-primary)';
+             tab.style.color = 'var(--accent-primary)';
+        });
     }
     
     function initCareerMap() {
