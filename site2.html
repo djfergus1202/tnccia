@@ -1,142 +1,371 @@
-<!DOCTYPE html>
+from pathlib import Path
+
+html_content = r"""<!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Aether: Interactive Career & Study Hub</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
-    <script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
-    <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
-    <script src="https://unpkg.com/jspdf@latest/dist/jspdf.umd.min.js"></script>
-    <script src="https://unpkg.com/docx@7.1.0/build/index.js"></script>
-    <style>
-        :root {
-            --bg-main: #F4F4F5;
-            --bg-alt: #FFFFFF;
-            --text-primary: #1F2937;
-            --text-secondary: #4B5563;
-            --accent-primary: #DC2626; /* Fusion Red */
-            --accent-secondary: #B91C1C;
-            --border-color: #E5E7EB;
-        }
-        body { font-family: 'Inter', sans-serif; background-color: var(--bg-main); color: var(--text-primary); }
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
-        
-        /* New Layout Styles */
-        #main-app-container { display: flex; }
-        #sidebar {
-            width: 68px;
-            transition: width 0.3s ease;
-            z-index: 30;
-        }
-        #sidebar:hover { width: 240px; }
-        .sidebar-item .nav-text {
-            display: none;
-            transition: opacity 0.2s ease;
-        }
-        #sidebar:hover .nav-text { display: inline; }
-        .sidebar-item.active { background-color: var(--accent-primary); color: white; }
-        .sidebar-item.active svg { color: white; }
-
-        .content-section { display: none; }
-        .content-section.active { display: block; }
-
-        /* Canvas & Gantt Chart Styles */
-        .interactive-canvas { 
-            background-color: #F9FAFB; 
-            background-image: 
-                linear-gradient(var(--border-color) 1px, transparent 1px), 
-                linear-gradient(to right, var(--border-color) 1px, #F9FAFB 1px); 
-            background-size: 25px 25px;
-            cursor: grab;
-            border-radius: 0.5rem;
-            border: 1px solid var(--border-color);
-        }
-        .interactive-canvas.linking-mode { cursor: crosshair; }
-        .interactive-canvas:active { cursor: grabbing; }
-        
-        /* General Component Styles */
-        #notes-editor { height: 250px; background-color: white; }
-        .flashcard-container { perspective: 1000px; cursor: pointer; }
-        .flashcard-inner { position: relative; width: 100%; height: 100%; transition: transform 0.6s; transform-style: preserve-3d; }
-        .flashcard-container.is-flipped .flashcard-inner { transform: rotateY(180deg); }
-        .flashcard-front, .flashcard-back { position: absolute; width: 100%; height: 100%; -webkit-backface-visibility: hidden; backface-visibility: hidden; display: flex; align-items: center; justify-content: center; text-align: center; padding: 1rem; }
-        .flashcard-back { transform: rotateY(180deg); }
-        .accordion-content { max-height: 0; overflow: hidden; transition: max-height 0.3s ease-out; }
-        .drag-drop-zone { border: 2px dashed var(--border-color); border-radius: 0.5rem; padding: 1rem; text-align: center; cursor: pointer; transition: background-color 0.2s; }
-        .drag-drop-zone.drag-over { background: #fee2e2; border-color: var(--accent-primary); }
-        .required { color: var(--accent-primary); }
-        .disclaimer { font-size: 0.8em; color: #555; margin-top: 8px; }
-        .timeline-container { max-height: 400px; overflow-y: auto; }
-        .timeline-avatar { width: 40px; height: 40px; border-radius: 50%; margin-right: 12px; object-fit: cover; }
-        .toggle-button.active { background-color: var(--accent-primary); color: white; }
-        
-        /* Toast Notification */
-        #toast-notification {
-            position: fixed;
-            bottom: -100px;
-            left: 50%;
-            transform: translateX(-50%);
-            transition: bottom 0.5s ease-in-out;
-            z-index: 100;
-        }
-        #toast-notification.show {
-            bottom: 20px;
-        }
-        .podcast-tab.active, .community-main-tab.active {
-            border-bottom-color: var(--accent-primary);
-            color: var(--accent-primary);
-        }
-        .emoji-btn { transition: transform 0.1s ease-in-out; }
-        .emoji-btn:hover { transform: scale(1.2); }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Aether Scholar Network</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-main: #141414;
+      --bg-card: #181818;
+      --text-primary: #fff;
+      --accent: #e50914;
+      --accent-hover: #b0060d;
+      --glow: 0 0 12px #e5091488;
+    }
+    body {
+      background: var(--bg-main);
+      color: var(--text-primary);
+      font-family: 'Inter', sans-serif;
+      min-height: 100vh;
+    }
+    #sidebar {
+      min-width: 72px;
+      width: 72px;
+      transition: width .3s;
+      background: #111;
+      box-shadow: 0 2px 12px #0008;
+      z-index: 2;
+    }
+    #sidebar:hover { width: 240px; }
+    .sidebar-item {
+      transition: color .2s, background .2s;
+      border-radius: .75rem;
+      padding: .8rem .7rem;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      color: #bbb;
+      cursor: pointer;
+      gap: 12px;
+      font-size: 1.09rem;
+    }
+    .sidebar-item.active, .sidebar-item:hover {
+      color: #fff;
+      background: #e5091440;
+      box-shadow: var(--glow);
+    }
+    .sidebar-item .label { display: none; transition: opacity .2s; }
+    #sidebar:hover .sidebar-item .label { display: inline-block; opacity: 1; margin-left: 10px; }
+    .content { display: none; }
+    .content.active { display: block; }
+    .main-content {
+      flex: 1;
+      overflow-x: hidden;
+      min-width: 0;
+      padding: 2rem 3vw 2rem 3vw;
+      max-width: 100vw;
+    }
+    .carousel-section {
+      margin-bottom: 2.5rem;
+    }
+    .carousel-title {
+      font-size: 2rem;
+      font-weight: 700;
+      margin-bottom: .7rem;
+      letter-spacing: -.03em;
+    }
+    .carousel {
+      display: flex;
+      overflow-x: auto;
+      gap: 1.5rem;
+      padding-bottom: .5rem;
+      scrollbar-width: thin;
+      scrollbar-color: #e50914 #232323;
+    }
+    .carousel::-webkit-scrollbar { height: 10px; }
+    .carousel::-webkit-scrollbar-thumb { background: #e50914; border-radius: 6px; }
+    .carousel::-webkit-scrollbar-track { background: #232323; }
+    .card {
+      background: var(--bg-card);
+      border-radius: 1rem;
+      box-shadow: 0 2px 12px #0005;
+      min-width: 310px;
+      max-width: 340px;
+      flex: 0 0 auto;
+      overflow: hidden;
+      position: relative;
+      transition: transform .18s, box-shadow .2s;
+      cursor: pointer;
+    }
+    .card:hover {
+      transform: scale(1.045) translateY(-5px);
+      box-shadow: 0 6px 32px #e5091433, 0 2px 24px #000b;
+      z-index: 2;
+    }
+    .card-cover {
+      width: 100%;
+      height: 170px;
+      object-fit: cover;
+      display: block;
+    }
+    .card-body { padding: 1.1rem 1.2rem 1.2rem 1.2rem; }
+    .card-title { font-size: 1.2rem; font-weight: bold; margin-bottom: .3rem; }
+    .card-meta { font-size: .99rem; color: #aaa; margin-bottom: .5rem; }
+    .btn {
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      border-radius: .4rem;
+      font-weight: 600;
+      font-size: .96rem;
+      padding: .4rem 1.2rem;
+      cursor: pointer;
+      margin-top: .3rem;
+      transition: background .17s;
+      box-shadow: 0 2px 7px #e5091422;
+    }
+    .btn:hover { background: var(--accent-hover); }
+    /* Feed Post Composer */
+    .composer-card {
+      background: #232323;
+      border-radius: 1rem;
+      padding: 1.4rem 1.2rem;
+      margin-bottom: 2.2rem;
+      box-shadow: 0 2px 12px #0006;
+    }
+    textarea, input[type="text"] {
+      background: #181818;
+      color: #fff;
+      border: 1px solid #2d2d2d;
+      border-radius: .5rem;
+      padding: .8rem 1rem;
+      width: 100%;
+      margin-bottom: .8rem;
+      font-size: 1rem;
+      outline: none;
+      transition: border .2s;
+    }
+    textarea:focus, input[type="text"]:focus { border: 1.5px solid var(--accent); }
+    .feed-post { margin-bottom: 2rem; }
+    .reaction-bar {
+      display: flex;
+      align-items: center;
+      gap: 1.2rem;
+      margin-top: .8rem;
+      font-size: 1rem;
+    }
+    .reaction-btn, .comment-toggle {
+      cursor: pointer;
+      color: #e50914;
+      margin-right: 0.4rem;
+      font-size: 1.04rem;
+      user-select: none;
+      transition: text-shadow .2s;
+    }
+    .reaction-btn:hover, .comment-toggle:hover { text-shadow: 0 0 6px #e5091499; }
+    .comments { display: none; margin-top: .7rem; }
+    .comments.visible { display: block; }
+    .comment-list .comment {
+      background: #242323;
+      padding: .6rem 1rem;
+      border-radius: .4rem;
+      margin-top: .3rem;
+      color: #eee;
+      font-size: .97rem;
+    }
+    /* Responsive */
+    @media (max-width: 900px) {
+      .main-content { padding: 1.3rem .7rem; }
+      .carousel-title { font-size: 1.2rem; }
+      .card { min-width: 220px; }
+      .card-cover { height: 110px; }
+    }
+  </style>
 </head>
-<body class="antialiased">
+<body class="flex h-screen overflow-hidden">
+  <!-- Sidebar -->
+  <aside id="sidebar" class="flex flex-col py-6 px-2 border-r border-gray-800 fixed h-full">
+    <div class="mb-7 flex items-center justify-center"><span class="text-2xl font-black tracking-tight text-[#e50914]">Æ</span></div>
+    <nav class="flex-1 flex flex-col gap-2">
+      <div data-tab="feed" class="sidebar-item active"><svg width="26" height="26" fill="currentColor"><rect width="26" height="12" y="7" rx="3"/></svg> <span class="label">Feed</span></div>
+      <div data-tab="profiles" class="sidebar-item"><svg width="24" height="24" fill="currentColor"><circle cx="12" cy="10" r="7"/><rect x="5" y="18" width="14" height="4" rx="2"/></svg> <span class="label">Researchers</span></div>
+      <div data-tab="events" class="sidebar-item"><svg width="25" height="25" fill="currentColor"><rect x="2" y="6" width="21" height="15" rx="3"/><rect x="6" y="2" width="3" height="7" rx="1.5" fill="#e50914"/><rect x="16" y="2" width="3" height="7" rx="1.5" fill="#e50914"/></svg> <span class="label">Events</span></div>
+    </nav>
+  </aside>
 
-    <!-- Landing/Registration Page -->
-    <div id="registration-page" class="flex items-center justify-center min-h-screen bg-gray-100 p-4">
-        <div class="text-center p-8 bg-white rounded-xl shadow-2xl max-w-lg mx-auto w-full">
-            <h1 class="text-5xl font-black text-red-600 mb-4">Aether</h1>
-            <p class="text-xl text-text-secondary mb-8">Create your profile to begin your integrated career and learning journey.</p>
-            <form id="regForm" class="text-left" novalidate>
-                 <div class="space-y-4">
-                    <div>
-                        <label for="fullName" class="block text-sm font-medium text-gray-700">Full Name<span class="required">*</span></label>
-                        <input type="text" id="fullName" name="fullName" required class="mt-1 w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-red-500">
-                    </div>
-                    <div>
-                        <label for="email" class="block text-sm font-medium text-gray-700">Email<span class="required">*</span></label>
-                        <input type="email" id="email" name="email" required class="mt-1 w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-red-500">
-                    </div>
-                    <div>
-                        <label for="headline" class="block text-sm font-medium text-gray-700">Headline</label>
-                        <input type="text" id="headline" name="headline" placeholder="e.g. Aspiring AI Researcher" class="mt-1 w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-red-500">
-                    </div>
-                    <div>
-                        <label for="bioReg" class="block text-sm font-medium text-gray-700">Bio</label>
-                        <textarea id="bioReg" name="bioReg" rows="3" placeholder="Tell us about your goals and interests..." class="mt-1 w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-red-500"></textarea>
-                    </div>
-                    <div>
-                        <label for="avatarReg" class="block text-sm font-medium text-gray-700">Avatar URL</label>
-                        <input type="url" id="avatarReg" name="avatarReg" placeholder="Link to your photo" class="mt-1 w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-red-500">
-                    </div>
-                     <div class="mt-4 p-3 bg-red-50 border border-red-200 rounded-lg">
-                        <label class="flex items-start">
-                            <input type="checkbox" id="consent-checkbox" required class="h-5 w-5 text-red-600 border-gray-300 rounded focus:ring-red-500 mr-3 mt-1 flex-shrink-0">
-                            <span class="text-xs text-gray-700">I have read and agree to the data usage policy. I understand that my data will be used for research purposes to improve career and economic outcomes for students, and that it will be de-identified before any analysis or publication.</span>
-                        </label>
-                    </div>
-                </div>
-                <button type="submit" id="register-btn" class="mt-6 w-full px-6 py-3 bg-red-600 text-white font-bold rounded-lg hover:bg-red-700 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed" disabled>Create Profile & Enter</button>
-                <p class="text-center mt-4 text-sm text-gray-600">Already have an account? <a href="#" id="show-signin" class="font-medium text-red-600 hover:text-red-500">Sign In</a></p>
-            </form>
+  <!-- Main -->
+  <main class="main-content ml-[72px] transition-all w-full">
+    <!-- Feed -->
+    <section id="feed" class="content active">
+      <div class="carousel-section">
+        <h2 class="carousel-title">New This Week</h2>
+        <div class="carousel" id="feed-carousel"></div>
+      </div>
+      <div class="composer-card">
+        <textarea id="new-post" rows="3" placeholder="Share your latest insight or discovery..."></textarea>
+        <div class="flex justify-end"><button id="post-btn" class="btn">Post</button></div>
+      </div>
+      <div id="feed-list"></div>
+    </section>
+    <!-- Researchers -->
+    <section id="profiles" class="content">
+      <div class="carousel-section">
+        <h2 class="carousel-title">Featured Researchers</h2>
+        <div class="carousel" id="profile-carousel"></div>
+      </div>
+      <div class="carousel-section">
+        <h2 class="carousel-title">All Researchers</h2>
+        <div id="profile-list" class="flex flex-wrap gap-5"></div>
+      </div>
+    </section>
+    <!-- Events -->
+    <section id="events" class="content">
+      <div class="carousel-section">
+        <h2 class="carousel-title">Upcoming Conferences</h2>
+        <div class="carousel" id="event-carousel"></div>
+      </div>
+      <div class="carousel-section">
+        <h2 class="carousel-title">All Events</h2>
+        <ul id="event-list" class="flex flex-col gap-4"></ul>
+      </div>
+    </section>
+  </main>
+  <script>
+    // Sidebar navigation
+    document.querySelectorAll('.sidebar-item').forEach(btn => {
+      btn.onclick = () => {
+        document.querySelectorAll('.sidebar-item').forEach(i => i.classList.remove('active'));
+        btn.classList.add('active');
+        document.querySelectorAll('.content').forEach(sec => sec.classList.remove('active'));
+        document.getElementById(btn.dataset.tab).classList.add('active');
+      };
+    });
+
+    // FEED CAROUSEL (Netflix style horizontal scroll)
+    const feedPosts = [
+      {cover:'https://images.unsplash.com/photo-1515378791036-0648a3ef77b2?auto=format&fit=crop&w=400&q=80', 
+       title:'Lipidomics in Neuro', meta:'Dr. Alice, MIT', desc:'New insights on cardiolipin’s role in brain health.'},
+      {cover:'https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=400&q=80',
+       title:'AI in Drug Discovery', meta:'Prof. Bob, Stanford', desc:'Generative models for retrosynthesis.'},
+      {cover:'https://images.unsplash.com/photo-1454023492550-5696f8ff10e1?auto=format&fit=crop&w=400&q=80',
+       title:'Quorum Sensing Inhibitors', meta:'Dr. Jane, Oxford', desc:'Novel sulfonamides in clinical pipeline.'}
+    ];
+    const feedCarousel = document.getElementById('feed-carousel');
+    feedPosts.forEach(post => {
+      feedCarousel.innerHTML += `
+        <div class="card">
+          <img class="card-cover" src="${post.cover}" alt="${post.title}"/>
+          <div class="card-body">
+            <div class="card-title">${post.title}</div>
+            <div class="card-meta">${post.meta}</div>
+            <div class="mb-2 text-sm">${post.desc}</div>
+            <button class="btn">Learn More</button>
+          </div>
         </div>
-    </div>
+      `;
+    });
 
-    <!-- Main App Container -->
-    <div id="main-app-container" class="hidden">
-        <!-- Sidebar Navigation --><!-- ...rest of code unchanged for brevity-->    
-</body>
-</html>
+    // Feed post composer & thread
+    const feedList = document.getElementById('feed-list');
+    document.getElementById('post-btn').onclick = () => {
+      const text = document.getElementById('new-post').value.trim();
+      if (!text) return;
+      const postEl = document.createElement('div');
+      postEl.className = 'card feed-post';
+      postEl.innerHTML = `
+        <div class="card-body">
+          <p>${text}</p>
+          <div class="reaction-bar">
+            <span class="reaction-btn" data-action="like">❤️ Like (<span class="like-count">0</span>)</span>
+            <span class="comment-toggle">💬 Comment</span>
+            <span class="card-meta text-gray-400">Just now</span>
+          </div>
+          <div class="comments">
+            <input type="text" class="comment-input" placeholder="Write a comment...">
+            <button class="btn btn-comment mt-2">Submit</button>
+            <div class="comment-list"></div>
+          </div>
+        </div>
+      `;
+      feedList.prepend(postEl);
+      document.getElementById('new-post').value = '';
+    };
+    feedList.addEventListener('click', e => {
+      const post = e.target.closest('.feed-post');
+      if (!post) return;
+      if (e.target.dataset.action === 'like') {
+        const countEl = post.querySelector('.like-count');
+        countEl.textContent = parseInt(countEl.textContent) + 1;
+      }
+      if (e.target.classList.contains('comment-toggle')) {
+        const comments = post.querySelector('.comments');
+        comments.classList.toggle('visible');
+      }
+      if (e.target.classList.contains('btn-comment')) {
+        const input = post.querySelector('.comment-input');
+        const text = input.value.trim();
+        if (!text) return;
+        const list = post.querySelector('.comment-list');
+        const c = document.createElement('div');
+        c.className = 'comment';
+        c.textContent = text;
+        list.appendChild(c);
+        input.value = '';
+      }
+    });
+
+    // RESEARCHERS carousels and list
+    const researchers = [
+      {img:'https://randomuser.me/api/portraits/women/42.jpg', name:'Dr. Alice', meta:'Lipidomics, MIT'},
+      {img:'https://randomuser.me/api/portraits/men/46.jpg', name:'Prof. Bob', meta:'AI Drug Design, Stanford'},
+      {img:'https://randomuser.me/api/portraits/women/43.jpg', name:'Dr. Jane', meta:'Quorum Sensing, Oxford'},
+      {img:'https://randomuser.me/api/portraits/men/45.jpg', name:'Dr. Jim', meta:'Systems Biology, Harvard'},
+      {img:'https://randomuser.me/api/portraits/women/47.jpg', name:'Dr. Kim', meta:'Biochem, Cambridge'}
+    ];
+    const profileCarousel = document.getElementById('profile-carousel');
+    researchers.slice(0,4).forEach(r =>
+      profileCarousel.innerHTML += `
+        <div class="card">
+          <img class="card-cover" src="${r.img}" alt="${r.name}"/>
+          <div class="card-body">
+            <div class="card-title">${r.name}</div>
+            <div class="card-meta">${r.meta}</div>
+            <button class="btn">Follow</button>
+          </div>
+        </div>
+      `
+    );
+    const profileList = document.getElementById('profile-list');
+    researchers.forEach(r =>
+      profileList.innerHTML += `
+        <div class="card" style="min-width:210px;max-width:230px;">
+          <img class="card-cover" src="${r.img}" alt="${r.name}"/>
+          <div class="card-body">
+            <div class="card-title">${r.name}</div>
+            <div class="card-meta">${r.meta}</div>
+            <button class="btn">Follow</button>
+          </div>
+        </div>
+      `
+    );
+
+    // EVENTS carousels and list
+    const events = [
+      {img:'https://images.unsplash.com/photo-1464983953574-0892a716854b?auto=format&fit=crop&w=400&q=80', title:'NeuroConf 2025', date:'Aug 12, 2025', desc:'Exploring brain-lipid interactions.'},
+      {img:'https://images.unsplash.com/photo-1504384308090-c894fdcc538d?auto=format&fit=crop&w=400&q=80', title:'Stats Summit', date:'Sep 5, 2025', desc:'Frontiers in statistics & ML.'},
+      {img:'https://images.unsplash.com/photo-1470770841072-f978cf4d019e?auto=format&fit=crop&w=400&q=80', title:'OncoChem', date:'Oct 18, 2025', desc:'Cancer drug chemistry symposium.'}
+    ];
+    const eventCarousel = document.getElementById('event-carousel');
+    events.forEach(ev => {
+      eventCarousel.innerHTML += `
+        <div class="card">
+          <img class="card-cover" src="${ev.img}" alt="${ev.title}"/>
+          <div class="card-body">
+            <div class="card-title">${ev.title}</div>
+            <div class="card-meta">${ev.date}</div>
+            <div class="mb-2 text-sm">${ev.desc}</div>
+            <button class="btn">View Details</button>
+          </div>
+        </div>
+      `;
+    });
+    const eventList = document.getElementById('event-list');
+    events.forEach(ev =>
+      eventList.innerHTML += `
+        <li class="card flex items-center gap-6" style="min-width:0;">
+          <img class="rounded-lg
