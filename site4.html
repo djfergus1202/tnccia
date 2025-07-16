@@ -81,7 +81,11 @@
                  </div>
                 <button type="submit" class="mt-6 w-full px-6 py-3 bg-red-600 text-white font-bold rounded-lg hover:bg-red-700 transition-colors">Create Profile & Enter</button>
                 <p class="disclaimer mt-4">By registering and signing in, you agree to participate in this research study. Please note your data will be used ethically and de-identified before analysis and reporting.</p>
-                <div class="text-center mt-4 text-sm text-gray-600"><a href="#" id="show-signin" class="font-medium text-red-600 hover:text-red-500">Already have an account? Sign In</a></div>
+                <div class="text-center mt-4 text-sm text-gray-600">
+                    <a href="#" id="show-signin" class="font-medium text-red-600 hover:text-red-500">Already have an account? Sign In</a>
+                    <span class="mx-2">|</span>
+                    <a href="#" id="show-admin-signin" class="font-medium text-gray-600 hover:text-gray-800">Admin Sign-In</a>
+                </div>
             </form>
         </div>
     </div>
@@ -97,6 +101,7 @@
                 <button data-target="collaboration" class="sidebar-item flex items-center py-3 px-5 rounded-md text-left w-full hover:bg-gray-700"><svg class="w-6 h-6 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path></svg><span class="nav-text ml-4 font-semibold">Strategic Collaboration</span></button>
                 <button data-target="envision" class="sidebar-item flex items-center py-3 px-5 rounded-md text-left w-full hover:bg-gray-700"><svg class="w-6 h-6 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg><span class="nav-text ml-4 font-semibold">Can You Envision It?</span></button>
                 <button data-target="entertainment" class="sidebar-item flex items-center py-3 px-5 rounded-md text-left w-full hover:bg-gray-700"><svg class="w-6 h-6 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg><span class="nav-text ml-4 font-semibold">Entertainment</span></button>
+                <button data-target="admin" id="admin-nav-btn" class="sidebar-item flex items-center py-3 px-5 rounded-md text-left w-full hover:bg-gray-700 hidden"><svg class="w-6 h-6 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg><span class="nav-text ml-4 font-semibold">Admin</span></button>
             </nav>
             <div class="mt-auto w-full">
                  <button data-target="profile" id="profile-nav-btn" class="sidebar-item flex items-center py-3 px-5 text-left w-full hover:bg-gray-700"><img id="nav-avatar" src="" alt="Profile" class="w-8 h-8 rounded-full flex-shrink-0 object-cover"/><span class="nav-text ml-4 font-semibold" id="nav-name">Profile</span></button>
@@ -112,6 +117,7 @@
                 <section id="collaboration" class="content-section"></section>
                 <section id="envision" class="content-section"></section>
                 <section id="entertainment" class="content-section"></section>
+                <section id="admin" class="content-section"></section>
                 <section id="profile" class="content-section"></section>
             </main>
         </div>
@@ -125,6 +131,12 @@
         <div class="bg-white rounded-lg shadow-xl w-full max-w-md p-8">
             <h2 class="text-2xl font-bold text-center mb-6">Sign In</h2>
             <form id="signin-form"><div class="space-y-4"><input type="email" id="signin-email" placeholder="Email" required class="w-full px-4 py-3 rounded-lg border focus:outline-none focus:ring-2 focus:ring-red-500"><button type="submit" class="w-full px-6 py-3 bg-red-600 text-white font-bold rounded-lg hover:bg-red-700">Sign In</button></div></form>
+        </div>
+    </div>
+    <div id="admin-signin-modal" class="fixed inset-0 bg-gray-900 bg-opacity-50 flex items-center justify-center p-4 z-50" style="display: none;">
+        <div class="bg-white rounded-lg shadow-xl w-full max-w-md p-8">
+            <h2 class="text-2xl font-bold text-center mb-6">Admin Access</h2>
+            <form id="admin-signin-form"><div class="space-y-4"><input type="password" id="admin-pin" placeholder="Enter Admin PIN" required class="w-full px-4 py-3 rounded-lg border focus:outline-none focus:ring-2 focus:ring-red-500"><button type="submit" class="w-full px-6 py-3 bg-gray-800 text-white font-bold rounded-lg hover:bg-gray-900">Authenticate</button></div></form>
         </div>
     </div>
     <div id="video-player-modal" class="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center p-4 z-50 hidden">
@@ -160,12 +172,13 @@ document.addEventListener('DOMContentLoaded', () => {
     const mainAppContainer = document.getElementById('main-app-container');
     const landingPage = document.getElementById('registration-page');
     const pageInitialized = {};
+    const ADMIN_PIN = '373202';
 
-    function showApp(userData) {
+    function showApp(userData, isAdmin = false) {
         const completeUserData = { headline: "Aspiring Professional", bio: "Ready to learn and grow.", skills: [], links: { linkedin: "", github: "" }, ...userData };
         mockDatabase.set('currentUser', completeUserData);
         landingPage.style.display = 'none'; mainAppContainer.style.display = 'flex';
-        initializeMainApp(completeUserData);
+        initializeMainApp(completeUserData, isAdmin);
     }
 
     document.getElementById('regForm').addEventListener('submit', (e) => {
@@ -186,17 +199,31 @@ document.addEventListener('DOMContentLoaded', () => {
         if (foundUser) { localStorage.setItem('aetherCurrentUser', JSON.stringify(foundUser)); showApp(foundUser); } 
         else { showToast('No account found. Please register.', 'info'); }
     });
+    document.getElementById('show-admin-signin').addEventListener('click', (e) => { e.preventDefault(); document.getElementById('admin-signin-modal').style.display = 'flex'; });
+    document.getElementById('admin-signin-modal').addEventListener('click', (e) => { if (e.target.id === 'admin-signin-modal') e.target.style.display = 'none'; });
+    document.getElementById('admin-signin-form').addEventListener('submit', (e) => {
+        e.preventDefault();
+        if (document.getElementById('admin-pin').value === ADMIN_PIN) {
+            const adminUser = { fullName: "Admin", email: "admin@aether.com", avatarUrl: "https://i.pravatar.cc/150?u=admin" };
+            showApp(adminUser, true);
+            document.getElementById('admin-signin-modal').style.display = 'none';
+        } else {
+            showToast('Invalid Admin PIN.', 'info');
+        }
+    });
 
     const storedUser = localStorage.getItem('aetherCurrentUser');
     if (storedUser) { showApp(JSON.parse(storedUser)); } 
     else { landingPage.style.display = 'flex'; }
 
-    function initializeMainApp(userData) {
+    function initializeMainApp(userData, isAdmin = false) {
         document.getElementById('nav-avatar').src = userData.avatarUrl;
         document.getElementById('nav-name').textContent = userData.fullName;
+        if(isAdmin) document.getElementById('admin-nav-btn').classList.remove('hidden');
+
         const nav = document.getElementById('main-nav');
         const sections = document.querySelectorAll('.content-section');
-        const initFunctions = { dashboard: initDashboard, strategy: initStrategyPage, canvas: initCareerMap, collaboration: initCollaborationPage, envision: initEnvisionPage, entertainment: initEntertainmentPage, profile: initProfilePage };
+        const initFunctions = { dashboard: initDashboard, strategy: initStrategyPage, canvas: initCareerMap, collaboration: initCollaborationPage, envision: initEnvisionPage, entertainment: initEntertainmentPage, admin: initAdminPage, profile: initProfilePage };
         function navigateTo(targetId) {
             if (!targetId) return;
             nav.querySelectorAll('.sidebar-item').forEach(btn => btn.classList.toggle('active', btn.dataset.target === targetId));
@@ -361,10 +388,99 @@ document.addEventListener('DOMContentLoaded', () => {
         setupState(); render();
     }
     
-    function initCollaborationPage(userData) { /* ... Full collaboration page code ... */ }
-    function initEnvisionPage(userData) { /* ... Full envision page code ... */ }
-    function initProfilePage(userData) { /* ... Full profile page code ... */ }
+    function initCollaborationPage(userData) {
+        const section = document.getElementById('collaboration');
+        let slides, feedPosts, chatMessages, currentSlideIndex, slideEditor;
+        function setupState() { slides = mockDatabase.get('collabSlides'); feedPosts = mockDatabase.get('collabFeedPosts'); chatMessages = mockDatabase.get('collabChatMessages'); currentSlideIndex = 0; }
+        function render() {
+            section.innerHTML = `
+                <h1 class="text-3xl font-bold mb-6">Strategic Workspace</h1>
+                <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+                    <div class="lg:col-span-1 bg-white p-4 rounded-xl border shadow-sm h-fit"><div class="flex justify-between items-center mb-4"><h3 class="font-bold">Slides</h3><button id="add-slide-btn" class="text-sm font-semibold text-accent-primary hover:text-accent-secondary">New</button></div><div id="collab-slide-sorter" class="space-y-2"></div></div>
+                    <div class="lg:col-span-2"><div class="bg-white p-6 rounded-xl border shadow-sm"><div class="flex border-b mb-4"><button data-view="presentation" class="tab-button flex-1 py-2 text-sm active">Presentation</button><button data-view="feed" class="tab-button flex-1 py-2 text-sm">Feed</button></div><div id="collab-presentation-view"></div><div id="collab-feed-view" class="hidden"></div></div></div>
+                    <div class="lg:col-span-1 bg-white p-4 rounded-xl border shadow-sm flex flex-col h-[70vh]"><h3 class="font-bold mb-4 border-b pb-2">Team Chat</h3><div id="collab-chat-messages" class="flex-1 space-y-4 overflow-y-auto pr-2"></div><div class="mt-4 pt-4 border-t"><textarea id="collab-chat-input" placeholder="Type..." rows="2" class="w-full p-2 border rounded-lg text-sm"></textarea><button id="collab-chat-send" class="mt-2 w-full px-4 py-2 bg-accent-primary text-white text-sm rounded-lg">Send</button></div></div>
+                </div>`;
+            renderAllSubmodules();
+        }
+        function renderAllSubmodules() { renderSlideSorter(); renderMainView(); renderChat(); }
+        function renderSlideSorter() { document.getElementById('collab-slide-sorter').innerHTML = slides.map((s, i) => `<div data-index="${i}" class="slide-thumbnail bg-gray-50 p-3 rounded-md ${i === currentSlideIndex ? 'active' : ''}"><p class="font-semibold text-sm truncate">${s.title}</p><p class="text-xs text-gray-500">By ${s.author}</p></div>`).join(''); }
+        function renderMainView() {
+            document.getElementById('collab-presentation-view').innerHTML = `<input class="text-2xl font-bold w-full p-1" id="slide-title-input" value="${slides[currentSlideIndex].title}"><div id="slide-editor" class="mt-4"></div>`;
+            slideEditor = new Quill('#slide-editor', { theme: 'snow' });
+            slideEditor.root.innerHTML = slides[currentSlideIndex].content;
+            document.getElementById('collab-feed-view').innerHTML = `<div class="flex gap-3"><img src="${userData.avatarUrl}" class="w-10 h-10 rounded-full"><div class="flex-1"><textarea id="collab-feed-input" class="w-full p-2 border rounded-lg text-sm" placeholder="Post an update..."></textarea><div class="text-right mt-2"><button id="collab-feed-post-btn" class="px-4 py-1.5 bg-red-600 text-white font-bold text-sm rounded-full">Post</button></div></div></div><div id="collab-feed-posts-container" class="mt-6 space-y-4 border-t pt-4">${feedPosts.map(p => `<div class="flex gap-3"><img src="${p.avatar}" class="w-10 h-10 rounded-full"><div class="flex-1"><p class="font-semibold text-sm">${p.author}</p><p class="text-gray-700 mt-1 text-sm">${p.text}</p></div></div>`).join('')}</div>`;
+        }
+        function renderChat() {
+            const chatContainer = document.getElementById('collab-chat-messages');
+            chatContainer.innerHTML = chatMessages.map(m => `<div class="flex gap-2 ${m.user === userData.fullName ? 'justify-end' : ''}"><div class="p-2 rounded-lg text-sm ${m.user === userData.fullName ? 'bg-red-100' : 'bg-gray-100'}">${m.text}</div></div>`).join('');
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+        }
+        section.addEventListener('click', e => {
+            const slideThumb = e.target.closest('.slide-thumbnail');
+            if(slideThumb) { currentSlideIndex = parseInt(slideThumb.dataset.index); renderAllSubmodules(); document.querySelector('.tab-button[data-view="presentation"]').click(); }
+            if(e.target.id === 'add-slide-btn') { slides.push({id: Date.now(), title: 'New Slide', content: '', author: userData.fullName}); currentSlideIndex = slides.length - 1; mockDatabase.set('collabSlides', slides); render(); }
+            const viewTab = e.target.closest('.tab-button');
+            if(viewTab) { section.querySelectorAll('.tab-button').forEach(b => b.classList.remove('active')); viewTab.classList.add('active'); const isFeed = viewTab.dataset.view === 'feed'; document.getElementById('collab-presentation-view').classList.toggle('hidden', isFeed); document.getElementById('collab-feed-view').classList.toggle('hidden', !isFeed); }
+            if(e.target.id === 'collab-feed-post-btn') { const input = document.getElementById('collab-feed-input'); if(input.value.trim()){ feedPosts.unshift({id: Date.now(), author: userData.fullName, avatar: userData.avatarUrl, text: input.value.trim()}); mockDatabase.set('collabFeedPosts', feedPosts); renderMainView(); } }
+            if(e.target.id === 'collab-chat-send') { const input = document.getElementById('collab-chat-input'); if(input.value.trim()){ chatMessages.push({user: userData.fullName, text: input.value.trim()}); mockDatabase.set('collabChatMessages', chatMessages); renderChat(); input.value = ''; } }
+        });
+        section.addEventListener('input', e => { if(e.target.id === 'slide-title-input') { slides[currentSlideIndex].title = e.target.value; mockDatabase.set('collabSlides', slides); renderSlideSorter(); } });
+        section.addEventListener('focusout', e => { if(slideEditor && slideEditor.hasFocus()){ slides[currentSlideIndex].content = slideEditor.root.innerHTML; mockDatabase.set('collabSlides', slides); } });
+        setupState(); render();
+    }
     
+    function initEnvisionPage(userData) {
+        const section = document.getElementById('envision');
+        const leaders = [
+            { name: 'Satya Nadella', title: 'CEO', company: 'Microsoft', industry: 'Business', profileUrl: 'https://en.wikipedia.org/wiki/Satya_Nadella' },
+            { name: 'Tim Cook', title: 'CEO', company: 'Apple', industry: 'Business', profileUrl: 'https://en.wikipedia.org/wiki/Tim_Cook' },
+            { name: 'Jensen Huang', title: 'CEO', company: 'NVIDIA', industry: 'Business', profileUrl: 'https://en.wikipedia.org/wiki/Jensen_Huang' },
+            { name: 'Reshma Kewalramani', title: 'CEO & President', company: 'Vertex Pharmaceuticals', industry: 'Biotech', profileUrl: 'https://en.wikipedia.org/wiki/Reshma_Kewalramani' },
+            { name: 'Stéphane Bancel', title: 'CEO', company: 'Moderna', industry: 'Biotech', profileUrl: 'https://en.wikipedia.org/wiki/St%C3%A9phane_Bancel' },
+            { name: 'Jennifer Doudna', title: 'Nobel Laureate in Chemistry', company: 'UC Berkeley', industry: 'Nobel Laureate', profileUrl: 'https://en.wikipedia.org/wiki/Jennifer_Doudna' },
+            { name: 'Sally Kornbluth', title: 'President', company: 'MIT', industry: 'University', profileUrl: 'https://en.wikipedia.org/wiki/Sally_Kornbluth' },
+            { name: 'Carol Christ', title: 'Chancellor', company: 'UC Berkeley', industry: 'University', profileUrl: 'https://en.wikipedia.org/wiki/Carol_T._Christ' },
+            { name: 'Katalin Karikó', title: 'Nobel Laureate in Medicine', company: 'Penn Medicine', industry: 'Nobel Laureate', profileUrl: 'https://en.wikipedia.org/wiki/Katalin_Karik%C3%B3' },
+            { name: 'Drew Weissman', title: 'Nobel Laureate in Medicine', company: 'Penn Medicine', industry: 'Nobel Laureate', profileUrl: 'https://en.wikipedia.org/wiki/Drew_Weissman' },
+        ];
+
+        let currentSort = { key: 'name', order: 'asc' };
+        let currentFilter = '';
+
+        const renderCatalog = () => {
+            let filteredLeaders = leaders.filter(leader => leader.name.toLowerCase().includes(currentFilter) || leader.company.toLowerCase().includes(currentFilter));
+            filteredLeaders.sort((a, b) => {
+                let valA = a[currentSort.key].toLowerCase(); let valB = b[currentSort.key].toLowerCase();
+                if (valA < valB) return currentSort.order === 'asc' ? -1 : 1;
+                if (valA > valB) return currentSort.order === 'asc' ? 1 : -1;
+                return 0;
+            });
+            const tableBody = section.querySelector('#catalog-body');
+            if (tableBody) tableBody.innerHTML = filteredLeaders.map(leader => `<tr class="border-b border-gray-200 hover:bg-gray-50"><td class="p-4"><a href="${leader.profileUrl}" target="_blank" class="font-semibold text-accent-primary hover:underline">${leader.name}</a></td><td class="p-4 text-text-secondary">${leader.title}</td><td class="p-4 text-text-secondary">${leader.company}</td><td class="p-4"><span class="px-2 py-1 text-xs font-semibold rounded-full ${leader.industry === 'Business' ? 'bg-blue-100 text-blue-800' : leader.industry === 'Biotech' ? 'bg-green-100 text-green-800' : leader.industry === 'University' ? 'bg-indigo-100 text-indigo-800' : 'bg-yellow-100 text-yellow-800'}">${leader.industry}</span></td></tr>`).join('');
+        }
+
+        section.innerHTML = `
+            <h1 class="text-3xl font-bold mb-2">Can You Envision It?</h1>
+            <p class="text-text-secondary mb-6">A catalog of influential leaders in business, biotech, and academia.</p>
+            <div class="bg-white rounded-xl border shadow-sm">
+                <div class="p-4 border-b"><input type="search" id="catalog-search" placeholder="Filter by name or company..." class="w-full max-w-sm px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-red-500"></div>
+                <div class="overflow-x-auto"><table class="w-full text-sm text-left"><thead class="bg-gray-50 text-xs text-gray-700 uppercase"><tr><th class="p-4 catalog-header-cell active" data-sort="name">Name <span class="sort-indicator">↕️</span></th><th class="p-4 catalog-header-cell" data-sort="title">Title <span class="sort-indicator">↕️</span></th><th class="p-4 catalog-header-cell" data-sort="company">Company / Institution <span class="sort-indicator">↕️</span></th><th class="p-4 catalog-header-cell" data-sort="industry">Industry <span class="sort-indicator">↕️</span></th></tr></thead><tbody id="catalog-body"></tbody></table></div>
+            </div>`;
+        
+        section.querySelector('#catalog-search').addEventListener('input', e => { currentFilter = e.target.value.toLowerCase(); renderCatalog(); });
+        section.querySelectorAll('.catalog-header-cell').forEach(cell => {
+            cell.addEventListener('click', () => {
+                const sortKey = cell.dataset.sort;
+                if (currentSort.key === sortKey) { currentSort.order = currentSort.order === 'asc' ? 'desc' : 'asc'; } 
+                else { currentSort.key = sortKey; currentSort.order = 'asc'; }
+                section.querySelectorAll('.catalog-header-cell').forEach(c => c.classList.remove('active'));
+                cell.classList.add('active');
+                renderCatalog();
+            });
+        });
+        renderCatalog();
+    }
+
     function initEntertainmentPage(userData) {
         const section = document.getElementById('entertainment');
         const videos = {
@@ -417,6 +533,85 @@ document.addEventListener('DOMContentLoaded', () => {
         section.addEventListener('click', (e) => { const videoTarget = e.target.closest('[data-video-id]'); if (videoTarget) { openVideoPlayer(videoTarget.dataset.videoId); } });
         closeVideoBtn.addEventListener('click', closeVideoPlayer);
         videoModal.addEventListener('click', (e) => { if (e.target === videoModal) closeVideoPlayer(); });
+    }
+
+    function initAdminPage(userData) {
+        const section = document.getElementById('admin');
+        section.innerHTML = `<h1 class="text-3xl font-bold">Admin Panel</h1><p class="mt-2 text-text-secondary">Welcome, Admin. This area is for managing users and content.</p>`;
+    }
+
+    function initProfilePage(userData) {
+        const section = document.getElementById('profile');
+        let currentSkills = [...userData.skills];
+        const render = () => {
+            section.innerHTML = `
+                <h1 class="text-3xl font-bold mb-6">My Profile</h1>
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                    <div class="lg:col-span-1 space-y-6">
+                        <div class="bg-white p-6 rounded-xl border shadow-sm text-center"><img id="profile-card-avatar" src="${userData.avatarUrl}" class="w-32 h-32 rounded-full object-cover mx-auto mb-4 border-4"><h2 id="profile-card-name" class="text-2xl font-bold">${userData.fullName}</h2><p id="profile-card-headline" class="text-text-secondary mt-1">${userData.headline}</p><div id="profile-card-links" class="flex justify-center gap-4 mt-4 text-gray-500"></div></div>
+                        <div class="bg-white p-6 rounded-xl border shadow-sm"><h3 class="font-bold mb-3 text-lg">About Me</h3><p id="profile-card-bio" class="text-text-secondary text-sm">${userData.bio || "No bio set."}</p></div>
+                        <div class="bg-white p-6 rounded-xl border shadow-sm"><h3 class="font-bold mb-4 text-lg">Skills</h3><div id="profile-card-skills" class="flex flex-wrap gap-2"></div></div>
+                    </div>
+                    <div class="lg:col-span-2 space-y-6">
+                        <div class="bg-white rounded-xl border shadow-sm p-6">
+                            <div class="flex border-b mb-6"><button data-tab="edit" class="tab-button flex-1 py-2 text-sm active">Edit Profile</button><button data-tab="activity" class="tab-button flex-1 py-2 text-sm">Activity</button></div>
+                            <div id="profile-edit-panel" class="space-y-4">
+                                <div><label class="block text-sm font-medium">Full Name</label><input type="text" id="profile-edit-name" value="${userData.fullName}" class="mt-1 w-full p-2 border rounded"></div>
+                                <div><label class="block text-sm font-medium">Headline</label><input type="text" id="profile-edit-headline" value="${userData.headline}" class="mt-1 w-full p-2 border rounded"></div>
+                                <div><label class="block text-sm font-medium">Avatar URL</label><input type="url" id="profile-edit-avatar" value="${userData.avatarUrl}" class="mt-1 w-full p-2 border rounded"></div>
+                                <div><label class="block text-sm font-medium">Bio</label><textarea id="profile-edit-bio" rows="4" class="mt-1 w-full p-2 border rounded">${userData.bio}</textarea></div>
+                                <div><label class="block text-sm font-medium">Skills</label><div id="profile-edit-skills-list" class="flex flex-wrap gap-2 mt-2"></div><div class="flex gap-2 mt-2"><input type="text" id="profile-add-skill-input" placeholder="Add skill" class="flex-1 p-2 border rounded"><button id="add-skill-btn" class="px-4 py-2 bg-gray-600 text-white rounded text-sm">Add</button></div></div>
+                                <div class="grid grid-cols-2 gap-4"><div><label class="block text-sm font-medium">LinkedIn URL</label><input type="url" id="profile-edit-linkedin" value="${userData.links.linkedin}" class="mt-1 w-full p-2 border rounded"></div><div><label class="block text-sm font-medium">GitHub URL</label><input type="url" id="profile-edit-github" value="${userData.links.github}" class="mt-1 w-full p-2 border rounded"></div></div>
+                                <button id="save-profile-btn" class="w-full p-3 bg-accent-primary text-white font-bold rounded">Save Changes</button>
+                            </div>
+                            <div id="profile-activity-panel" class="hidden space-y-6">
+                                <div><h4 class="font-bold mb-2">Active Goals</h4><ul class="list-disc pl-5 text-sm">${mockDatabase.get('careerGoals').map(g => `<li>${g.title}</li>`).join('') || 'No goals.'}</ul></div>
+                                <div><h4 class="font-bold mb-2">Learning</h4><p class="text-sm">${mockDatabase.get('flashcards').length} flashcards created.</p></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>`;
+            updateProfileCard(userData);
+            updateSkillsEditor();
+        }
+        const updateProfileCard = (user) => {
+            document.getElementById('profile-card-name').textContent = user.fullName;
+            document.getElementById('profile-card-headline').textContent = user.headline;
+            document.getElementById('profile-card-bio').textContent = user.bio || "No bio set.";
+            document.getElementById('profile-card-avatar').src = user.avatarUrl;
+            document.getElementById('nav-avatar').src = user.avatarUrl;
+            document.getElementById('nav-name').textContent = user.fullName;
+            document.getElementById('profile-card-skills').innerHTML = user.skills.map(skill => `<span class="bg-red-100 text-red-800 text-xs font-semibold px-2.5 py-0.5 rounded-full">${skill}</span>`).join('') || '<p class="text-sm text-gray-500">No skills.</p>';
+            document.getElementById('profile-card-links').innerHTML = `${user.links.linkedin ? `<a href="${user.links.linkedin}" target="_blank"><svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M19 3a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h14m-.5 15.5v-5.3a3.26 3.26 0 0 0-3.26-3.26c-.85 0-1.84.52-2.32 1.3v-1.11h-2.79v8.37h2.79v-4.93c0-.85.61-1.48 1.48-1.48s1.48.63 1.48 1.48v4.93h2.79M6.88 8.56a1.68 1.68 0 0 0 1.68-1.68c0-.93-.75-1.69-1.68-1.69a1.69 1.69 0 0 0-1.69 1.69c0 .93.76 1.68 1.69 1.68m1.39 9.94v-8.37H5.5v8.37h2.77z"></path></svg></a>` : ''}${user.links.github ? `<a href="${user.links.github}" target="_blank"><svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2A10 10 0 0 0 2 12c0 4.42 2.87 8.17 6.84 9.5.5.09.68-.22.68-.48v-1.7c-2.78.6-3.37-1.34-3.37-1.34-.46-1.16-1.11-1.47-1.11-1.47-.91-.62.07-.6.07-.6 1 .07 1.53 1.03 1.53 1.03.9 1.52 2.34 1.08 2.91.83.09-.65.35-1.08.63-1.34-2.22-.25-4.55-1.11-4.55-4.94 0-1.1.39-1.99 1.03-2.69a3.6 3.6 0 0 1 .1-2.64s.84-.27 2.75 1.02a9.58 9.58 0 0 1 5 0c1.91-1.29 2.75-1.02 2.75-1.02.55 1.37.2 2.4.1 2.64.64.7 1.03 1.6 1.03 2.69 0 3.84-2.34 4.68-4.57 4.93.36.31.68.92.68 1.85v2.72c0 .27.18.58.69.48A10 10 0 0 0 22 12C22 6.48 17.52 2 12 2z"></path></svg></a>` : ''}`;
+        };
+        const updateSkillsEditor = () => {
+            document.getElementById('profile-edit-skills-list').innerHTML = currentSkills.map(skill => `<span class="flex items-center bg-gray-200 text-sm pl-3 pr-2 py-1 rounded-full">${skill}<button data-skill="${skill}" class="remove-skill-btn ml-2">&times;</button></span>`).join('');
+        }
+        section.addEventListener('click', e => {
+            const tabButton = e.target.closest('.tab-button');
+            if(tabButton) {
+                section.querySelectorAll('.tab-button').forEach(b => b.classList.remove('active'));
+                tabButton.classList.add('active');
+                const isEdit = tabButton.dataset.tab === 'edit';
+                document.getElementById('profile-edit-panel').classList.toggle('hidden', !isEdit);
+                document.getElementById('profile-activity-panel').classList.toggle('hidden', isEdit);
+            }
+            if(e.target.id === 'add-skill-btn') {
+                const input = document.getElementById('profile-add-skill-input');
+                if (input.value && !currentSkills.includes(input.value)) { currentSkills.push(input.value); updateSkillsEditor(); }
+                input.value = '';
+            }
+            const removeBtn = e.target.closest('.remove-skill-btn');
+            if(removeBtn) { currentSkills = currentSkills.filter(s => s !== removeBtn.dataset.skill); updateSkillsEditor(); }
+            if(e.target.id === 'save-profile-btn') {
+                const updatedUser = { ...userData, fullName: document.getElementById('profile-edit-name').value, headline: document.getElementById('profile-edit-headline').value, avatarUrl: document.getElementById('profile-edit-avatar').value, bio: document.getElementById('profile-edit-bio').value, skills: [...currentSkills], links: { linkedin: document.getElementById('profile-edit-linkedin').value, github: document.getElementById('profile-edit-github').value, } };
+                mockDatabase.set('currentUser', updatedUser);
+                localStorage.setItem('aetherCurrentUser', JSON.stringify(updatedUser));
+                updateProfileCard(updatedUser);
+                showToast("Profile saved successfully!");
+            }
+        });
+        render();
     }
 });
 </script>
