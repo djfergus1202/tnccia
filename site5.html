@@ -1,0 +1,554 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Anchoring the Future Scholar in an AI Era</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Warm Sand, Slate Gray, Sky Blue, and Off-White -->
+    <!-- Application Structure Plan: The SPA is designed as an interactive dashboard with tabbed navigation to deconstruct the linear report into thematic, digestible sections. The structure is: 1) A main navigation bar (Overview, Core Competencies, Domain Applications, Framework, Resources, Hypotheses) for high-level topic switching. 2) An "Overview" section that uses a donut chart to visually anchor the report's main pillars. 3) A "Core Competencies" section with interactive cards that reveal detailed text on click. 4) A "Domain Applications" section with sub-tabs (Science, Engineering, Healthcare) to allow users to filter content based on their interest, paired with an updating bar chart. 5) A "Framework" section using a visual timeline. 6) A "Resources" section with accordions. 7) A "Hypotheses" section with cards detailing testable research questions. This non-linear, interactive structure prioritizes user exploration and understanding. -->
+    <!-- Visualization & Content Choices: 
+        - Report Info: Main pillars of the report (Pedagogy, Skills, Ethics). Goal: Inform. Viz/Presentation: Donut Chart. Interaction: Hover tooltips provide brief context. Justification: Provides a high-level visual summary of the report's core themes. Library: Chart.js.
+        - Report Info: Core skill importance across domains. Goal: Compare. Viz/Presentation: Bar Chart. Interaction: Chart data dynamically updates when the user clicks a domain tab (Science, Engineering, Healthcare). Justification: Allows users to compare skill priorities, making the data relevant to their specific field. Library: Chart.js.
+        - Report Info: Core competency details. Goal: Organize/Inform. Viz/Presentation: Interactive Cards. Interaction: Clicking a card title reveals detailed text. Justification: Prevents information overload by hiding details until requested, encouraging focused reading. Method: Vanilla JS + Tailwind.
+        - Report Info: Implementation steps. Goal: Organize/Change. Viz/Presentation: HTML/CSS Timeline. Interaction: Content is laid out sequentially. Justification: Visually represents the process flow, making it more intuitive than a bulleted list. Method: HTML/CSS with Tailwind.
+        - CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .chart-container { position: relative; width: 100%; max-width: 450px; margin-left: auto; margin-right: auto; height: 300px; max-height: 350px; }
+        @media (min-width: 768px) { .chart-container { height: 350px; max-height: 400px; } }
+        .bar-chart-container { position: relative; width: 100%; height: 400px; max-height: 50vh; }
+        .nav-link { transition: color 0.3s, border-color 0.3s; }
+        .nav-link.active { color: #3b82f6; border-bottom-color: #3b82f6; }
+        .nav-link:not(.active) { border-bottom-color: transparent; }
+        .domain-btn { transition: background-color 0.3s, color 0.3s; }
+        .domain-btn.active { background-color: #3b82f6; color: white; }
+        .competency-card { transition: transform 0.2s, box-shadow 0.2s; }
+        .competency-card:hover { transform: translateY(-5px); box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05); }
+        .accordion-content { max-height: 0; overflow: hidden; transition: max-height 0.5s ease-in-out; }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800">
+
+    <div class="container mx-auto px-4 py-8">
+        
+        <header class="text-center mb-10">
+            <h1 class="text-4xl md:text-5xl font-bold text-slate-900">Anchoring the Future Scholar</h1>
+            <p class="mt-2 text-lg text-slate-600">Enhancing Pedagogy and Skills in an AI Era</p>
+        </header>
+
+        <nav class="sticky top-0 z-10 bg-slate-50/80 backdrop-blur-md mb-12 border-b border-slate-200">
+            <ul class="flex flex-wrap justify-center space-x-4 md:space-x-8 text-sm md:text-base font-medium">
+                <li><a href="#" class="nav-link active py-4 px-2 border-b-2" data-target="overview">Overview</a></li>
+                <li><a href="#" class="nav-link py-4 px-2 border-b-2" data-target="competencies">Core Competencies</a></li>
+                <li><a href="#" class="nav-link py-4 px-2 border-b-2" data-target="domains">Domain Applications</a></li>
+                <li><a href="#" class="nav-link py-4 px-2 border-b-2" data-target="framework">Implementation</a></li>
+                <li><a href="#" class="nav-link py-4 px-2 border-b-2" data-target="resources">Resources</a></li>
+                <li><a href="#" class="nav-link py-4 px-2 border-b-2" data-target="hypotheses">Hypotheses</a></li>
+            </ul>
+        </nav>
+
+        <main>
+            <!-- Overview Section -->
+            <section id="overview" class="content-section">
+                <div class="max-w-4xl mx-auto bg-white p-8 rounded-xl shadow-sm">
+                    <h2 class="text-3xl font-bold text-slate-900 mb-4 text-center">A New Foundation for Professional Education</h2>
+                    <p class="text-slate-600 mb-8 text-justify">
+                        The generative AI revolution marks a critical inflection point for professional education. For scientists, engineers, and healthcare providers, AI is no longer a fringe technology but a foundational element of their daily workflows. To remain relevant, the next generation of professionals cannot simply be users of AI tools; they must become sophisticated collaborators. This interactive report explores a framework for this educational evolution, focusing on shifts in teaching methods, essential new skills, and domain-specific applications to prepare students for an AI-driven world.
+                    </p>
+                    <div class="grid md:grid-cols-2 gap-8 items-center">
+                        <div>
+                             <h3 class="text-xl font-semibold text-slate-800 mb-3 text-center">Pillars of AI Integration</h3>
+                            <p class="text-slate-600 text-sm text-center mb-4">
+                                Our proposed framework is built on three interconnected pillars. Each represents a crucial area of focus for institutions aiming to prepare students for the future. Hover over the chart segments to learn more about each pillar.
+                            </p>
+                        </div>
+                        <div class="chart-container">
+                            <canvas id="pillarsChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Core Competencies Section -->
+            <section id="competencies" class="content-section hidden">
+                 <div class="max-w-5xl mx-auto">
+                    <h2 class="text-3xl font-bold text-slate-900 mb-4 text-center">Core Competencies for the AI Era</h2>
+                    <p class="text-slate-600 mb-8 text-center max-w-3xl mx-auto">
+                        In an age where factual recall is automated, the value of education shifts to cultivating durable cognitive and technical skills. The following competencies are essential for any professional operating alongside AI. Click on each card to expand and read more about its importance.
+                    </p>
+                    <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        <div class="competency-card bg-white p-6 rounded-xl shadow-sm cursor-pointer" data-card="ai-literacy">
+                            <h3 class="text-xl font-semibold text-blue-600 mb-2">1. AI Literacy</h3>
+                            <p class="text-slate-600 text-sm">Understanding the core concepts, capabilities, and limitations of AI systems.</p>
+                            <div id="ai-literacy-detail" class="text-sm text-slate-600 mt-4 hidden">Understanding the fundamental concepts of AI, including machine learning types (supervised, unsupervised, reinforcement), neural networks, and large language models. This includes knowing the limitations, potential for "hallucinations," and the probabilistic nature of AI outputs.</div>
+                        </div>
+                         <div class="competency-card bg-white p-6 rounded-xl shadow-sm cursor-pointer" data-card="human-ai">
+                            <h3 class="text-xl font-semibold text-blue-600 mb-2">2. Human-AI Collaboration</h3>
+                            <p class="text-slate-600 text-sm">Mastering prompt engineering and iterative interaction to effectively partner with AI.</p>
+                             <div id="human-ai-detail" class="text-sm text-slate-600 mt-4 hidden">This is the art and science of formulating precise, context-aware prompts to elicit desired, accurate, and creative outputs from generative models. It involves an iterative process of refining inputs to improve results, treating the AI as a creative and analytical partner.</div>
+                        </div>
+                         <div class="competency-card bg-white p-6 rounded-xl shadow-sm cursor-pointer" data-card="critical-thinking">
+                            <h3 class="text-xl font-semibold text-blue-600 mb-2">3. Critical Evaluation</h3>
+                            <p class="text-slate-600 text-sm">Rigorously assessing AI outputs for accuracy, bias, and contextual relevance.</p>
+                             <div id="critical-thinking-detail" class="text-sm text-slate-600 mt-4 hidden">The skill of rigorously assessing AI-generated content. Students must become critical consumers of AI outputs, cross-referencing information with trusted sources and applying their domain-specific knowledge to validate or challenge the results.</div>
+                        </div>
+                         <div class="competency-card bg-white p-6 rounded-xl shadow-sm cursor-pointer" data-card="ethical-reasoning">
+                            <h3 class="text-xl font-semibold text-blue-600 mb-2">4. Ethical Reasoning</h3>
+                            <p class="text-slate-600 text-sm">Navigating the moral landscape of AI, including privacy, bias, and accountability.</p>
+                             <div id="ethical-reasoning-detail" class="text-sm text-slate-600 mt-4 hidden">A deep understanding of the ethical challenges posed by AI. Professionals must be able to identify potential harms, advocate for fairness and transparency, and contribute to the responsible governance of AI systems in their workplaces and society.</div>
+                        </div>
+                         <div class="competency-card bg-white p-6 rounded-xl shadow-sm cursor-pointer" data-card="data-acumen">
+                            <h3 class="text-xl font-semibold text-blue-600 mb-2">5. Data Acumen</h3>
+                            <p class="text-slate-600 text-sm">Understanding how data is used to train AI and its impact on model performance.</p>
+                             <div id="data-acumen-detail" class="text-sm text-slate-600 mt-4 hidden">The ability to understand, interpret, and question data. While not every professional needs to be a data scientist, a baseline understanding of how data is collected, processed, and used to train AI models is essential for evaluating their outputs.</div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Domain Applications Section -->
+            <section id="domains" class="content-section hidden">
+                <div class="max-w-6xl mx-auto">
+                    <h2 class="text-3xl font-bold text-slate-900 mb-4 text-center">Domain-Specific Applications</h2>
+                    <p class="text-slate-600 mb-8 text-center max-w-3xl mx-auto">
+                       Core AI competencies come to life when applied within a specific professional context. The needs of a scientist, engineer, and doctor differ, and so should their AI training. Select a domain to explore its unique applications and see how the importance of core skills shifts.
+                    </p>
+                    <div class="flex justify-center space-x-4 mb-8">
+                        <button class="domain-btn active bg-blue-500 text-white px-6 py-2 rounded-full font-semibold" data-domain="science">Science</button>
+                        <button class="domain-btn bg-white px-6 py-2 rounded-full font-semibold" data-domain="engineering">Engineering</button>
+                        <button class="domain-btn bg-white px-6 py-2 rounded-full font-semibold" data-domain="healthcare">Healthcare</button>
+                    </div>
+
+                    <div class="grid lg:grid-cols-5 gap-8">
+                        <div class="lg:col-span-2 space-y-6">
+                            <div id="science-content" class="domain-content bg-white p-6 rounded-xl shadow-sm">
+                                <h3 class="text-2xl font-bold text-slate-800 mb-3">For Scientists: Accelerating Discovery</h3>
+                                <p class="text-slate-600 mb-4">AI is a powerful partner in research, capable of analyzing vast datasets and identifying patterns that elude human observation. Training should focus on using AI for hypothesis generation, literature synthesis, and high-throughput data analysis in fields like genomics and climate modeling.</p>
+                                <div class="font-semibold text-slate-700">Curriculum Example:</div>
+                                <p class="text-slate-600 text-sm">A biology course where students use an AI model like AlphaFold to predict a protein's structure, then design lab experiments to validate or refute the AI's prediction, testing both the AI's capability and their own scientific reasoning.</p>
+                            </div>
+                            <div id="engineering-content" class="domain-content hidden bg-white p-6 rounded-xl shadow-sm">
+                                 <h3 class="text-2xl font-bold text-slate-800 mb-3">For Engineers: Intelligent Design</h3>
+                                <p class="text-slate-600 mb-4">For engineers, AI tools can dramatically accelerate the design and testing lifecycle. Education should integrate tools for generative design, where AI proposes novel solutions based on constraints, and for running complex simulations for predictive maintenance and material science.</p>
+                                <div class="font-semibold text-slate-700">Curriculum Example:</div>
+                                <p class="text-slate-600 text-sm">A mechanical engineering project where students define a problem (e.g., design a lighter, stronger aerospace bracket) and use a generative AI to explore thousands of design options, followed by a critical analysis of the manufacturability and efficiency of the top AI-proposed solutions.</p>
+                            </div>
+                            <div id="healthcare-content" class="domain-content hidden bg-white p-6 rounded-xl shadow-sm">
+                                 <h3 class="text-2xl font-bold text-slate-800 mb-3">For Healthcare: Augmenting Care</h3>
+                                <p class="text-slate-600 mb-4">In medicine, AI excels at pattern recognition in complex data, from scans to patient records. Training must cover AI-assisted diagnostics (radiology, pathology), identifying at-risk patients, and personalizing treatment plans, with a heavy emphasis on ethical use and preserving the human-patient connection.</p>
+                                <div class="font-semibold text-slate-700">Curriculum Example:</div>
+                                <p class="text-slate-600 text-sm">A medical school module where students use an AI diagnostic assistant for a case study. Their assessment is based on their interaction with the AI, their validation of its suggestions, and their empathetic communication of the findings to a simulated patient.</p>
+                            </div>
+                        </div>
+                        <div class="lg:col-span-3 bg-white p-6 rounded-xl shadow-sm">
+                             <h3 class="text-xl font-semibold text-slate-800 mb-3 text-center">Relative Importance of Core Skills by Domain</h3>
+                            <p class="text-slate-600 text-sm text-center mb-4">This chart shows a notional representation of how the emphasis on core competencies might vary across different professional fields.</p>
+                            <div class="bar-chart-container">
+                                <canvas id="domainSkillsChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            
+            <!-- Implementation Section -->
+            <section id="framework" class="content-section hidden">
+                 <div class="max-w-4xl mx-auto">
+                    <h2 class="text-3xl font-bold text-slate-900 mb-6 text-center">A Framework for Implementation</h2>
+                     <p class="text-slate-600 mb-10 text-center max-w-3xl mx-auto">
+                        Transforming education for the AI era requires a deliberate, phased approach. The following roadmap outlines key steps for academic institutions to build a robust and sustainable strategy for change, moving from high-level planning to deep curricular integration.
+                    </p>
+                    <div class="relative">
+                        <!-- The vertical line -->
+                        <div class="absolute left-1/2 -ml-px w-0.5 h-full bg-blue-300"></div>
+                        
+                        <!-- Step 1 -->
+                        <div class="relative mb-12">
+                            <div class="absolute left-1/2 -ml-4 w-8 h-8 bg-blue-500 rounded-full text-white flex items-center justify-center font-bold">1</div>
+                            <div class="ml-[calc(50%+2rem)] pl-8 bg-white p-6 rounded-xl shadow-sm">
+                                <h3 class="text-xl font-semibold text-slate-800 mb-2">Establish Institutional AI Strategy</h3>
+                                <p class="text-slate-600">Form a cross-disciplinary task force involving faculty, students, and administration. This group will define the institution's vision for AI in education, establish guiding principles, and create clear guidelines for ethical and effective AI use in both teaching and research.</p>
+                            </div>
+                        </div>
+
+                        <!-- Step 2 -->
+                         <div class="relative mb-12">
+                             <div class="absolute left-1/2 -ml-4 w-8 h-8 bg-blue-500 rounded-full text-white flex items-center justify-center font-bold">2</div>
+                             <div class="mr-[calc(50%+2rem)] pr-8 text-right bg-white p-6 rounded-xl shadow-sm">
+                                <h3 class="text-xl font-semibold text-slate-800 mb-2">Invest in Faculty Development</h3>
+                                <p class="text-slate-600">Provide sustained, hands-on training for educators. This goes beyond one-off workshops and includes creating learning communities, providing access to AI tools, and offering pedagogical support for redesigning courses and assessments around AI collaboration.</p>
+                            </div>
+                        </div>
+
+                        <!-- Step 3 -->
+                        <div class="relative mb-12">
+                            <div class="absolute left-1/2 -ml-4 w-8 h-8 bg-blue-500 rounded-full text-white flex items-center justify-center font-bold">3</div>
+                            <div class="ml-[calc(50%+2rem)] pl-8 bg-white p-6 rounded-xl shadow-sm">
+                                <h3 class="text-xl font-semibold text-slate-800 mb-2">Redesign Curricula Around Competencies</h3>
+                                <p class="text-slate-600">Systematically audit existing programs to identify opportunities for embedding the core AI-era competencies. This is a deep, collaborative process requiring departmental commitment to integrate skills like prompt engineering and ethical evaluation into existing subject matter.</p>
+                            </div>
+                        </div>
+
+                         <!-- Step 4 -->
+                        <div class="relative">
+                             <div class="absolute left-1/2 -ml-4 w-8 h-8 bg-blue-500 rounded-full text-white flex items-center justify-center font-bold">4</div>
+                             <div class="mr-[calc(50%+2rem)] pr-8 text-right bg-white p-6 rounded-xl shadow-sm">
+                                <h3 class="text-xl font-semibold text-slate-800 mb-2">Promote and Enforce Ethical AI Use</h3>
+                                <p class="text-slate-600">Develop and widely disseminate strong, clear policies on academic integrity and responsible AI use. This includes creating resources for students on proper citation of AI assistance and fostering a campus-wide dialogue on the societal implications of AI technologies.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Resources Section -->
+            <section id="resources" class="content-section hidden">
+                <div class="max-w-4xl mx-auto">
+                     <h2 class="text-3xl font-bold text-slate-900 mb-8 text-center">Resources for Further Reading</h2>
+                     <div class="space-y-4">
+                        <div class="accordion-item bg-white rounded-xl shadow-sm">
+                            <button class="accordion-header w-full text-left p-6 font-semibold text-slate-800 text-lg flex justify-between items-center">
+                                <span>Suggested Reading List</span>
+                                <span class="transform transition-transform duration-300">+</span>
+                            </button>
+                            <div class="accordion-content px-6">
+                                <ul class="list-disc list-inside text-slate-600 pb-6 space-y-2">
+                                     <li>Agrawal, A., Gans, J., & Goldfarb, A. (2018). <i>Prediction Machines: The Simple Economics of Artificial Intelligence.</i></li>
+                                    <li>Brynjolfsson, E., & McAfee, A. (2014). <i>The Second Machine Age.</i></li>
+                                    <li>Daugherty, P. R., & Wilson, H. J. (2018). <i>Human + Machine: Reimagining Work in the Age of AI.</i></li>
+                                    <li>Guan, C., et al. (2020). "Artificial intelligence in medical education." <i>Journal of Medical Systems.</i></li>
+                                    <li>O'Neil, C. (2016). <i>Weapons of Math Destruction.</i></li>
+                                    <li>Russell, S., & Norvig, P. (2020). <i>Artificial Intelligence: A Modern Approach (4th ed.).</i></li>
+                                    <li>Topol, E. J. (2019). <i>Deep Medicine: How Artificial Intelligence Can Make Healthcare Human Again.</i></li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="accordion-item bg-white rounded-xl shadow-sm">
+                            <button class="accordion-header w-full text-left p-6 font-semibold text-slate-800 text-lg flex justify-between items-center">
+                                <span>References</span>
+                                <span class="transform transition-transform duration-300">+</span>
+                            </button>
+                            <div class="accordion-content px-6">
+                                <ul class="list-disc list-inside text-slate-600 pb-6 space-y-2">
+                                    <li>AAMC. (2024). "Medical schools move from worrying about AI to teaching it."</li>
+                                    <li>Frontiers in Education. (2025). "Integrating artificial intelligence into pre-clinical medical education."</li>
+                                    <li>Red Hat. (2025). "Future-proof your tech career: 6 essential human skills for the AI era."</li>
+                                    <li>Queen Mary University of London. (2025). "Integrating AI in Curriculum."</li>
+                                    <li>Rize Education. (2025). "Addressing AI Curriculum Challenges in Higher Ed."</li>
+                                    <li>Stanford Report. (2024). "Education scholar uses AI to help medical students hone diagnostic skills."</li>
+                                </ul>
+                            </div>
+                        </div>
+                     </div>
+                </div>
+            </section>
+
+            <!-- Hypotheses Section -->
+            <section id="hypotheses" class="content-section hidden">
+                <div class="max-w-4xl mx-auto">
+                    <h2 class="text-3xl font-bold text-slate-900 mb-8 text-center">Testable Research Hypotheses</h2>
+                    <p class="text-slate-600 mb-10 text-center max-w-3xl mx-auto">
+                        This framework gives rise to several big-picture, testable hypotheses that can form the basis of a formal research proposal. These questions explore the deeper, second-order effects of AI integration on student learning, innovation, and ethical behavior.
+                    </p>
+                    <div class="space-y-8">
+                        <!-- Hypothesis 1 -->
+                        <div class="bg-white p-6 rounded-xl shadow-sm">
+                            <h3 class="text-xl font-bold text-slate-800 mb-2">1. The Competency Inversion Hypothesis</h3>
+                            <p class="text-slate-600 mb-4 italic">AI integration inverts the value of skills, making non-automatable skills (critical thinking, ethics) a stronger predictor of high achievement than traditional, automatable skills (calculation, recall).</p>
+                            <div class="flex justify-end space-x-4 text-sm font-semibold mb-4">
+                                <span>Testability: <span class="text-blue-600">8/10</span></span>
+                                <span>Scalability: <span class="text-blue-600">6/10</span></span>
+                            </div>
+                            <h4 class="font-semibold text-slate-700 mb-2">Research Methodologies:</h4>
+                            <ul class="list-disc list-inside text-slate-600 space-y-1 text-sm">
+                                <li><strong>Longitudinal Cohort Study:</strong> Track traditional vs. AI-integrated cohorts over 4 years, measuring performance via standard and AI-resilient assessments.</li>
+                                <li><strong>Cross-Sectional Experiment:</strong> Randomly assign students to solve problems with/without AI, assessing the reasoning process and justification quality.</li>
+                            </ul>
+                        </div>
+                        <!-- Hypothesis 2 -->
+                        <div class="bg-white p-6 rounded-xl shadow-sm">
+                            <h3 class="text-xl font-bold text-slate-800 mb-2">2. The Monoculture-Pluralism Paradox</h3>
+                            <p class="text-slate-600 mb-4 italic">Uncritical reliance on dominant AI models leads to an "intellectual monoculture," reducing methodological diversity and solution-space exploration in student projects.</p>
+                             <div class="flex justify-end space-x-4 text-sm font-semibold mb-4">
+                                <span>Testability: <span class="text-blue-600">9/10</span></span>
+                                <span>Scalability: <span class="text-blue-600">7/10</span></span>
+                            </div>
+                            <h4 class="font-semibold text-slate-700 mb-2">Research Methodologies:</h4>
+                            <ul class="list-disc list-inside text-slate-600 space-y-1 text-sm">
+                                <li><strong>Comparative Content Analysis:</strong> Use NLP to analyze a large corpus of student projects, measuring the semantic diversity of work citing dominant AI models vs. others.</li>
+                                <li><strong>Controlled Laboratory Experiment:</strong> Assign teams to a design problem under different conditions (no AI, single AI, multiple AIs) and have blind expert panels rate the creativity and novelty of solutions.</li>
+                            </ul>
+                        </div>
+                        <!-- Hypothesis 3 -->
+                        <div class="bg-white p-6 rounded-xl shadow-sm">
+                            <h3 class="text-xl font-bold text-slate-800 mb-2">3. The Ethical Fading Effect</h3>
+                            <p class="text-slate-600 mb-4 italic">Teaching AI ethics in isolated modules leads to "ethical fading," where students fail to spontaneously apply ethical principles in subsequent technical tasks, unlike those in an integrated curriculum.</p>
+                             <div class="flex justify-end space-x-4 text-sm font-semibold mb-4">
+                                <span>Testability: <span class="text-blue-600">7/10</span></span>
+                                <span>Scalability: <span class="text-blue-600">5/10</span></span>
+                            </div>
+                            <h4 class="font-semibold text-slate-700 mb-2">Research Methodologies:</h4>
+                            <ul class="list-disc list-inside text-slate-600 space-y-1 text-sm">
+                                <li><strong>Scenario-Based Assessment with Eye-Tracking:</strong> Present students with a technical task containing a subtle ethical trap. Use eye-tracking and interviews to see if they identify and address the issue.</li>
+                                <li><strong>Pre-test/Post-test Control Group Design:</strong> Compare gain scores in applied ethical reasoning between students in an integrated vs. isolated ethics curriculum.</li>
+                            </ul>
+                        </div>
+                        <!-- Hypothesis 4 -->
+                        <div class="bg-white p-6 rounded-xl shadow-sm">
+                            <h3 class="text-xl font-bold text-slate-800 mb-2">4. The Pedagogical Automation Dilemma</h3>
+                            <p class="text-slate-600 mb-4 italic">As faculty automate pedagogical tasks (grading, lesson planning) with AI, their deep "pedagogical content knowledge" may atrophy, reducing long-term teaching effectiveness despite short-term efficiency gains.</p>
+                             <div class="flex justify-end space-x-4 text-sm font-semibold mb-4">
+                                <span>Testability: <span class="text-blue-600">6/10</span></span>
+                                <span>Scalability: <span class="text-blue-600">4/10</span></span>
+                            </div>
+                            <h4 class="font-semibold text-slate-700 mb-2">Research Methodologies:</h4>
+                            <ul class="list-disc list-inside text-slate-600 space-y-1 text-sm">
+                                <li><strong>Faculty Longitudinal Study:</strong> Track faculty AI use and student performance data over several years to identify correlations between pedagogical automation and teaching outcomes.</li>
+                                <li><strong>Comparative Classroom Observation:</strong> Use qualitative observation to compare the teaching practices and student engagement in classrooms with high vs. low pedagogical AI automation.</li>
+                            </ul>
+                        </div>
+                        <!-- Hypothesis 5 -->
+                        <div class="bg-white p-6 rounded-xl shadow-sm">
+                            <h3 class="text-xl font-bold text-slate-800 mb-2">5. The "Scaffolding-to-Crutch" Transition</h3>
+                            <p class="text-slate-600 mb-4 italic">AI tools intended as learning scaffolds (e.g., AI tutors) become permanent crutches for many students, inhibiting the development of independent problem-solving skills, especially in those with lower initial self-efficacy.</p>
+                             <div class="flex justify-end space-x-4 text-sm font-semibold mb-4">
+                                <span>Testability: <span class="text-blue-600">8/10</span></span>
+                                <span>Scalability: <span class="text-blue-600">7/10</span></span>
+                            </div>
+                            <h4 class="font-semibold text-slate-700 mb-2">Research Methodologies:</h4>
+                            <ul class="list-disc list-inside text-slate-600 space-y-1 text-sm">
+                                <li><strong>Randomized Controlled Trial with Delayed Post-test:</strong> After a learning phase with an AI tool, a delayed post-test (without the tool) can directly measure skill retention and independence.</li>
+                                <li><strong>Self-Efficacy Surveys:</strong> Correlate students' initial self-efficacy with their level of AI dependency and performance on the delayed post-test.</li>
+                            </ul>
+                        </div>
+                        <!-- Hypothesis 6 -->
+                        <div class="bg-white p-6 rounded-xl shadow-sm">
+                            <h3 class="text-xl font-bold text-slate-800 mb-2">6. The Collaboration Inflation Hypothesis</h3>
+                            <p class="text-slate-600 mb-4 italic">AI integration in group projects leads to "collaboration inflation," where tasks are divided and individually completed with AI, reducing genuine peer interaction and resulting in less cohesive final projects.</p>
+                             <div class="flex justify-end space-x-4 text-sm font-semibold mb-4">
+                                <span>Testability: <span class="text-blue-600">7/10</span></span>
+                                <span>Scalability: <span class="text-blue-600">6/10</span></span>
+                            </div>
+                            <h4 class="font-semibold text-slate-700 mb-2">Research Methodologies:</h4>
+                            <ul class="list-disc list-inside text-slate-600 space-y-1 text-sm">
+                                <li><strong>Social Network Analysis:</strong> Analyze communication data (e.g., chat logs) from student groups to map interaction patterns and measure the density of collaboration.</li>
+                                <li><strong>Qualitative Analysis of Group Process:</strong> Observe and interview groups to understand how they divide labor and integrate AI into their workflow.</li>
+                            </ul>
+                        </div>
+                        <!-- Hypothesis 7 -->
+                        <div class="bg-white p-6 rounded-xl shadow-sm">
+                            <h3 class="text-xl font-bold text-slate-800 mb-2">7. The Equity Paradox</h3>
+                            <p class="text-slate-600 mb-4 italic">AI tools act as an "accelerator" for well-resourced students but may widen the achievement gap over time for under-resourced students who face barriers to effective use (e.g., device quality, internet access).</p>
+                             <div class="flex justify-end space-x-4 text-sm font-semibold mb-4">
+                                <span>Testability: <span class="text-blue-600">8/10</span></span>
+                                <span>Scalability: <span class="text-blue-600">8/10</span></span>
+                            </div>
+                            <h4 class="font-semibold text-slate-700 mb-2">Research Methodologies:</h4>
+                            <ul class="list-disc list-inside text-slate-600 space-y-1 text-sm">
+                                <li><strong>Stratified Cohort Analysis:</strong> Track student performance data stratified by socioeconomic status and other demographic factors to identify trends in the achievement gap over time.</li>
+                                <li><strong>Mixed-Methods Case Studies:</strong> Conduct in-depth case studies of students from different backgrounds to understand the contextual factors influencing their use of AI tools.</li>
+                            </ul>
+                        </div>
+                        <!-- Hypothesis 8 -->
+                        <div class="bg-white p-6 rounded-xl shadow-sm">
+                            <h3 class="text-xl font-bold text-slate-800 mb-2">8. The Assessment Authenticity Arms Race</h3>
+                            <p class="text-slate-600 mb-4 italic">The effort to create "AI-resilient" assessments will trigger a continuous "arms race," forcing a shift towards resource-intensive methods like oral exams and placing significant strain on faculty.</p>
+                             <div class="flex justify-end space-x-4 text-sm font-semibold mb-4">
+                                <span>Testability: <span class="text-blue-600">9/10</span></span>
+                                <span>Scalability: <span class="text-blue-600">9/10</span></span>
+                            </div>
+                            <h4 class="font-semibold text-slate-700 mb-2">Research Methodologies:</h4>
+                            <ul class="list-disc list-inside text-slate-600 space-y-1 text-sm">
+                                <li><strong>Longitudinal Assessment Design Study:</strong> Track the evolution of assessment types in course syllabi over several years.</li>
+                                <li><strong>Faculty Workload Analysis:</strong> Survey and analyze faculty time allocation for grading and assessment design to quantify changes in workload.</li>
+                            </ul>
+                        </div>
+                        <!-- Hypothesis 9 -->
+                        <div class="bg-white p-6 rounded-xl shadow-sm">
+                            <h3 class="text-xl font-bold text-slate-800 mb-2">9. The Disciplinary Domain Specificity Hypothesis</h3>
+                            <p class="text-slate-600 mb-4 italic">AI integration will be most effective in highly structured disciplines (e.g., computer science) and less effective or even detrimental in fields requiring high levels of ambiguity and tacit knowledge (e.g., clinical interaction).</p>
+                             <div class="flex justify-end space-x-4 text-sm font-semibold mb-4">
+                                <span>Testability: <span class="text-blue-600">7/10</span></span>
+                                <span>Scalability: <span class="text-blue-600">6/10</span></span>
+                            </div>
+                            <h4 class="font-semibold text-slate-700 mb-2">Research Methodologies:</h4>
+                            <ul class="list-disc list-inside text-slate-600 space-y-1 text-sm">
+                                <li><strong>Multi-Domain Comparative Study:</strong> Compare learning outcomes and faculty/student satisfaction across different disciplines implementing similar AI tools.</li>
+                                <li><strong>Expert Panel Review:</strong> Have expert panels from different fields evaluate the quality of AI-assisted student work to develop domain-specific metrics of success.</li>
+                            </ul>
+                        </div>
+                        <!-- Hypothesis 10 -->
+                        <div class="bg-white p-6 rounded-xl shadow-sm">
+                            <h3 class="text-xl font-bold text-slate-800 mb-2">10. The "Pi-Shaped" Professional Premium</h3>
+                            <p class="text-slate-600 mb-4 italic">Graduates from curricula explicitly designed to cultivate "Pi-shaped" professionals (deep domain + AI skills) will achieve significantly better career outcomes within 5 years than peers from traditional programs.</p>
+                             <div class="flex justify-end space-x-4 text-sm font-semibold mb-4">
+                                <span>Testability: <span class="text-blue-600">8/10</span></span>
+                                <span>Scalability: <span class="text-blue-600">7/10</span></span>
+                            </div>
+                            <h4 class="font-semibold text-slate-700 mb-2">Research Methodologies:</h4>
+                            <ul class="list-disc list-inside text-slate-600 space-y-1 text-sm">
+                                <li><strong>Longitudinal Career Outcomes Tracking:</strong> Track alumni career progression (salary, promotion rate, job satisfaction) from different curricula.</li>
+                                <li><strong>Employer Surveys and Interviews:</strong> Survey and interview hiring managers to assess their valuation of "Pi-shaped" skills and their perception of graduates from different programs.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+        </main>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const navLinks = document.querySelectorAll('.nav-link');
+            const contentSections = document.querySelectorAll('.content-section');
+
+            navLinks.forEach(link => {
+                link.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const targetId = link.getAttribute('data-target');
+
+                    navLinks.forEach(navLink => navLink.classList.remove('active'));
+                    link.classList.add('active');
+
+                    contentSections.forEach(section => {
+                        if (section.id === targetId) {
+                            section.classList.remove('hidden');
+                        } else {
+                            section.classList.add('hidden');
+                        }
+                    });
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                });
+            });
+            
+            const competencyCards = document.querySelectorAll('.competency-card');
+            competencyCards.forEach(card => {
+                card.addEventListener('click', () => {
+                    const detailId = card.dataset.card + '-detail';
+                    const detailEl = document.getElementById(detailId);
+                    detailEl.classList.toggle('hidden');
+                });
+            });
+
+            const accordionItems = document.querySelectorAll('.accordion-item');
+            accordionItems.forEach(item => {
+                const header = item.querySelector('.accordion-header');
+                const content = item.querySelector('.accordion-content');
+                const icon = header.querySelector('span:last-child');
+                header.addEventListener('click', () => {
+                    if (content.style.maxHeight) {
+                        content.style.maxHeight = null;
+                        icon.style.transform = 'rotate(0deg)';
+                    } else {
+                        content.style.maxHeight = content.scrollHeight + 'px';
+                        icon.style.transform = 'rotate(45deg)';
+                    }
+                });
+            });
+
+            const pillarsData = {
+                labels: ['Pedagogical Shift', 'Core Competency Development', 'Ethical Framework'],
+                datasets: [{
+                    label: 'Pillars of AI Integration',
+                    data: [40, 40, 20],
+                    backgroundColor: ['#3b82f6', '#60a5fa', '#93c5fd'],
+                    borderColor: '#f8fafc',
+                    borderWidth: 2,
+                    hoverOffset: 4
+                }]
+            };
+
+            const pillarsCtx = document.getElementById('pillarsChart').getContext('2d');
+            new Chart(pillarsCtx, {
+                type: 'doughnut',
+                data: pillarsData,
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'bottom' },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    let label = context.label || '';
+                                    if (label) {
+                                        label += ': ';
+                                    }
+                                    if (context.parsed !== null) {
+                                        label += context.parsed + '%';
+                                    }
+                                    return label;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+
+            const skillLabels = ['AI Literacy', 'Human-AI Collab', 'Critical Evaluation', 'Ethical Reasoning', 'Data Acumen'];
+            const skillsData = {
+                science: [9, 7, 9, 6, 8],
+                engineering: [8, 9, 7, 7, 8],
+                healthcare: [7, 6, 9, 10, 7]
+            };
+            
+            const domainSkillsCtx = document.getElementById('domainSkillsChart').getContext('2d');
+            let domainSkillsChart = new Chart(domainSkillsCtx, {
+                type: 'bar',
+                data: {
+                    labels: skillLabels,
+                    datasets: [{
+                        label: 'Importance in Science',
+                        data: skillsData.science,
+                        backgroundColor: '#3b82f6',
+                        borderColor: '#1d4ed8',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    indexAxis: 'y',
+                    scales: {
+                        x: { beginAtZero: true, max: 10, title: { display: true, text: 'Relative Importance (out of 10)' } },
+                        y: { grid: { display: false } }
+                    },
+                    plugins: {
+                        legend: { display: true, position: 'top' },
+                    }
+                }
+            });
+
+            const domainBtns = document.querySelectorAll('.domain-btn');
+            const domainContents = document.querySelectorAll('.domain-content');
+
+            domainBtns.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const domain = btn.dataset.domain;
+                    
+                    domainBtns.forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+
+                    domainContents.forEach(content => {
+                        if(content.id === `${domain}-content`) {
+                            content.classList.remove('hidden');
+                        } else {
+                            content.classList.add('hidden');
+                        }
+                    });
+
+                    domainSkillsChart.data.datasets[0].data = skillsData[domain];
+                    domainSkillsChart.data.datasets[0].label = `Importance in ${domain.charAt(0).toUpperCase() + domain.slice(1)}`;
+                    domainSkillsChart.update();
+                });
+            });
+        });
+    </script>
+</body>
+</html>
