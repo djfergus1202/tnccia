@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Codex Chess - The Ultimate Challenge</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.10.377/pdf.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.12.0/chess.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/chessboard-js/1.0.0/chessboard-1.0.0.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/chessboard-js/1.0.0/chessboard-1.0.0.min.css"/>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            overflow-y: auto; /* Allow scrolling if needed */
+            background-color: #111827;
+        }
+        .font-game {
+            font-family: 'Press-Start-2P', cursive;
+        }
+        .modal {
+            background-color: rgba(0,0,0,0.85);
+        }
+        .game-ui-panel {
+            background-color: #1f2937;
+            border: 2px solid #4b5563;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+        }
+        .answer-btn { 
+            transition: background-color 0.3s, transform 0.1s;
+        }
+        .answer-btn:active {
+            transform: scale(0.95);
+        }
+        /* Chessboard custom styles */
+        #board-container {
+            width: 90vw;
+            max-width: 450px;
+        }
+        #chess-status {
+            text-align: center;
+            font-size: 1.25rem; /* 20px */
+            margin-top: 1rem;
+            color: #f3f4f6; /* gray-100 */
+        }
+    </style>
+</head>
+<body class="text-white flex items-center justify-center min-h-screen p-4">
+
+    <div id="pdf-upload-section" class="text-center">
+        <h1 class="font-game text-4xl text-yellow-400 mb-4">Codex Chess</h1>
+        <p class="mb-6 max-w-2xl mx-auto">Upload a PDF to generate questions. Answer 10 questions correctly to earn your next chess move!</p>
+        <div class="bg-gray-800 border-2 border-dashed border-gray-600 rounded-lg p-12">
+            <input type="file" id="pdf-file" accept=".pdf" class="hidden">
+            <label for="pdf-file" class="font-game bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg px-8 py-4 cursor-pointer text-xl transition-transform transform hover:scale-105">
+                Select PDF Chronicle
+            </label>
+            <p id="file-name" class="mt-4 text-gray-400"></p>
+        </div>
+        <div id="loading-indicator" class="hidden mt-6">
+            <p id="loading-text" class="font-game text-yellow-400 text-lg animate-pulse">Analyzing Chronicle...</p>
+        </div>
+    </div>
+
+    <div id="main-game-view" class="hidden w-full h-full flex flex-col lg:flex-row items-center justify-center gap-8">
+        
+        <div id="quiz-view" class="w-full max-w-2xl flex flex-col items-center">
+            <h1 class="font-game text-4xl text-yellow-400 mb-4">Codex Conquest</h1>
+            
+            <div class="game-ui-panel w-full p-4 flex justify-around items-center mb-6 text-center">
+                <div class="font-game text-lg">Round Progress</div>
+                <div id="round-progress" class="font-game text-2xl text-yellow-400">0 / 10</div>
+            </div>
+            
+            <div id="action-panel" class="game-ui-panel w-full p-6 mb-6 text-center">
+                <h2 id="action-title" class="font-game text-2xl text-cyan-400 mb-2">Awaiting Orders</h2>
+                <div id="action-info" class="text-lg">Upload a PDF to begin.</div>
+            </div>
+            
+            <button id="start-round-btn" class="hidden font-game bg-green-600 hover:bg-green-700 px-8 py-4 rounded text-xl transition-transform transform hover:scale-105">Start Round</button>
+        </div>
+
+        <div id="chess-view" class="flex flex-col items-center">
+             <div id="board-container">
+                <div id="board"></div>
+            </div>
+            <div id="chess-status" class="font-game"></div>
+        </div>
+
+    </div>
+    
+    <div id="question-modal" class="hidden modal fixed inset-0 z-50 flex items-center justify-center p-4">
+        <div class="game-ui-panel w-full max-w-3xl p-6 text-center">
+            <h3 class="font-game text-yellow-400 text-xl mb-4">The Codex Challenges You!</h3>
+            <p id="question-prompt" class="mb-6 text-lg"></p>
+            <div id="question-answers" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
+        </div>
+    </div>
+
+    <div id="game-over-modal" class="hidden modal fixed inset-0 z-50 flex items-center justify-center p-4">
+        <div class="game-ui-panel w-full max-w-2xl p-8 text-center">
+            <h2 id="game-over-title" class="font-game text-4xl text-yellow-400 mb-4">🏆 VICTORY! 🏆</h2>
+            <p id="game-over-message" class="text-xl mb-6">You have conquered the codex!</p>
+            <button onclick="location.reload()" class="font-game bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg px-8 py-4 text-xl">Play Again</button>
+        </div>
+    </div>
+    
+    <script>
+        // --- DOM Elements ---
+        const pdfUploadSection = document.getElementById('pdf-upload-section');
+        const pdfFileInput = document.getElementById('pdf-file');
+        const fileNameEl = document.getElementById('file-name');
+        const loadingIndicator = document.getElementById('loading-indicator');
+        const loadingText = document.getElementById('loading-text');
+
+        const mainGameView = document.getElementById('main-game-view');
+        const quizView = document.getElementById('quiz-view');
+        const roundProgressEl = document.getElementById('round-progress');
+        const actionPanel = document.getElementById('action-panel');
+        const actionTitle = document.getElementById('action-title');
+        const actionInfo = document.getElementById('action-info');
+        const startRoundBtn = document.getElementById('start-round-btn');
+        
+        const chessView = document.getElementById('chess-view');
+        const chessStatusEl = document.getElementById('chess-status');
+        
+        const questionModal = document.getElementById('question-modal');
+        const questionPrompt = document.getElementById('question-prompt');
+        const questionAnswers = document.getElementById('question-answers');
+        
+        const gameOverModal = document.getElementById('game-over-modal');
+        const gameOverTitle = document.getElementById('game-over-title');
+        const gameOverMessage = document.getElementById('game-over-message');
+
+        // --- Game State & Constants ---
+        const QUESTIONS_PER_ROUND = 10;
+        let questionsAnsweredInRound = 0;
+        let allSentences = [];
+        let quizActive = false;
+
+        // --- Chess State ---
+        let board = null;
+        const game = new Chess();
+
+        // --- CHESS LOGIC ---
+        function onDragStart(source, piece) {
+            // Do not pick up pieces if the game is over or if it's not that side's turn
+            if (game.game_over() ||
+                (game.turn() === 'w' && piece.search(/^b/) !== -1) ||
+                (game.turn() === 'b' && piece.search(/^w/) !== -1)) {
+                return false;
+            }
+        }
+
+        function onDrop(source, target) {
+            // Attempt to make the move
+            const move = game.move({
+                from: source,
+                to: target,
+                promotion: 'q' // NOTE: always promote to a queen for simplicity
+            });
+
+            // Illegal move
+            if (move === null) return 'snapback';
+            
+            // Move was legal, lock the board and prepare for the next quiz round
+            board.draggable(false);
+            updateChessStatus();
+            prepareForNextRound();
+        }
+
+        // update the board position after the piece snap
+        // for castling, en passant, pawn promotion
+        function onSnapEnd() {
+            board.position(game.fen());
+        }
+
+        function updateChessStatus() {
+            let status = '';
+            const moveColor = game.turn() === 'b' ? 'Black' : 'White';
+
+            if (game.game_over()) {
+                if (game.in_checkmate()) {
+                    status = `Checkmate! ${moveColor === 'White' ? 'Black' : 'White'} wins.`;
+                    showGameOverScreen(status);
+                } else if (game.in_draw()) {
+                    status = 'Game over, it\'s a draw!';
+                    showGameOverScreen(status);
+                }
+            } else {
+                status = `${moveColor}'s Turn`;
+                if (game.in_check()) {
+                    status += ` - Check!`;
+                }
+            }
+            chessStatusEl.innerHTML = status;
+        }
+
+        function prepareForNextRound() {
+            if (game.game_over()) return;
+            
+            const moveColor = game.turn() === 'w' ? 'White' : 'Black';
+            actionTitle.textContent = `${moveColor}'s Turn`;
+            actionInfo.textContent = `Complete the next round of questions to unlock your move.`;
+            startRoundBtn.textContent = `Start Round for ${moveColor}`;
+            startRoundBtn.classList.remove('hidden');
+        }
+
+        // --- PDF & INITIALIZATION ---
+        window.onload = () => {
+            pdfFileInput.addEventListener('change', handlePdfUpload);
+            startRoundBtn.addEventListener('click', startQuizRound);
+        };
+
+        async function handlePdfUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            fileNameEl.textContent = file.name;
+            pdfUploadSection.querySelector('label').classList.add('hidden');
+            loadingIndicator.classList.remove('hidden');
+
+            try {
+                const reader = new FileReader();
+                reader.onload = async (e) => {
+                    const typedarray = new Uint8Array(e.target.result);
+                    pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.10.377/pdf.worker.min.js`;
+                    const pdf = await pdfjsLib.getDocument({ data: typedarray }).promise;
+                    
+                    loadingText.textContent = `Processing ${pdf.numPages} pages...`;
+                    const text = await getFullText(pdf);
+                    allSentences = text.match(/[^.!?\n\r]+[.!?\n\r]+/g) || [];
+                    allSentences = allSentences.filter(s => s.trim().split(' ').length >= 8);
+
+                    if (allSentences.length < 50) {
+                        alert("PDF has insufficient content. Please choose a document with at least 50 long sentences.");
+                        location.reload();
+                        return;
+                    }
+                    startGame();
+                };
+                reader.readAsArrayBuffer(file);
+            } catch (error) {
+                console.error('Error processing PDF:', error);
+                alert("An error occurred while processing the PDF.");
+                location.reload();
+            }
+        }
+        
+        async function getFullText(pdf) {
+            let fullText = "";
+            for (let i = 1; i <= pdf.numPages; i++) {
+                const page = await pdf.getPage(i);
+                const textContent = await page.getTextContent();
+                fullText += textContent.items.map(item => item.str).join(' ');
+            }
+            return fullText;
+        }
+
+        // --- GAME FLOW ---
+        function startGame() {
+            pdfUploadSection.classList.add('hidden');
+            mainGameView.classList.remove('hidden');
+            
+            // Initialize Chessboard
+            board = Chessboard('board', {
+                draggable: false, // Start with board locked
+                position: 'start',
+                onDragStart: onDragStart,
+                onDrop: onDrop,
+                onSnapEnd: onSnapEnd,
+                pieceTheme: 'img/chesspieces/wikipedia/{piece}.png' // A nice default theme
+            });
+            $(window).resize(board.resize);
+            
+            updateChessStatus();
+            prepareForNextRound();
+        }
+
+        function startQuizRound() {
+            if (quizActive) return;
+            
+            quizActive = true;
+            questionsAnsweredInRound = 0;
+            startRoundBtn.classList.add('hidden');
+            
+            actionTitle.textContent = "Question Round In Progress";
+            actionInfo.textContent = "Answer correctly to advance!";
+            updateHUD();
+            askQuestion();
+        }
+
+        function endQuizRound() {
+            quizActive = false;
+            const moveColor = game.turn() === 'w' ? 'White' : 'Black';
+            actionTitle.textContent = "Move Earned!";
+            actionInfo.textContent = `Well done! Make your move, ${moveColor}.`;
+            board.draggable(true); // Unlock the board
+        }
+
+        function updateHUD() {
+            roundProgressEl.textContent = `${questionsAnsweredInRound} / ${QUESTIONS_PER_ROUND}`;
+        }
+
+        // --- QUIZ QUESTION LOGIC ---
+        function askQuestion() {
+            if (questionsAnsweredInRound >= QUESTIONS_PER_ROUND || !quizActive) return;
+
+            const questionSentence = allSentences[Math.floor(Math.random() * allSentences.length)];
+            const words = questionSentence.trim().split(' ');
+
+            if (words.length < 5) {
+                askQuestion(); // Reroll for a better sentence
+                return;
+            }
+            
+            const blankIndex = Math.floor(Math.random() * (words.length - 2)) + 1;
+            const correctAnswer = words[blankIndex].replace(/[.,!?;:"()]/g, '');
+
+            let questionWords = [...words];
+            questionWords[blankIndex] = '<span class="text-yellow-400 font-bold">______</span>';
+            questionPrompt.innerHTML = `"${questionWords.join(' ')}"`;
+            
+            let answers = new Set([correctAnswer]);
+            while (answers.size < 4) {
+                const randomSentence = allSentences[Math.floor(Math.random() * allSentences.length)];
+                const randomWords = randomSentence.split(' ');
+                const randomWord = randomWords[Math.floor(Math.random() * randomWords.length)].replace(/[.,!?;:"()]/g, '');
+                if (randomWord && randomWord.length > 1 && !answers.has(randomWord)) {
+                    answers.add(randomWord);
+                }
+            }
+            
+            questionAnswers.innerHTML = '';
+            Array.from(answers).sort(() => Math.random() - 0.5).forEach(ans => {
+                const btn = document.createElement('button');
+                btn.className = 'answer-btn font-game bg-blue-600 hover:bg-blue-700 text-white p-3 rounded';
+                btn.textContent = ans;
+                btn.onclick = () => handleAnswer(ans === correctAnswer, btn);
+                questionAnswers.appendChild(btn);
+            });
+
+            questionModal.classList.remove('hidden');
+        }
+
+        function handleAnswer(isCorrect, button) {
+            if (!quizActive) return;
+            
+            // For now, we only advance on correct answers to keep the game moving.
+            // You could add penalties for wrong answers here.
+            if (isCorrect) {
+                button.className = 'answer-btn font-game bg-green-500 text-white p-3 rounded';
+                Array.from(questionAnswers.children).forEach(btn => btn.disabled = true);
+
+                setTimeout(() => {
+                    questionModal.classList.add('hidden');
+                    questionsAnsweredInRound++;
+                    updateHUD();
+
+                    if (questionsAnsweredInRound >= QUESTIONS_PER_ROUND) {
+                        endQuizRound();
+                    } else {
+                        askQuestion();
+                    }
+                }, 1000); // Pause to show result
+            } else {
+                button.className = 'answer-btn font-game bg-red-500 text-white p-3 rounded';
+                // Keep the question on screen for another try.
+            }
+        }
+
+        function showGameOverScreen(message) {
+            quizActive = false;
+            mainGameView.classList.add('hidden');
+            questionModal.classList.add('hidden');
+            gameOverMessage.textContent = message;
+            gameOverModal.classList.remove('hidden');
+        }
+    </script>
+</body>
+</html>
