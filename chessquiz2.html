@@ -300,7 +300,8 @@
                 onDragStart: onDragStart,
                 onDrop: onDrop,
                 onSnapEnd: onSnapEnd,
-                pieceTheme: 'img/chesspieces/wikipedia/{piece}.png'
+                // **FIXED** Use the full URL for piece images
+                pieceTheme: 'https://chessboardjs.com/img/chesspieces/wikipedia/{piece}.png'
             };
             board = Chessboard('board', boardConfig);
             $(window).resize(board.resize);
