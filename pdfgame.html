@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Codex Conquest 2D - Narrative Edition</title>
+    <title>Codex Conquest - Quiz Edition</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.10.377/pdf.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
@@ -25,51 +25,21 @@
             border-radius: 8px;
             box-shadow: 0 4px 15px rgba(0,0,0,0.5);
         }
-        #game-canvas-container {
-            position: relative;
-            flex-grow: 1;
-            width: 100%;
+        .answer-btn { 
+            transition: background-color 0.3s, transform 0.1s;
         }
-        #game-canvas {
-            background-color: #374151;
-            image-rendering: pixelated;
-            cursor: pointer;
-            border-radius: 8px;
+        .answer-btn:active {
+            transform: scale(0.95);
         }
-        #thought-bubble {
-            position: absolute;
-            background-color: white;
-            color: black;
-            padding: 10px;
-            border-radius: 10px;
-            border: 2px solid #333;
-            max-width: 250px;
-            font-size: 14px;
-            z-index: 10;
-            transition: opacity 0.3s;
-            pointer-events: none;
-        }
-        #thought-bubble::after {
-            content: '';
-            position: absolute;
-            bottom: -10px;
-            left: 20px;
-            border-width: 10px;
-            border-style: solid;
-            border-color: white transparent transparent transparent;
-        }
-        .answer-btn { transition: background-color 0.2s; }
     </style>
 </head>
 <body class="text-white flex items-center justify-center h-screen">
 
-    <!-- Main Application -->
     <div id="main-app" class="w-full h-full flex flex-col items-center justify-center p-4">
         
-        <!-- PDF Upload Section -->
         <div id="pdf-upload-section" class="text-center">
             <h1 class="font-game text-4xl text-yellow-400 mb-4">Codex Conquest</h1>
-            <p class="mb-6 max-w-2xl mx-auto">Upload a PDF to generate a strategic campaign. Gather Knowledge, raise an army of Text-Warriors, and conquer the map!</p>
+            <p class="mb-6 max-w-2xl mx-auto">Upload a PDF to begin your conquest. Answer questions drawn from the text to prove your mastery!</p>
             <div class="bg-gray-800 border-2 border-dashed border-gray-600 rounded-lg p-12">
                 <input type="file" id="pdf-file" accept=".pdf" class="hidden">
                 <label for="pdf-file" class="font-game bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg px-8 py-4 cursor-pointer text-xl transition-transform transform hover:scale-105">
@@ -78,65 +48,41 @@
                 <p id="file-name" class="mt-4 text-gray-400"></p>
             </div>
              <div id="loading-indicator" class="hidden mt-6">
-                <p id="loading-text" class="font-game text-yellow-400 text-lg animate-pulse">Generating Campaign World...</p>
+                <p id="loading-text" class="font-game text-yellow-400 text-lg animate-pulse">Generating Campaign...</p>
             </div>
         </div>
 
-        <!-- Main Game View -->
-        <div id="game-view" class="hidden w-full h-full flex flex-col">
-            <!-- HUD -->
-            <div id="game-hud" class="game-ui-panel w-full p-2 flex justify-between items-center mb-2">
-                <div class="flex gap-4 items-center">
-                    <span title="Logic Resource">🧠: <span id="res-logic">0</span></span>
-                    <span title="History Resource">📜: <span id="res-history">0</span></span>
-                    <span title="Science Resource">🔬: <span id="res-science">0</span></span>
-                </div>
-                <div class="font-game text-xl">Turn: <span id="turn-counter">1</span></div>
-                <button id="end-turn-btn" class="font-game bg-green-600 hover:bg-green-700 px-6 py-2 rounded">End Turn</button>
+        <div id="quiz-view" class="hidden w-full max-w-4xl flex flex-col items-center">
+            <h1 class="font-game text-4xl text-yellow-400 mb-4">Codex Conquest</h1>
+            
+            <div class="game-ui-panel w-full p-4 flex justify-around items-center mb-6 text-center">
+                <div class="font-game text-lg md:text-xl">Score: <span id="total-score" class="text-green-400">0</span> / 100</div>
+                <div class="font-game text-lg md:text-xl">Round: <span id="round-progress" class="text-yellow-400">0</span> / 10</div>
             </div>
-            <!-- 2D Canvas Container -->
-            <div id="game-canvas-container">
-                <canvas id="game-canvas"></canvas>
-                <div id="thought-bubble" class="hidden"></div>
+            
+            <div id="enemy-display" class="game-ui-panel w-full p-6 mb-6 text-center transition-all duration-500">
+                <h2 id="enemy-title" class="font-game text-2xl text-red-500 mb-2">Enemy Encounter!</h2>
+                <div id="enemy-info"></div>
             </div>
+            
+            <button id="start-round-btn" class="font-game bg-green-600 hover:bg-green-700 px-8 py-4 rounded text-xl transition-transform transform hover:scale-105">Start Round</button>
         </div>
 
     </div>
     
-    <!-- Battle View Modal -->
-    <div id="battle-view" class="hidden modal fixed inset-0 z-40 p-4 flex flex-col items-center justify-center">
-        <h2 id="battle-title" class="font-game text-3xl text-yellow-400 mb-4">Tactical Combat!</h2>
-        <div class="flex w-full max-w-6xl gap-4">
-            <div id="battle-grid" class="w-2/3 grid grid-cols-12 gap-1 bg-gray-600 p-1 rounded"></div>
-            <div class="w-1/3 game-ui-panel p-4 flex flex-col">
-                <h3 class="font-game text-xl mb-2">Unit Info</h3>
-                <div id="battle-unit-info" class="flex-grow bg-gray-800 p-2 rounded">Select a unit.</div>
-                <h3 class="font-game text-xl mt-4 mb-2">Battle Log</h3>
-                <div id="battle-log" class="flex-grow bg-gray-800 p-2 rounded h-32 overflow-y-auto"></div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Question Modal for Battle -->
     <div id="question-modal" class="hidden modal fixed inset-0 z-50 flex items-center justify-center p-4">
-        <div class="game-ui-panel w-full max-w-2xl p-6 text-center">
-            <h3 class="font-game text-yellow-400 text-xl mb-4">Critical Hit Chance!</h3>
-            <p id="question-prompt" class="mb-4 text-lg"></p>
-            <div id="question-answers" class="grid grid-cols-2 gap-3"></div>
+        <div class="game-ui-panel w-full max-w-3xl p-6 text-center">
+            <h3 class="font-game text-yellow-400 text-xl mb-4">Answer Correctly!</h3>
+            <p id="question-prompt" class="mb-6 text-lg"></p>
+            <div id="question-answers" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
         </div>
     </div>
-    
-    <!-- Castle Modal for Recruitment -->
-    <div id="castle-modal" class="hidden modal fixed inset-0 z-50 flex items-center justify-center p-4">
-        <div class="game-ui-panel w-full max-w-3xl p-6">
-             <div class="flex justify-between items-center">
-                <h3 class="font-game text-yellow-400 text-2xl">Castle</h3>
-                <button id="close-castle-btn" class="font-game text-red-500 text-2xl">X</button>
-            </div>
-            <div class="mt-4">
-                <h4 class="font-game text-lg mb-2">Recruit Text-Warriors</h4>
-                <div id="recruitment-options" class="grid grid-cols-1 gap-2 max-h-96 overflow-y-auto"></div>
-            </div>
+
+    <div id="win-modal" class="hidden modal fixed inset-0 z-50 flex items-center justify-center p-4">
+        <div class="game-ui-panel w-full max-w-2xl p-8 text-center">
+            <h2 class="font-game text-4xl text-yellow-400 mb-4">🏆 VICTORY! 🏆</h2>
+            <p class="text-xl mb-6">You have mastered the Codex and achieved victory by answering 100 questions correctly!</p>
+            <button onclick="location.reload()" class="font-game bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg px-8 py-4 text-xl">Play Again</button>
         </div>
     </div>
     
@@ -144,267 +90,73 @@
         // --- DOM Elements ---
         const pdfUploadSection = document.getElementById('pdf-upload-section');
         const pdfFileInput = document.getElementById('pdf-file');
+        const fileNameEl = document.getElementById('file-name');
         const loadingIndicator = document.getElementById('loading-indicator');
         const loadingText = document.getElementById('loading-text');
-        const gameView = document.getElementById('game-view');
-        const worldMapCanvas = document.getElementById('game-canvas');
-        const thoughtBubble = document.getElementById('thought-bubble');
-        const resLogic = document.getElementById('res-logic');
-        const resHistory = document.getElementById('res-history');
-        const resScience = document.getElementById('res-science');
-        const turnCounter = document.getElementById('turn-counter');
-        const endTurnBtn = document.getElementById('end-turn-btn');
-        const battleView = document.getElementById('battle-view');
-        const battleTitle = document.getElementById('battle-title');
-        const battleGridEl = document.getElementById('battle-grid');
-        const battleUnitInfo = document.getElementById('battle-unit-info');
-        const battleLog = document.getElementById('battle-log');
+
+        const quizView = document.getElementById('quiz-view');
+        const totalScoreEl = document.getElementById('total-score');
+        const roundProgressEl = document.getElementById('round-progress');
+        const enemyDisplay = document.getElementById('enemy-display');
+        const enemyTitle = document.getElementById('enemy-title');
+        const enemyInfo = document.getElementById('enemy-info');
+        const startRoundBtn = document.getElementById('start-round-btn');
+
         const questionModal = document.getElementById('question-modal');
         const questionPrompt = document.getElementById('question-prompt');
         const questionAnswers = document.getElementById('question-answers');
-        const castleModal = document.getElementById('castle-modal');
-        const closeCastleBtn = document.getElementById('close-castle-btn');
-        const recruitmentOptions = document.getElementById('recruitment-options');
-        
-        let ctx;
-        const TILE_SIZE = 32;
+        const winModal = document.getElementById('win-modal');
 
-        // --- Game State ---
-        let gameState = 'IDLE';
-        let turn = 1;
+        // --- Game Constants and State ---
+        const QUESTIONS_PER_ROUND = 10;
+        const QUESTIONS_TO_WIN = 100;
+        let totalCorrectAnswers = 0;
+        let questionsAskedInRound = 0;
         let allSentences = [];
-        let availableRecruits = [];
-        let mapObjects = [];
-        let player;
-        let currentBattle = null;
-        let resources = { logic: 100, history: 100, science: 100 };
-        let gameLoopId;
-        let thoughtBubbleTimeout;
+        let currentEnemy = null;
+        let gameActive = false;
 
         // --- Classes ---
+        // Kept for flavor to represent the 'enemy' of the round
         class Unit {
             constructor(sentence) {
                 this.sentence = sentence.trim();
                 const words = this.sentence.split(' ');
-                this.name = words[Math.floor(words.length/2)].replace(/[^a-zA-Z]/g, '') || 'Recruit';
-                this.name = this.name.charAt(0).toUpperCase() + this.name.slice(1);
-                this.type = this.determineType();
-                this.maxHp = Math.max(10, words.length * 2);
-                this.hp = this.maxHp;
-                this.attack = Math.max(3, Math.floor(words.filter(w => w.length > 5).length * 1.5));
-                this.speed = Math.max(2, 10 - Math.floor(words.length / 5));
-                this.hasMoved = false; this.hasAttacked = false;
-                this.gridX = 0; this.gridY = 0;
+                this.name = this.generateName(words) || 'Text-Wraith';
             }
-            determineType() {
-                const s = this.sentence.toLowerCase();
-                if (s.includes('because') || s.includes('therefore')) return 'logic';
-                if (s.match(/\d{4}/) || s.includes('history')) return 'history';
-                if (s.includes('science') || s.includes('cell')) return 'science';
-                return 'logic';
+            generateName(words) {
+                // Generates a more interesting name from a noun in the sentence
+                const nouns = ['concept', 'system', 'theory', 'analysis', 'study', 'data', 'model', 'process', 'result', 'approach'];
+                const keyword = words.find(w => nouns.includes(w.toLowerCase().replace(/[^a-z]/g, '')))
+                let name = words[Math.floor(words.length / 2)].replace(/[^a-zA-Z]/g, '');
+                name = name.charAt(0).toUpperCase() + name.slice(1);
+                return keyword ? `${name} of ${keyword.charAt(0).toUpperCase() + keyword.slice(1)}` : `${name} Fiend`;
             }
-            resetTurn() { this.hasMoved = false; this.hasAttacked = false; }
-            getCost() {
-                const cost = { logic: 0, history: 0, science: 0 };
-                cost[this.type] = this.maxHp + this.attack;
-                return cost;
-            }
-        }
-        class Army {
-            constructor(isPlayer = false) { this.units = []; this.isPlayer = isPlayer; }
-            addUnit(unit) { if (this.units.length < 5) { this.units.push(unit); return true; } return false; }
-        }
-        class Player {
-            constructor(x, y) { this.x = x; this.y = y; this.army = new Army(true); }
-            draw() {
-                ctx.fillStyle = '#facc15';
-                ctx.fillRect(this.x * TILE_SIZE, this.y * TILE_SIZE, TILE_SIZE, TILE_SIZE);
-            }
-        }
-        class Battle {
-            constructor(playerArmy, enemyArmy) {
-                this.playerArmy = playerArmy;
-                this.enemyArmy = enemyArmy;
-                this.grid = Array.from({length: 10}, () => Array(12).fill(null));
-                this.allUnits = [...playerArmy.units, ...enemyArmy.units].filter(u => u.hp > 0);
-                this.turnOrder = [...this.allUnits].sort((a,b) => b.speed - a.speed);
-                this.currentTurnIndex = 0;
-                this.attackContext = null;
-                this.setupBattlefield();
-            }
-            setupBattlefield() {
-                this.playerArmy.units.forEach((unit, i) => { unit.gridX = 1; unit.gridY = i * 2 + 1; this.grid[unit.gridY][unit.gridX] = unit; });
-                this.enemyArmy.units.forEach((unit, i) => { unit.gridX = 10; unit.gridY = i * 2 + 1; this.grid[unit.gridY][unit.gridX] = unit; });
-                this.start();
-            }
-            start() { gameState = 'BATTLE'; battleView.classList.remove('hidden'); this.log("Battle started!"); this.nextTurn(); }
-            nextTurn() {
-                if (this.checkWinCondition()) return;
-                if (this.currentTurnIndex >= this.turnOrder.length) this.currentTurnIndex = 0;
-                const currentUnit = this.turnOrder[this.currentTurnIndex];
-                currentUnit.resetTurn();
-                battleTitle.textContent = `${currentUnit.name}'s Turn`;
-                this.draw();
-                this.updateUnitInfo(currentUnit);
-                if (!this.playerArmy.units.includes(currentUnit)) setTimeout(() => this.runAI(currentUnit), 1000);
-            }
-            endCurrentUnitTurn() { this.currentTurnIndex++; this.nextTurn(); }
-            draw() {
-                battleGridEl.innerHTML = '';
-                for(let r=0; r<10; r++) {
-                    for(let c=0; c<12; c++) {
-                        const tile = document.createElement('div');
-                        tile.className = 'bg-green-700 hover:bg-green-600';
-                        tile.dataset.x = c; tile.dataset.y = r;
-                        const unit = this.grid[r][c];
-                        if (unit) {
-                            const unitDiv = document.createElement('div');
-                            unitDiv.className = `w-full h-full rounded flex items-center justify-center font-bold text-white ${this.playerArmy.units.includes(unit) ? 'bg-blue-600' : 'bg-red-600'}`;
-                            unitDiv.textContent = unit.name.charAt(0);
-                            tile.appendChild(unitDiv);
-                        }
-                        battleGridEl.appendChild(tile);
-                    }
-                }
-                battleGridEl.onclick = (e) => this.handleClick(e);
-            }
-            handleClick(e) {
-                const currentTurnUnit = this.turnOrder[this.currentTurnIndex];
-                if (!this.playerArmy.units.includes(currentTurnUnit)) return;
-                const tile = e.target.closest('div[data-x]');
-                if (!tile) return;
-                const x = parseInt(tile.dataset.x), y = parseInt(tile.dataset.y);
-                const unitOnTile = this.grid[y][x];
-                if (unitOnTile && this.enemyArmy.units.includes(unitOnTile)) this.initiateAttack(currentTurnUnit, unitOnTile);
-                else if (!unitOnTile) this.performMove(currentTurnUnit, x, y);
-            }
-            performMove(unit, x, y) {
-                if(unit.hasMoved) { this.log(`${unit.name} has already moved.`); return; }
-                this.log(`${unit.name} moves to (${x},${y})`);
-                this.grid[unit.gridY][unit.gridX] = null;
-                unit.gridX = x; unit.gridY = y;
-                this.grid[y][x] = unit;
-                unit.hasMoved = true;
-                this.draw();
-            }
-            initiateAttack(attacker, defender) {
-                if(attacker.hasAttacked) { this.log(`${attacker.name} has already attacked.`); return; }
-                this.attackContext = { attacker, defender };
-                this.askQuestion(attacker);
-            }
-            askQuestion(unit) {
-                const words = unit.sentence.split(' ');
-                if (words.length < 5) { this.resolveAttack(false); return; }
-                const blankIndex = Math.floor(Math.random() * (words.length - 2)) + 1;
-                const correctAnswer = words[blankIndex].replace(/[.,!?]/g, '');
-                let questionWords = [...words];
-                questionWords[blankIndex] = '______';
-                questionPrompt.textContent = `"${questionWords.join(' ')}"`;
-                let answers = new Set([correctAnswer]);
-                while (answers.size < 4) {
-                    const randomSentence = allSentences[Math.floor(Math.random() * allSentences.length)];
-                    const randomWords = randomSentence.split(' ');
-                    const randomWord = randomWords[Math.floor(Math.random() * randomWords.length)].replace(/[.,!?]/g, '');
-                    if (randomWord.length > 2) answers.add(randomWord);
-                }
-                questionAnswers.innerHTML = '';
-                Array.from(answers).sort(() => Math.random() - 0.5).forEach(ans => {
-                    const btn = document.createElement('button');
-                    btn.className = 'answer-btn font-game bg-blue-600 hover:bg-blue-700 text-white p-3 rounded';
-                    btn.textContent = ans;
-                    btn.onclick = () => this.resolveAttack(ans === correctAnswer);
-                    questionAnswers.appendChild(btn);
-                });
-                gameState = 'QUESTION';
-                questionModal.classList.remove('hidden');
-            }
-            resolveAttack(isCorrect) {
-                questionModal.classList.add('hidden');
-                gameState = 'BATTLE';
-                const { attacker, defender } = this.attackContext;
-                if (isCorrect) {
-                    const damage = attacker.attack * 2;
-                    this.log(`CRITICAL HIT! ${attacker.name} strikes ${defender.name} for ${damage} damage!`);
-                    defender.hp -= damage;
-                } else {
-                    this.log(`MISS! ${attacker.name}'s attack on ${defender.name} fails!`);
-                }
-                attacker.hasAttacked = true;
-                if (defender.hp <= 0) {
-                    this.log(`${defender.name} has been defeated!`);
-                    this.grid[defender.gridY][defender.gridX] = null;
-                    this.turnOrder = this.turnOrder.filter(u => u !== defender);
-                    this.allUnits = this.allUnits.filter(u => u !== defender);
-                }
-                this.endCurrentUnitTurn();
-            }
-            runAI(unit) {
-                let closestPlayerUnit = null, minDistance = Infinity;
-                this.playerArmy.units.filter(u => u.hp > 0).forEach(pUnit => {
-                    const dist = Math.abs(pUnit.gridX - unit.gridX) + Math.abs(pUnit.gridY - unit.gridY);
-                    if (dist < minDistance) { minDistance = dist; closestPlayerUnit = pUnit; }
-                });
-                if (closestPlayerUnit) {
-                    if (minDistance <= 1) {
-                        this.log(`${unit.name} attacks ${closestPlayerUnit.name} for ${unit.attack} damage!`);
-                        closestPlayerUnit.hp -= unit.attack;
-                        if (closestPlayerUnit.hp <= 0) {
-                            this.log(`${closestPlayerUnit.name} has been defeated!`);
-                            this.grid[closestPlayerUnit.gridY][closestPlayerUnit.gridX] = null;
-                            this.turnOrder = this.turnOrder.filter(u => u !== closestPlayerUnit);
-                            this.allUnits = this.allUnits.filter(u => u !== closestPlayerUnit);
-                        }
-                        this.endCurrentUnitTurn();
-                    } else {
-                        let newX = unit.gridX, newY = unit.gridY;
-                        if (closestPlayerUnit.gridX > unit.gridX) newX++;
-                        else if (closestPlayerUnit.gridX < unit.gridX) newX--;
-                        else if (closestPlayerUnit.gridY > unit.gridY) newY++;
-                        else if (closestPlayerUnit.gridY < unit.gridY) newY--;
-                        if(newY >= 0 && newY < 10 && newX >= 0 && newX < 12 && !this.grid[newY][newX]) this.performMove(unit, newX, newY);
-                        else this.endCurrentUnitTurn();
-                    }
-                } else this.endCurrentUnitTurn();
-            }
-            checkWinCondition() {
-                const playerUnitsAlive = this.playerArmy.units.some(u => u.hp > 0);
-                const enemyUnitsAlive = this.enemyArmy.units.some(u => u.hp > 0);
-                if (!enemyUnitsAlive) { this.log("Victory!"); setTimeout(() => this.endBattle(true), 2000); return true; }
-                if (!playerUnitsAlive) { this.log("Defeat!"); setTimeout(() => this.endBattle(false), 2000); return true; }
-                return false;
-            }
-            endBattle(playerWon) {
-                battleView.classList.add('hidden');
-                gameState = 'WORLD_MAP';
-                if (playerWon) mapObjects = mapObjects.filter(obj => obj.army !== this.enemyArmy);
-                else alert("Your army was defeated! Game Over.");
-                currentBattle = null;
-            }
-            updateUnitInfo(unit) { battleUnitInfo.innerHTML = `<h4 class="font-bold text-lg">${unit.name}</h4><p>HP: ${unit.hp}/${unit.maxHp}</p><p>Atk: ${unit.attack}</p><p>Spd: ${unit.speed}</p><p>Type: ${unit.type}</p>`; }
-            log(message) { battleLog.innerHTML += `<p>${message}</p>`; battleLog.scrollTop = battleLog.scrollHeight; }
         }
 
         // --- Initialization & PDF Processing ---
         window.onload = () => {
             pdfFileInput.addEventListener('change', handlePdfUpload);
-            endTurnBtn.addEventListener('click', endTurn);
-            closeCastleBtn.addEventListener('click', () => { castleModal.classList.add('hidden'); gameState = 'WORLD_MAP'; });
+            startRoundBtn.addEventListener('click', startRound);
         };
 
         async function processPdfInBatches(pdf) {
-            const numPages = pdf.numPages, batchSize = 10;
+            const numPages = pdf.numPages;
+            const batchSize = 10;
             let sentences = [];
             for (let i = 1; i <= numPages; i += batchSize) {
                 const endPage = Math.min(i + batchSize - 1, numPages);
-                loadingText.textContent = `Processing pages ${i}-${endPage} of ${numPages}...`;
+                loadingText.textContent = `Analyzing pages ${i}-${endPage} of ${numPages}...`;
                 const promises = [];
-                for (let j = i; j <= endPage; j++) promises.push(pdf.getPage(j).then(page => page.getTextContent()));
+                for (let j = i; j <= endPage; j++) {
+                    promises.push(pdf.getPage(j).then(page => page.getTextContent()));
+                }
                 const textContents = await Promise.all(promises);
                 textContents.forEach(content => {
                     const pageText = content.items.map(item => item.str).join(' ');
-                    sentences.push(...(pageText.match(/[^.!?]+[.!?]+/g) || []));
+                    sentences.push(...(pageText.match(/[^.!?\n\r]+[.!?\n\r]+/g) || []));
                 });
-                await new Promise(resolve => setTimeout(resolve, 0));
+                await new Promise(resolve => setTimeout(resolve, 0)); // Unblock UI thread
             }
             return sentences;
         }
@@ -412,222 +164,154 @@
         async function handlePdfUpload(event) {
             const file = event.target.files[0];
             if (!file) return;
-            gameState = 'UPLOADING';
-            pdfUploadSection.classList.add('hidden');
+            fileNameEl.textContent = file.name;
+            pdfUploadSection.querySelector('label').classList.add('hidden');
             loadingIndicator.classList.remove('hidden');
+
             try {
                 const reader = new FileReader();
                 reader.onload = async (e) => {
                     const typedarray = new Uint8Array(e.target.result);
                     pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.10.377/pdf.worker.min.js`;
-                    const pdf = await pdfjsLib.getDocument({data: typedarray}).promise;
+                    const pdf = await pdfjsLib.getDocument({ data: typedarray }).promise;
                     allSentences = await processPdfInBatches(pdf);
-                    allSentences = allSentences.filter(s => s.trim().split(' ').length > 6);
-                    if (allSentences.length < 50) { alert("PDF has insufficient content. Please choose a document with at least 50 sentences."); location.reload(); return; }
+                    allSentences = allSentences.filter(s => s.trim().split(' ').length >= 8);
+                    
+                    if (allSentences.length < 50) {
+                        alert("PDF has insufficient content. Please choose a document with at least 50 long sentences.");
+                        location.reload();
+                        return;
+                    }
                     startGame();
                 };
                 reader.readAsArrayBuffer(file);
-            } catch (error) { console.error('Error processing PDF:', error); alert("Error processing PDF."); location.reload(); }
+            } catch (error) {
+                console.error('Error processing PDF:', error);
+                alert("An error occurred while processing the PDF.");
+                location.reload();
+            }
         }
 
-        // --- Game Setup ---
+        // --- Game Flow ---
         function startGame() {
             loadingIndicator.classList.add('hidden');
-            gameView.classList.remove('hidden');
-            worldMapCanvas.width = worldMapCanvas.parentElement.clientWidth;
-            worldMapCanvas.height = worldMapCanvas.parentElement.clientHeight;
-            ctx = worldMapCanvas.getContext('2d');
-            player = new Player(5, 5);
-            player.army.addUnit(new Unit(allSentences.shift()));
-            player.army.addUnit(new Unit(allSentences.shift()));
-            generateWorld();
-            updateHUD();
-            gameState = 'WORLD_MAP';
-            gameLoop();
-        }
-
-        function generateWorld() {
-            const cols = Math.floor(worldMapCanvas.width / TILE_SIZE);
-            const rows = Math.floor(worldMapCanvas.height / TILE_SIZE);
-            mapObjects.push({x: 5, y: 5, type: 'castle'});
-            mapObjects.push({x: 10, y: 10, type: 'mine', resource: 'logic'});
-            mapObjects.push({x: 20, y: 4, type: 'mine', resource: 'history'});
-            mapObjects.push({x: 3, y: 15, type: 'mine', resource: 'science'});
-            for(let i=0; i<5; i++) {
-                const enemy = new Army();
-                enemy.addUnit(new Unit(allSentences.shift()));
-                const x = Math.floor(Math.random() * (cols - 10)) + 10;
-                const y = Math.floor(Math.random() * rows);
-                mapObjects.push({x, y, type: 'enemy', army: enemy, owner: null});
-            }
-        }
-
-        // --- Game Loop & Drawing ---
-        function gameLoop() { gameLoopId = requestAnimationFrame(gameLoop); draw(); }
-        function draw() {
-            if (!ctx || gameState !== 'WORLD_MAP') return;
-            ctx.clearRect(0, 0, worldMapCanvas.width, worldMapCanvas.height);
-            drawWorldMap();
-            mapObjects.forEach(obj => drawMapObject(obj));
-            player.draw();
-        }
-        function drawWorldMap() {
-            const cols = Math.floor(worldMapCanvas.width / TILE_SIZE);
-            const rows = Math.floor(worldMapCanvas.height / TILE_SIZE);
-            for(let r=0; r<rows; r++) {
-                for(let c=0; c<cols; c++) {
-                    ctx.fillStyle = "#166534"; ctx.fillRect(c * TILE_SIZE, r * TILE_SIZE, TILE_SIZE, TILE_SIZE);
-                    ctx.strokeStyle = "#14532d"; ctx.strokeRect(c * TILE_SIZE, r * TILE_SIZE, TILE_SIZE, TILE_SIZE);
-                }
-            }
-        }
-        function drawMapObject(obj) {
-            ctx.font = `${TILE_SIZE * 0.8}px sans-serif`;
-            ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-            const centerX = obj.x * TILE_SIZE + TILE_SIZE / 2;
-            const centerY = obj.y * TILE_SIZE + TILE_SIZE / 2;
-            if (obj.type === 'enemy') ctx.fillText('👹', centerX, centerY);
-            else if (obj.type === 'castle') ctx.fillText('🏰', centerX, centerY);
-            else if (obj.type === 'mine') {
-                if(obj.resource === 'logic') ctx.fillText('🧠', centerX, centerY);
-                if(obj.resource === 'history') ctx.fillText('📜', centerX, centerY);
-                if(obj.resource === 'science') ctx.fillText('🔬', centerX, centerY);
-                ctx.strokeStyle = obj.owner === 'player' ? '#60a5fa' : '#9ca3af';
-                ctx.lineWidth = 2;
-                ctx.strokeRect(obj.x * TILE_SIZE, obj.y * TILE_SIZE, TILE_SIZE, TILE_SIZE);
-            }
-        }
-
-        // --- Turn & UI Logic ---
-        function endTurn() {
-            if (gameState !== 'WORLD_MAP') return;
-            turn++;
-            turnCounter.textContent = turn;
-            mapObjects.filter(o => o.type === 'mine' && o.owner === 'player').forEach(mine => {
-                resources[mine.resource] += 10;
-            });
+            pdfUploadSection.classList.add('hidden');
+            quizView.classList.remove('hidden');
             updateHUD();
         }
+
+        function startRound() {
+            if (gameActive || totalCorrectAnswers >= QUESTIONS_TO_WIN) return;
+            
+            gameActive = true;
+            questionsAskedInRound = 0;
+            startRoundBtn.classList.add('hidden');
+            
+            currentEnemy = new Unit(allSentences[Math.floor(Math.random() * allSentences.length)]);
+            enemyTitle.textContent = 'Enemy Encounter!';
+            enemyInfo.innerHTML = `
+                <h3 class="font-bold text-xl text-white">${currentEnemy.name}</h3>
+                <p class="text-sm italic mt-2 text-gray-400">"${currentEnemy.sentence.substring(0, 100)}..."</p>
+            `;
+            enemyDisplay.classList.remove('border-green-500');
+            enemyDisplay.classList.add('border-red-500');
+
+            updateHUD();
+            askQuestion();
+        }
+
+        function endRound() {
+            gameActive = false;
+            enemyTitle.textContent = 'Round Over!';
+            enemyInfo.innerHTML = `<p class="text-lg text-gray-300">Prepare for the next challenge.</p>`;
+            enemyDisplay.classList.remove('border-red-500');
+            enemyDisplay.classList.add('border-green-500'); 
+            startRoundBtn.textContent = 'Start Next Round';
+            startRoundBtn.classList.remove('hidden');
+        }
+
         function updateHUD() {
-            resLogic.textContent = resources.logic;
-            resHistory.textContent = resources.history;
-            resScience.textContent = resources.science;
+            totalScoreEl.textContent = totalCorrectAnswers;
+            roundProgressEl.textContent = questionsAskedInRound;
         }
-        function openCastleUI() {
-            gameState = 'CASTLE';
-            castleModal.classList.remove('hidden');
-            populateRecruitment();
-        }
-        function populateRecruitment() {
-            recruitmentOptions.innerHTML = '';
-            if (availableRecruits.length === 0) {
-                for(let i=0; i<5; i++) if(allSentences.length > 0) availableRecruits.push(new Unit(allSentences.shift()));
+
+        // --- Question Logic ---
+        function askQuestion() {
+            if (questionsAskedInRound >= QUESTIONS_PER_ROUND || !gameActive) return;
+
+            const questionSentence = allSentences[Math.floor(Math.random() * allSentences.length)];
+            const words = questionSentence.trim().split(' ');
+
+            if (words.length < 5) {
+                askQuestion(); // Find a better sentence
+                return;
             }
-            availableRecruits.forEach((unit, index) => {
-                const cost = unit.getCost();
-                const costString = `${cost[unit.type]} ${unit.type}`;
-                const canAfford = resources[unit.type] >= cost[unit.type];
-                const div = document.createElement('div');
-                div.className = `p-2 rounded flex justify-between items-center ${canAfford ? 'bg-gray-700' : 'bg-gray-800 text-gray-500'}`;
-                div.innerHTML = `<div><p class="font-bold">${unit.name} (HP: ${unit.maxHp}, Atk: ${unit.attack})</p><p class="text-sm italic">"${unit.sentence.substring(0, 50)}..."</p></div><button data-index="${index}" class="recruit-btn font-game px-4 py-2 rounded ${canAfford ? 'bg-green-600 hover:bg-green-700' : 'bg-gray-600 cursor-not-allowed'}">Recruit (${costString})</button>`;
-                recruitmentOptions.appendChild(div);
+            
+            const blankIndex = Math.floor(Math.random() * (words.length - 2)) + 1;
+            const correctAnswer = words[blankIndex].replace(/[.,!?;:"()]/g, '');
+
+            let questionWords = [...words];
+            questionWords[blankIndex] = '<span class="text-yellow-400 font-bold">______</span>';
+            questionPrompt.innerHTML = `"${questionWords.join(' ')}"`;
+            
+            let answers = new Set([correctAnswer]);
+            while (answers.size < 4) {
+                const randomSentence = allSentences[Math.floor(Math.random() * allSentences.length)];
+                const randomWords = randomSentence.split(' ');
+                const randomWord = randomWords[Math.floor(Math.random() * randomWords.length)].replace(/[.,!?;:"()]/g, '');
+                if (randomWord && randomWord.length > 1 && randomWord !== correctAnswer) {
+                    answers.add(randomWord);
+                }
+            }
+            
+            questionAnswers.innerHTML = '';
+            Array.from(answers).sort(() => Math.random() - 0.5).forEach(ans => {
+                const btn = document.createElement('button');
+                btn.className = 'answer-btn font-game bg-blue-600 hover:bg-blue-700 text-white p-3 rounded';
+                btn.textContent = ans;
+                btn.onclick = () => handleAnswer(ans === correctAnswer, btn);
+                questionAnswers.appendChild(btn);
             });
-        }
-        document.addEventListener('click', (e) => {
-            if(e.target.classList.contains('recruit-btn')) {
-                const index = parseInt(e.target.dataset.index);
-                const unit = availableRecruits[index];
-                const cost = unit.getCost();
-                if (resources[unit.type] >= cost[unit.type]) {
-                    if (player.army.addUnit(unit)) {
-                        resources[unit.type] -= cost[unit.type];
-                        availableRecruits.splice(index, 1);
-                        updateHUD();
-                        populateRecruitment();
-                    } else { alert("Your army is full (Max 5 units)!"); }
-                }
-            }
-        });
-        
-        // --- Narrative Generation ---
-        async function generateThought(context) {
-            const prompt = `Based on the following text from a document, write a short, first-person thought for a fantasy hero who is observing something related to it. The thought should be 1-2 sentences. Do not use quotes.
 
-Context Text: "${context}"
-
-Hero's Thought:`;
-
-            try {
-                let chatHistory = [{ role: "user", parts: [{ text: prompt }] }];
-                const payload = { contents: chatHistory };
-                const apiKey = ""; 
-                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
-                const response = await fetch(apiUrl, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
-                });
-                const result = await response.json();
-                if (result.candidates && result.candidates.length > 0) {
-                    const text = result.candidates[0].content.parts[0].text;
-                    return text.trim();
-                }
-            } catch (error) {
-                console.error("Error generating thought:", error);
-                return "My mind is blank...";
-            }
-            return "An interesting sight...";
+            questionModal.classList.remove('hidden');
         }
 
-        function showThoughtBubble(text, x, y) {
-            clearTimeout(thoughtBubbleTimeout);
-            thoughtBubble.textContent = text;
-            thoughtBubble.style.left = `${x * TILE_SIZE - 100}px`;
-            thoughtBubble.style.top = `${y * TILE_SIZE - 70}px`;
-            thoughtBubble.classList.remove('hidden');
-            thoughtBubble.style.opacity = 1;
-            thoughtBubbleTimeout = setTimeout(() => {
-                thoughtBubble.style.opacity = 0;
-            }, 4000);
-        }
-        
-        // --- Input Handling ---
-        document.addEventListener('keydown', async (e) => {
-            if (gameState !== 'WORLD_MAP') return;
-            let newX = player.x, newY = player.y;
-            if (e.key === 'ArrowUp') newY--;
-            else if (e.key === 'ArrowDown') newY++;
-            else if (e.key === 'ArrowLeft') newX--;
-            else if (e.key === 'ArrowRight') newX++;
-            else return;
-            
-            player.x = newX; player.y = newY;
-            
-            const objectAtTarget = mapObjects.find(obj => obj.x === newX && obj.y === newY);
-            if (objectAtTarget) {
-                let thoughtContext = "I see something ahead.";
-                if (objectAtTarget.type === 'enemy') {
-                    thoughtContext = objectAtTarget.army.units[0].sentence;
-                } else if (objectAtTarget.type === 'mine') {
-                    thoughtContext = `A mine of ${objectAtTarget.resource}. It seems valuable.`;
-                } else if (objectAtTarget.type === 'castle') {
-                    thoughtContext = "My own castle. A place of refuge and strength.";
-                }
-                
-                const thought = await generateThought(thoughtContext);
-                showThoughtBubble(thought, newX, newY);
+        function handleAnswer(isCorrect, button) {
+            if (!gameActive) return;
 
-                if (objectAtTarget.type === 'enemy') currentBattle = new Battle(player.army, objectAtTarget.army);
-                else if (objectAtTarget.type === 'mine') {
-                    if(objectAtTarget.owner !== 'player') {
-                        objectAtTarget.owner = 'player';
-                    }
-                }
-                else if (objectAtTarget.type === 'castle') openCastleUI();
+            if (isCorrect) {
+                totalCorrectAnswers++;
+                button.className = 'answer-btn font-game bg-green-500 text-white p-3 rounded';
             } else {
-                thoughtBubble.style.opacity = 0;
+                button.className = 'answer-btn font-game bg-red-500 text-white p-3 rounded';
             }
-        });
+            
+            Array.from(questionAnswers.children).forEach(btn => btn.disabled = true);
+
+            setTimeout(() => {
+                questionModal.classList.add('hidden');
+                questionsAskedInRound++;
+                updateHUD();
+
+                if (totalCorrectAnswers >= QUESTIONS_TO_WIN) {
+                    showWinScreen();
+                    return;
+                }
+
+                if (questionsAskedInRound >= QUESTIONS_PER_ROUND) {
+                    endRound();
+                } else {
+                    askQuestion();
+                }
+            }, 1200); // Pause to show result
+        }
+
+        function showWinScreen() {
+            gameActive = false;
+            quizView.classList.add('hidden');
+            questionModal.classList.add('hidden');
+            winModal.classList.remove('hidden');
+        }
     </script>
 </body>
 </html>
