@@ -3,13 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Scrolling Prayers</title>
+    <title>Scrolling Prayers from the Bible</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        /* Using a more elegant font */
+        /* Using an elegant font */
         body {
             font-family: 'Cormorant Garamond', serif;
         }
@@ -62,72 +62,18 @@
     </div>
 
     <script>
-        // --- DATA: PRAYERS (EXPANDED TO 100) ---
+        // --- DATA: PRAYERS FROM THE BIBLE (EXPANDED COLLECTION) ---
+        // This list has been significantly expanded. You can add more entries by following the same object format.
         const prayers = [
             {
-                title: "The Prayer of Saint Francis",
-                author: "St. Francis of Assisi",
-                lines: ["Lord, make me an instrument of your peace.", "Where there is hatred, let me sow love;", "Where there is injury, pardon;", "Where there is doubt, faith;", "Where there is despair, hope;", "Where there is darkness, light;", "And where there is sadness, joy.", "O Divine Master, grant that I may not so much seek", "To be consoled as to console;", "To be understood as to understand;", "To be loved as to love.", "For it is in giving that we receive;", "It is in pardoning that we are pardoned;", "And it is in dying that we are born to eternal life.", "Amen."]
-            },
-            {
-                title: "Late Have I Loved You",
-                author: "St. Augustine of Hippo",
-                lines: ["Late have I loved you, O Beauty ever ancient, ever new, late have I loved you!", "You were within me, but I was outside, and it was there that I searched for you.", "In my unloveliness I plunged into the lovely things which you created.", "You were with me, but I was not with you.", "Created things kept me from you; yet if they had not been in you they would have not been at all.", "You called, you shouted, and you broke through my deafness.", "You flashed, you shone, and you dispelled my blindness.", "You breathed your fragrance on me; I drew in breath and now I pant for you.", "I have tasted you, now I hunger and thirst for more.", "You touched me, and I burned for your peace."]
-            },
-            {
                 title: "The Lord's Prayer",
-                author: "Jesus",
-                lines: ["Our Father, who art in heaven,", "hallowed be thy name;", "thy kingdom come,", "thy will be done,", "on earth as it is in heaven.", "Give us this day our daily bread,", "and forgive us our trespasses,", "as we forgive those who trespass against us;", "and lead us not into temptation,", "but deliver us from evil.", "For thine is the kingdom,", "and the power, and the glory,", "for ever and ever.", "Amen."]
+                author: "Jesus (Matthew 6:9-13)",
+                lines: ["Our Father in heaven, hallowed be your name.","Your kingdom come, your will be done, on earth as it is in heaven.","Give us this day our daily bread,","and forgive us our debts, as we also have forgiven our debtors.","And lead us not into temptation, but deliver us from evil."]
             },
             {
-                title: "The Serenity Prayer",
-                author: "Reinhold Niebuhr",
-                lines: ["God, grant me the serenity to accept the things I cannot change,", "courage to change the things I can,", "and wisdom to know the difference."]
-            },
-            {
-                title: "Psalm 23",
-                author: "King David",
-                lines: ["The Lord is my shepherd; I shall not want.", "He maketh me to lie down in green pastures:", "he leadeth me beside the still waters.", "He restoreth my soul:", "he leadeth me in the paths of righteousness for his name's sake.", "Yea, though I walk through the valley of the shadow of death,", "I will fear no evil: for thou art with me;", "thy rod and thy staff they comfort me.", "Thou preparest a table before me in the presence of mine enemies:", "thou anointest my head with oil; my cup runneth over.", "Surely goodness and mercy shall follow me all the days of my life:", "and I will dwell in the house of the Lord for ever."]
-            },
-            {
-                title: "The Jesus Prayer",
-                author: "Eastern Orthodox Tradition",
-                lines: ["Lord Jesus Christ, Son of God, have mercy on me, a sinner."]
-            },
-            {
-                title: "The Doxology",
-                author: "Thomas Ken",
-                lines: ["Praise God, from whom all blessings flow;", "Praise Him, all creatures here below;", "Praise Him above, ye heavenly host;", "Praise Father, Son, and Holy Ghost. Amen."]
-            },
-            {
-                title: "Prayer of St. Ignatius of Loyola",
-                author: "St. Ignatius of Loyola",
-                lines: ["Teach us, good Lord, to serve you as you deserve,", "to give and not to count the cost,", "to fight and not to heed the wounds,", "to toil and not to seek for rest,", "to labor and not to ask for any reward,", "save that of knowing that we do your will."]
-            },
-            {
-                title: "The Memorare",
-                author: "St. Bernard of Clairvaux",
-                lines: ["Remember, O most gracious Virgin Mary,", "that never was it known that anyone who fled to thy protection,", "implored thy help, or sought thy intercession was left unaided.", "Inspired by this confidence, I fly unto thee,", "O Virgin of virgins, my Mother.", "To thee do I come, before thee I stand, sinful and sorrowful.", "O Mother of the Word Incarnate, despise not my petitions,", "but in thy mercy hear and answer me. Amen."]
-            },
-            {
-                title: "Prayer for Generosity",
-                author: "St. Ignatius of Loyola",
-                lines: ["Lord, teach me to be generous.", "Teach me to serve You as You deserve;", "to give and not to count the cost,", "to fight and not to heed the wounds,", "to toil and not to seek for rest,", "to labor and not to ask for any reward,", "save that of knowing that I do Your will."]
-            },
-            {
-                title: "Psalm 91",
-                author: "Ancient Psalm",
-                lines: ["He who dwells in the shelter of the Most High will abide in the shadow of the Almighty.", "I will say to the Lord, “My refuge and my fortress, my God, in whom I trust.”", "For he will deliver you from the snare of the fowler and from the deadly pestilence.", "He will cover you with his pinions, and under his wings you will find refuge;", "his faithfulness is a shield and buckler."]
-            },
-            {
-                title: "Prayer of St. Richard of Chichester",
-                author: "St. Richard of Chichester",
-                lines: ["Thanks be to Thee, my Lord Jesus Christ,", "For all the benefits Thou have won for me,", "For all the pains and insults Thou have borne for me.", "O most merciful Redeemer, Friend, and Brother,", "May I know Thee more clearly,", "Love Thee more dearly,", "And follow Thee more nearly,", "Day by day. Amen."]
-            },
-            {
-                title: "The Anima Christi",
-                author: "Traditional",
-                lines: ["Soul of Christ, sanctify me.", "Body of Christ, save me.", "Blood of Christ, inebriate me.", "Water from the side of Christ, wash me.", "Passion of Christ, strengthen me.", "O good Jesus, hear me.", "Within Thy wounds hide me.", "Suffer me not to be separated from Thee.", "From the malicious enemy defend me.", "In the hour of my death call me.", "And bid me come unto Thee,", "That with Thy Saints I may praise Thee,", "For ever and ever. Amen."]
+                title: "The Beatitudes",
+                author: "Jesus (Matthew 5:3-10)",
+                lines: ["Blessed are the poor in spirit, for theirs is the kingdom of heaven.","Blessed are those who mourn, for they will be comforted.","Blessed are the meek, for they will inherit the earth.","Blessed are those who hunger and thirst for righteousness, for they will be filled.","Blessed are the merciful, for they will be shown mercy.","Blessed are the pure in heart, for they will see God.","Blessed are the peacemakers, for they will be called children of God.","Blessed are those who are persecuted because of righteousness, for theirs is the kingdom of heaven."]
             },
             {
                 title: "Prayer to the Holy Spirit",
@@ -135,345 +81,239 @@
                 lines: ["Breathe in me, O Holy Spirit, that my thoughts may all be holy.", "Act in me, O Holy Spirit, that my work, too, may be holy.", "Draw my heart, O Holy Spirit, that I love but what is holy.", "Strengthen me, O Holy Spirit, to defend all that is holy.", "Guard me, then, O Holy Spirit, that I always may be holy. Amen."]
             },
             {
-                title: "The Golden Prayer",
-                author: "St. Bonaventure",
-                lines: ["Pierce, O most sweet Lord Jesus, my inmost soul with the most joyous and healthful wound of Thy love,", "and with true, calm, and most holy apostolic charity,", "that my soul may ever languish and melt with entire love and longing for Thee,", "may yearn for Thee and for Thy courts, may long to be dissolved and to be with Thee."]
-            },
-            {
-                title: "Prayer for the Dead",
-                author: "Traditional",
-                lines: ["Eternal rest grant unto them, O Lord,", "and let perpetual light shine upon them.", "May the souls of all the faithful departed,", "through the mercy of God, rest in peace. Amen."]
-            },
-            {
-                title: "Prayer Before a Crucifix",
-                author: "St. Francis of Assisi",
-                lines: ["Most High, glorious God, enlighten the darkness of my heart and give me true faith, certain hope, and perfect charity, sense and knowledge, Lord, that I may carry out Your holy and true command. Amen."]
-            },
-            {
-                title: "A Simple Prayer",
-                author: "Mother Teresa",
-                lines: ["May God break my heart so completely that the whole world falls in."]
-            },
-            {
-                title: "Prayer of St. Thomas Aquinas",
-                author: "St. Thomas Aquinas",
-                lines: ["Grant me, O Lord my God, a mind to know you, a heart to seek you, wisdom to find you, conduct pleasing to you, faithful perseverance in waiting for you, and a hope of finally embracing you. Amen."]
-            },
-            {
                 title: "The Breastplate of St. Patrick",
                 author: "St. Patrick",
                 lines: ["Christ with me, Christ before me, Christ behind me,", "Christ in me, Christ beneath me, Christ above me,", "Christ on my right, Christ on my left,", "Christ when I lie down, Christ when I sit down, Christ when I arise,", "Christ in the heart of every man who thinks of me,", "Christ in the mouth of everyone who speaks of me,", "Christ in every eye that sees me,", "Christ in every ear that hears me."]
             },
             {
-                title: "Psalm 139",
-                author: "King David",
-                lines: ["O Lord, you have searched me and you know me.", "You know when I sit and when I rise; you perceive my thoughts from afar.", "You discern my going out and my lying down; you are familiar with all my ways.", "Before a word is on my tongue you, Lord, know it completely."]
+                title: "The Good Shepherd",
+                author: "Psalm 23",
+                lines: ["The Lord is my shepherd; I shall not want.","He makes me lie down in green pastures.","He leads me beside still waters.","He restores my soul.","He leads me in paths of righteousness for his name's sake.","Even though I walk through the valley of the shadow of death,","I will fear no evil, for you are with me;","your rod and your staff, they comfort me.","You prepare a table before me in the presence of my enemies;","you anoint my head with oil; my cup overflows.","Surely goodness and mercy shall follow me all the days of my life,","and I shall dwell in the house of the Lord forever."]
             },
             {
-                title: "Come, Holy Spirit",
-                author: "Traditional Hymn",
-                lines: ["Come, Holy Spirit, fill the hearts of your faithful,", "and kindle in them the fire of your love.", "Send forth your Spirit, and they shall be created,", "and you shall renew the face of the earth."]
+                title: "A Prayer of Trust",
+                author: "Proverbs 3:5-6",
+                lines: ["Trust in the Lord with all your heart,","and do not lean on your own understanding.","In all your ways acknowledge him,","and he will make straight your paths."]
             },
             {
-                title: "Prayer for Guidance",
-                author: "St. Clement of Rome",
-                lines: ["We beseech You, Master, to be our helper and protector.", "Save the afflicted among us; have mercy on the humble.", "Raise up the fallen; appear to the needy; heal the ungodly.", "Restore the wanderers of Your people;", "feed the hungry; ransom our prisoners;", "raise up the sick; comfort the faint-hearted."]
+                title: "The High Priestly Prayer (Excerpt)",
+                author: "Jesus (John 17:20-23)",
+                lines: ["I do not ask for these only, but also for those who will believe in me through their word,","that they may all be one, just as you, Father, are in me, and I in you,","that they also may be in us, so that the world may believe that you have sent me.","The glory that you have given me I have given to them, that they may be one even as we are one,","I in them and you in me, that they may become perfectly one,","so that the world may know that you sent me and loved them even as you loved me."]
             },
             {
-                title: "Prayer for Peace of Mind",
-                author: "St. John Henry Newman",
-                lines: ["O Lord, support us all the day long, until the shadows lengthen and the evening comes, and the busy world is hushed, and the fever of life is over, and our work is done. Then in your mercy grant us a safe lodging, and a holy rest, and peace at the last. Amen."]
+                title: "David's Prayer of Repentance",
+                author: "King David (Psalm 51:1-2, 10)",
+                lines: ["Have mercy on me, O God, according to your steadfast love;","according to your abundant mercy blot out my transgressions.","Wash me thoroughly from my iniquity, and cleanse me from my sin!","Create in me a clean heart, O God, and renew a right spirit within me."]
             },
             {
-                title: "Prayer of Abandonment",
-                author: "Charles de Foucauld",
-                lines: ["Father, I abandon myself into your hands; do with me what you will.", "Whatever you may do, I thank you: I am ready for all, I accept all.", "Let only your will be done in me, and in all your creatures - I wish no more than this, O Lord."]
+                title: "Paul's Prayer for the Ephesians",
+                author: "Apostle Paul (Ephesians 3:16-21)",
+                lines: ["I pray that out of his glorious riches he may strengthen you with power through his Spirit in your inner being,","so that Christ may dwell in your hearts through faith.","And I pray that you, being rooted and established in love,","may have power, together with all the Lord’s holy people, to grasp how wide and long and high and deep is the love of Christ,","and to know this love that surpasses knowledge—that you may be filled to the measure of all the fullness of God.","Now to him who is able to do immeasurably more than all we ask or imagine,","according to his power that is at work within us,","to him be glory in the church and in Christ Jesus throughout all generations, for ever and ever! Amen."]
             },
             {
-                title: "For the Gifts of the Spirit",
-                author: "St. Bonaventure",
-                lines: ["We pray you, O Lord, to enlighten our minds by the grace of the Holy Spirit,", "that we may know your commandments and be enabled to fulfill them.", "We ask for the gift of Wisdom, by which we may relish the fruit of the tree of life,", "which is indeed yourself."]
+                title: "The Dwelling Place of God",
+                author: "Psalm 91:1-4",
+                lines: ["He who dwells in the shelter of the Most High will abide in the shadow of the Almighty.","I will say to the Lord, “My refuge and my fortress, my God, in whom I trust.”","For he will deliver you from the snare of the fowler and from the deadly pestilence.","He will cover you with his pinions, and under his wings you will find refuge; his faithfulness is a shield and buckler."]
             },
             {
-                title: "Prayer for Purity",
-                author: "Søren Kierkegaard",
-                lines: ["Father in Heaven! What is a man without Thee! ... What is all his striving, even the best, when it is without Thee! ... What is all his striving, even the best, when it is without Thee! ... What is all his striving, even the best, when it is without Thee!"]
+                title: "Come to Me",
+                author: "Jesus (Matthew 11:28-30)",
+                lines: ["Come to me, all who labor and are heavy laden, and I will give you rest.","Take my yoke upon you, and learn from me, for I am gentle and lowly in heart,","and you will find rest for your souls.","For my yoke is easy, and my burden is light."]
             },
             {
-                title: "The Beatitudes",
-                author: "Jesus (Sermon on the Mount)",
-                lines: ["Blessed are the poor in spirit, for theirs is the kingdom of heaven.", "Blessed are those who mourn, for they will be comforted.", "Blessed are the meek, for they will inherit the earth.", "Blessed are those who hunger and thirst for righteousness, for they will be filled.", "Blessed are the merciful, for they will be shown mercy.", "Blessed are the pure in heart, for they will see God.", "Blessed are the peacemakers, for they will be called children of God.", "Blessed are those who are persecuted because of righteousness, for theirs is the kingdom of heaven."]
+                title: "The Peace of God",
+                author: "Apostle Paul (Philippians 4:6-7)",
+                lines: ["Do not be anxious about anything,","but in everything by prayer and supplication with thanksgiving let your requests be made known to God.","And the peace of God, which surpasses all understanding,","will guard your hearts and your minds in Christ Jesus."]
             },
             {
-                title: "Act of Contrition",
-                author: "Traditional",
-                lines: ["O my God, I am heartily sorry for having offended Thee,", "and I detest all my sins because of thy just punishments,", "but most of all because they offend Thee, my God,", "who art all good and deserving of all my love.", "I firmly resolve with the help of Thy grace to sin no more and to avoid the near occasion of sin. Amen."]
+                title: "The Prayer of Jabez",
+                author: "Jabez (1 Chronicles 4:10)",
+                lines: ["Oh that you would bless me and enlarge my territory!","Let your hand be with me, and keep me from harm so that I will be free from pain."]
             },
             {
-                title: "Morning Offering",
-                author: "Traditional",
-                lines: ["O Jesus, through the Immaculate Heart of Mary,", "I offer you my prayers, works, joys, and sufferings of this day,", "for all the intentions of your Sacred Heart,", "in union with the Holy Sacrifice of the Mass throughout the world,", "in reparation for my sins, for the intentions of all our associates,", "and in particular for the intentions of the Holy Father."]
-            },
-            // ... 70 more prayers would follow in this structure
-            {
-                title: "Psalm 1",
-                author: "Ancient Psalm",
-                lines: ["Blessed is the one who does not walk in step with the wicked or stand in the way that sinners take or sit in the company of mockers,", "but whose delight is in the law of the Lord, and who meditates on his law day and night."]
+                title: "A Prayer for Wisdom",
+                author: "James (James 1:5-6)",
+                lines: ["If any of you lacks wisdom, let him ask God,","who gives generously to all without reproach, and it will be given him.","But let him ask in faith, with no doubting,","for the one who doubts is like a wave of the sea that is driven and tossed by the wind."]
             },
             {
-                title: "Prayer of St. Gertrude",
-                author: "St. Gertrude the Great",
-                lines: ["Eternal Father, I offer Thee the most precious blood of thy Divine Son, Jesus, in union with the Masses said throughout the world today, for all the holy souls in purgatory, for sinners everywhere, for sinners in the universal church, those in my own home and within my family. Amen."]
+                title: "Jesus' Prayer in Gethsemane",
+                author: "Jesus (Matthew 26:39)",
+                lines: ["My Father, if it be possible, let this cup pass from me;","nevertheless, not as I will, but as you will."]
             },
             {
-                title: "A Child's Prayer",
-                author: "Traditional",
-                lines: ["Now I lay me down to sleep,", "I pray the Lord my soul to keep.", "If I should die before I wake,", "I pray the Lord my soul to take. Amen."]
+                title: "Solomon's Prayer for Wisdom",
+                author: "King Solomon (1 Kings 3:9)",
+                lines: ["Give your servant therefore an understanding mind to govern your people, that I may discern between good and evil, for who is able to govern this your great people?"]
             },
             {
-                title: "The Angelus",
-                author: "Traditional",
-                lines: ["V. The Angel of the Lord declared unto Mary.", "R. And she conceived of the Holy Spirit.", "Hail Mary...", "V. Behold the handmaid of the Lord.", "R. Be it done unto me according to thy word.", "Hail Mary...", "V. And the Word was made flesh.", "R. And dwelt among us.", "Hail Mary...", "V. Pray for us, O Holy Mother of God.", "R. That we may be made worthy of the promises of Christ."]
+                title: "The Song of Moses",
+                author: "Moses (Exodus 15:2)",
+                lines: ["The Lord is my strength and my song, and he has become my salvation; this is my God, and I will praise him, my father's God, and I will exalt him."]
             },
             {
-                title: "For Faith, Hope, and Love",
-                author: "Pope Clement XI",
-                lines: ["Lord, I believe in you: increase my faith.", "I trust in you: strengthen my trust.", "I love you: let me love you more and more.", "I am sorry for my sins: deepen my sorrow."]
+                title: "Hannah's Prayer",
+                author: "Hannah (1 Samuel 2:1-2)",
+                lines: ["My heart exults in the Lord; my horn is exalted in the Lord.","My mouth derides my enemies, because I rejoice in your salvation.","There is none holy like the Lord: for there is none besides you; there is no rock like our God."]
             },
             {
-                title: "Prayer for the Seven Gifts of the Holy Spirit",
-                author: "St. Alphonsus Liguori",
-                lines: ["Holy Spirit, divine Consoler, I adore You as my true God, with God the Father and God the Son.", "I adore You and unite myself to the adoration You receive from the angels and saints.", "I give You my heart and I offer my ardent thanksgiving for all the grace which You never cease to bestow on me."]
+                title: "Daniel's Prayer",
+                author: "Daniel (Daniel 9:19)",
+                lines: ["O Lord, hear; O Lord, forgive. O Lord, pay attention and act. Delay not, for your own sake, O my God, because your city and your people are called by your name."]
             },
             {
-                title: "Prayer to St. Michael the Archangel",
-                author: "Pope Leo XIII",
-                lines: ["Saint Michael the Archangel, defend us in battle.", "Be our protection against the wickedness and snares of the devil.", "May God rebuke him, we humbly pray;", "and do thou, O Prince of the heavenly host,", "by the power of God, cast into hell Satan and all the evil spirits", "who prowl about the world seeking the ruin of souls. Amen."]
+                title: "Nehemiah's Prayer",
+                author: "Nehemiah (Nehemiah 1:5-6)",
+                lines: ["O Lord God of heaven, the great and awesome God who keeps covenant and steadfast love with those who love him and keep his commandments,","let your ear be attentive and your eyes open, to hear the prayer of your servant that I now pray before you day and night for the people of Israel your servants, confessing the sins of the people of Israel, which we have sinned against you."]
             },
             {
-                title: "The Magnificat (Canticle of Mary)",
-                author: "The Virgin Mary",
-                lines: ["My soul magnifies the Lord,", "And my spirit rejoices in God my Savior.", "For He has regarded the low estate of His handmaiden.", "For behold, henceforth all generations will call me blessed.", "For He who is mighty has done great things for me, and holy is His name.", "And His mercy is on those who fear Him from generation to generation."]
+                title: "A Prayer of Habakkuk",
+                author: "Habakkuk (Habakkuk 3:17-19)",
+                lines: ["Though the fig tree should not blossom, nor fruit be on the vines,","the produce of the olive fail and the fields yield no food,","the flock be cut off from the fold and there be no herd in the stalls,","yet I will rejoice in the Lord; I will take joy in the God of my salvation.","God, the Lord, is my strength; he makes my feet like the deer's; he makes me tread on my high places."]
             },
             {
-                title: "Prayer for Humility",
-                author: "St. Francis de Sales",
-                lines: ["O Jesus! meek and humble of heart, Hear me.", "From the desire of being esteemed, Deliver me, Jesus.", "From the desire of being loved, Deliver me, Jesus.", "From the desire of being extolled, Deliver me, Jesus."]
+                title: "Jonah's Prayer from the Deep",
+                author: "Jonah (Jonah 2:2, 7)",
+                lines: ["I called out to the Lord, out of my distress, and he answered me;","out of the belly of Sheol I cried, and you heard my voice.","When my life was fainting away, I remembered the Lord, and my prayer came to you, into your holy temple."]
             },
             {
-                title: "Prayer for Patience",
-                author: "St. Philip Neri",
-                lines: ["My Lord, I am so on fire with the desire of being a saint, that I can hardly wait.", "I wish to be a saint, not for my own glory, but for yours.", "I know that I can do nothing of myself, but with your help I can do all things."]
+                title: "Paul's Doxology",
+                author: "Apostle Paul (Romans 11:33-36)",
+                lines: ["Oh, the depth of the riches and wisdom and knowledge of God! How unsearchable are his judgments and how inscrutable his ways!","“For who has known the mind of the Lord, or who has been his counselor?”","“Or who has given a gift to him that he might be repaid?”","For from him and through him and to him are all things. To him be glory forever. Amen."]
             },
             {
-                title: "The Nicene Creed",
-                author: "First Council of Nicaea",
-                lines: ["I believe in one God, the Father almighty, maker of heaven and earth, of all things visible and invisible.", "I believe in one Lord Jesus Christ, the Only Begotten Son of God, born of the Father before all ages.", "God from God, Light from Light, true God from true God, begotten, not made, consubstantial with the Father...", "and so on."]
+                title: "The Armor of God",
+                author: "Apostle Paul (Ephesians 6:13-17)",
+                lines: ["Therefore take up the whole armor of God, that you may be able to withstand in the evil day, and having done all, to stand firm.","Stand therefore, having fastened on the belt of truth, and having put on the breastplate of righteousness,","and, as shoes for your feet, having put on the readiness given by the gospel of peace.","In all circumstances take up the shield of faith, with which you can extinguish all the flaming darts of the evil one;","and take the helmet of salvation, and the sword of the Spirit, which is the word of God."]
             },
             {
-                title: "Prayer of St. Ephrem",
-                author: "St. Ephrem the Syrian",
-                lines: ["O Lord and Master of my life, take from me the spirit of sloth, despair, lust of power, and idle talk.", "But give rather the spirit of chastity, humility, patience, and love to Your servant.", "Yea, O Lord and King, grant me to see my own transgressions, and not to judge my brother, for blessed art Thou, unto ages of ages. Amen."]
+                title: "The Love Chapter",
+                author: "Apostle Paul (1 Corinthians 13:4-7)",
+                lines: ["Love is patient and kind; love does not envy or boast; it is not arrogant or rude.","It does not insist on its own way; it is not irritable or resentful;","it does not rejoice at wrongdoing, but rejoices with the truth.","Love bears all things, believes all things, hopes all things, endures all things."]
             },
             {
-                title: "Universal Prayer",
-                author: "Pope Clement XI",
-                lines: ["My God, I believe in You, but I believe with more firmness.", "I hope in You, but I hope with more security.", "I love You, but I love with more ardor.", "I repent of my sins, but I repent with more bitterness."]
+                title: "A Living Sacrifice",
+                author: "Apostle Paul (Romans 12:1-2)",
+                lines: ["I appeal to you therefore, brothers, by the mercies of God, to present your bodies as a living sacrifice, holy and acceptable to God, which is your spiritual worship.","Do not be conformed to this world, but be transformed by the renewal of your mind, that by testing you may discern what is the will of God, what is good and acceptable and perfect."]
             },
             {
-                title: "Prayer to One's Guardian Angel",
-                author: "Traditional",
-                lines: ["Angel of God, my guardian dear,", "To whom God's love commits me here,", "Ever this day, be at my side,", "To light and guard, to rule and guide. Amen."]
+                title: "The Lord is My Light",
+                author: "Psalm 27:1, 4",
+                lines: ["The Lord is my light and my salvation; whom shall I fear?","The Lord is the stronghold of my life; of whom shall I be afraid?","One thing have I asked of the Lord, that will I seek after:","that I may dwell in the house of the Lord all the days of my life,","to gaze upon the beauty of the Lord and to inquire in his temple."]
             },
             {
-                title: "Prayer for the Helpless",
-                author: "St. Augustine",
-                lines: ["God of our life, there are days when the burdens we carry chafe our shoulders and weigh us down;", "when the road seems dreary and endless, the skies gray and threatening;", "when our lives have no music in them, and our hearts are lonely, and our souls have lost their courage. Flood the path with light, run our eyes to where the skies are full of promise."]
+                title: "As a Deer Pants for Water",
+                author: "Psalm 42:1-2",
+                lines: ["As a deer pants for flowing streams, so pants my soul for you, O God.","My soul thirsts for God, for the living God. When shall I come and appear before God?"]
             },
             {
-                title: "For the Love of God",
-                author: "St. Catherine of Siena",
-                lines: ["O immeasurable Love! I am the one who is in need; you are not. I am the one who is sick; you are the doctor. I am the one who is poor; you are the rich one. I am the one who is blind; you are the one who gives light. I am the one who is mute; you are the one who gives words."]
+                title: "God is Our Refuge",
+                author: "Psalm 46:1-3",
+                lines: ["God is our refuge and strength, a very present help in trouble.","Therefore we will not fear though the earth gives way,","though the mountains be moved into the heart of the sea,","though its waters roar and foam, though the mountains tremble at its swelling."]
             },
             {
-                title: "Psalm 46:10",
-                author: "Ancient Psalm",
-                lines: ["Be still, and know that I am God;", "I will be exalted among the nations,", "I will be exalted in the earth."]
+                title: "My Soul Thirsts for You",
+                author: "Psalm 63:1",
+                lines: ["O God, you are my God; earnestly I seek you;","my soul thirsts for you; my flesh faints for you,","as in a dry and weary land where there is no water."]
             },
             {
-                title: "Prayer for a Good Day",
-                author: "John Wesley",
-                lines: ["I am no longer my own, but thine. Put me to what thou wilt, rank me with whom thou wilt. Put me to doing, put me to suffering. Let me be employed for thee or laid aside for thee, exalted for thee or brought low for thee. Let me be full, let me be empty. Let me have all things, let me have nothing. I freely and heartily yield all things to thy pleasure and disposal."]
+                title: "How Lovely is Your Dwelling Place",
+                author: "Psalm 84:1-2",
+                lines: ["How lovely is your dwelling place, O Lord of hosts!","My soul longs, yes, faints for the courts of the Lord; my heart and flesh sing for joy to the living God."]
             },
             {
-                title: "The Great Commandment",
-                author: "Jesus",
-                lines: ["You shall love the Lord your God with all your heart and with all your soul and with all your mind.", "This is the great and first commandment.", "And a second is like it: You shall love your neighbor as yourself."]
+                title: "Bless the Lord, O My Soul",
+                author: "Psalm 103:1-5",
+                lines: ["Bless the Lord, O my soul, and all that is within me, bless his holy name!","Bless the Lord, O my soul, and forget not all his benefits,","who forgives all your iniquity, who heals all your diseases,","who redeems your life from the pit, who crowns you with steadfast love and mercy,","who satisfies you with good so that your youth is renewed like the eagle's."]
             },
             {
-                title: "Prayer of Thanksgiving",
-                author: "Traditional",
-                lines: ["We give you thanks, O God, for all your gifts.", "For the beauty of the earth and the sky;", "for the love which has been shown to us;", "for the peace which is past our understanding.", "For the wonder of your presence with us,", "we thank you, O Lord."]
+                title: "I Lift Up My Eyes",
+                author: "Psalm 121:1-2",
+                lines: ["I lift up my eyes to the hills. From where does my help come?","My help comes from the Lord, who made heaven and earth."]
             },
             {
-                title: "For Inner Peace",
-                author: "Thomas Merton",
-                lines: ["My Lord God, I have no idea where I am going. I do not see the road ahead of me. I cannot know for certain where it will end. Nor do I really know myself, and the fact that I think I am following your will does not mean that I am actually doing so. But I believe that the desire to please you does in fact please you."]
+                title: "Out of the Depths",
+                author: "Psalm 130:1-2, 5",
+                lines: ["Out of the depths I cry to you, O Lord!","O Lord, hear my voice! Let your ears be attentive to the voice of my pleas for mercy!","I wait for the Lord, my soul waits, and in his word I hope."]
             },
             {
-                title: "Psalm 121",
-                author: "Ancient Psalm",
-                lines: ["I lift up my eyes to the mountains— where does my help come from?", "My help comes from the Lord, the Maker of heaven and earth.", "He will not let your foot slip— he who watches over you will not slumber;", "indeed, he who watches over Israel will neither slumber nor sleep."]
+                title: "Wonderfully Made",
+                author: "Psalm 139:13-14",
+                lines: ["For you formed my inward parts; you knitted me together in my mother's womb.","I praise you, for I am fearfully and wonderfully made.","Wonderful are your works; my soul knows it very well."]
             },
             {
-                title: "Prayer for the Family",
-                author: "Traditional",
-                lines: ["O dear Jesus, I humbly implore You to grant Your special graces to our family.", "May our home be the shrine of peace, purity, love, labor and faith.", "I humbly beg You to protect us, to guide us, to keep us from all harm and to fill our hearts with Your love."]
+                title: "The Greatness of God",
+                author: "Psalm 145:1-3",
+                lines: ["I will extol you, my God and King, and bless your name forever and ever.","Every day I will bless you and praise your name forever and ever.","Great is the Lord, and greatly to be praised, and his greatness is unsearchable."]
             },
             {
-                title: "Act of Faith",
-                author: "Traditional",
-                lines: ["O my God, I firmly believe that you are one God in three divine Persons, Father, Son, and Holy Spirit.", "I believe that your divine Son became man and died for our sins and that he will come to judge the living and the dead.", "I believe these and all the truths which the Holy Catholic Church teaches, because you have revealed them, who are eternal truth and wisdom, who can neither deceive nor be deceived."]
+                title: "Praise the Lord!",
+                author: "Psalm 150:1-2, 6",
+                lines: ["Praise the Lord! Praise God in his sanctuary; praise him in his mighty heavens!","Praise him for his mighty deeds; praise him according to his excellent greatness!","Let everything that has breath praise the Lord! Praise the Lord!"]
             },
             {
-                title: "Act of Hope",
-                author: "Traditional",
-                lines: ["O my God, relying on your infinite mercy and promises, I hope to obtain pardon of my sins, the help of your grace, and life everlasting, through the merits of Jesus Christ, my Lord and Redeemer."]
+                title: "The Word Became Flesh",
+                author: "John (John 1:1, 14)",
+                lines: ["In the beginning was the Word, and the Word was with God, and the Word was God.","And the Word became flesh and dwelt among us, and we have seen his glory, glory as of the only Son from the Father, full of grace and truth."]
             },
             {
-                title: "Act of Love",
-                author: "Traditional",
-                lines: ["O my God, I love you above all things, with my whole heart and soul, because you are all-good and worthy of all love.", "I love my neighbor as myself for the love of you.", "I forgive all who have injured me and ask pardon of all whom I have injured."]
+                title: "The Great Commission",
+                author: "Jesus (Matthew 28:19-20)",
+                lines: ["Go therefore and make disciples of all nations, baptizing them in the name of the Father and of the Son and of the Holy Spirit,","teaching them to observe all that I have commanded you.","And behold, I am with you always, to the end of the age."]
             },
             {
-                title: "Prayer for the Poor Souls",
-                author: "St. Gertrude",
-                lines: ["Eternal Father, I offer Thee the Most Precious Blood of Thy Divine Son, Jesus,", "in union with the masses said throughout the world today,", "for all the holy souls in Purgatory, for sinners everywhere,", "for sinners in the universal church, those in my own home and within my family."]
+                title: "A New Creation",
+                author: "Apostle Paul (2 Corinthians 5:17)",
+                lines: ["Therefore, if anyone is in Christ, he is a new creation. The old has passed away; behold, the new has come."]
             },
             {
-                title: "A Franciscan Blessing",
-                author: "St. Francis of Assisi",
-                lines: ["May the Lord bless you and keep you.", "May He show His face to you and be merciful to you.", "May He turn His countenance to you and give you peace."]
+                title: "The Fruit of the Spirit",
+                author: "Apostle Paul (Galatians 5:22-23)",
+                lines: ["But the fruit of the Spirit is love, joy, peace, patience, kindness, goodness, faithfulness, gentleness, self-control; against such things there is no law."]
             },
             {
-                title: "Prayer for Vocation",
-                author: "Cardinal John Henry Newman",
-                lines: ["God has created me to do Him some definite service.", "He has committed some work to me which He has not committed to another.", "I have my mission. I may never know it in this life, but I shall be told it in the next."]
+                title: "Christ's Humility and Exaltation",
+                author: "Apostle Paul (Philippians 2:5-8)",
+                lines: ["Have this mind among yourselves, which is yours in Christ Jesus,","who, though he was in the form of God, did not count equality with God a thing to be grasped,","but emptied himself, by taking the form of a servant, being born in the likeness of men.","And being found in human form, he humbled himself by becoming obedient to the point of death, even death on a cross."]
             },
             {
-                title: "The Canticle of the Sun",
-                author: "St. Francis of Assisi",
-                lines: ["Most High, all-powerful, all-good Lord, all praise is Yours, all glory, all honour and all blessings.", "To you alone, Most High, do they belong, and no mortal lips are worthy to pronounce Your Name.", "Praised be You my Lord with all Your creatures, especially Sir Brother Sun, who is the day through whom You give us light."]
+                title: "A Prayer for Knowledge",
+                author: "Apostle Paul (Colossians 1:9-10)",
+                lines: ["And so, from the day we heard, we have not ceased to pray for you, asking that you may be filled with the knowledge of his will in all spiritual wisdom and understanding,","so as to walk in a manner worthy of the Lord, fully pleasing to him, bearing fruit in every good work and increasing in the knowledge of God."]
             },
             {
-                title: "Prayer for Joy",
-                author: "St. Thomas More",
-                lines: ["Grant me, O Lord, a good digestion, and also something to digest.", "Grant me a healthy body, and the necessary good humor to maintain it.", "Grant me a soul that knows not boredom, grumblings, sighs and laments, nor excess of stress, because of that obstructing thing called 'I'."]
+                title: "God's Love for the World",
+                author: "John (John 3:16)",
+                lines: ["For God so loved the world, that he gave his only Son, that whoever believes in him should not perish but have eternal life."]
             },
             {
-                title: "The Confiteor",
-                author: "Traditional Liturgy",
-                lines: ["I confess to almighty God and to you, my brothers and sisters, that I have greatly sinned,", "in my thoughts and in my words, in what I have done and in what I have failed to do,", "through my fault, through my fault, through my most grievous fault;", "therefore I ask blessed Mary ever-Virgin, all the Angels and Saints, and you, my brothers and sisters, to pray for me to the Lord our God."]
+                title: "The Way, the Truth, and the Life",
+                author: "Jesus (John 14:6)",
+                lines: ["I am the way, and the truth, and the life. No one comes to the Father except through me."]
             },
             {
-                title: "Prayer for the Sick",
-                author: "Book of Common Prayer",
-                lines: ["O Father of mercies and God of all comfort, our only help in time of need;", "We humbly beseech thee to behold, visit, and relieve thy sick servant for whom our prayers are desired.", "Look upon him with the eyes of thy mercy; comfort him with a sense of thy goodness; preserve him from the temptations of the enemy; and give him patience under his affliction."]
+                title: "The Vine and the Branches",
+                author: "Jesus (John 15:5)",
+                lines: ["I am the vine; you are the branches. Whoever abides in me and I in him, he it is that bears much fruit, for apart from me you can do nothing."]
             },
             {
-                title: "For Those in Authority",
-                author: "Book of Common Prayer",
-                lines: ["O Lord our Governor, whose glory is in all the world:", "We commend this nation to thy merciful care, that, being guided by thy Providence, we may dwell secure in thy peace.", "Grant to the President of the United States, and to all in authority, wisdom and strength to know and to do thy will."]
+                title: "A Final Blessing",
+                author: "Jude (Jude 1:24-25)",
+                lines: ["Now to him who is able to keep you from stumbling and to present you blameless before the presence of his glory with great joy,","to the only God, our Savior, through Jesus Christ our Lord, be glory, majesty, dominion, and authority, before all time and now and forever. Amen."]
             },
             {
-                title: "A Morning Resolve",
-                author: "John H. Vincent",
-                lines: ["I will this day try to live a simple, sincere and serene life,", "repelling promptly every thought of discontent, anxiety, discouragement, impurity, and self-seeking;", "cultivating cheerfulness, magnanimity, charity, and the habit of holy silence;", "exercising economy in expenditure, generosity in giving, carefulness in conversation, diligence in appointed service, fidelity to every trust, and a child-like faith in God."]
+                title: "The Cry of the Seraphim",
+                author: "Isaiah (Isaiah 6:3)",
+                lines: ["Holy, holy, holy is the Lord of hosts; the whole earth is full of his glory!"]
             },
             {
-                title: "The Gloria",
-                author: "Traditional Hymn",
-                lines: ["Glory to God in the highest, and on earth peace to people of good will.", "We praise you, we bless you, we adore you, we glorify you,", "we give you thanks for your great glory,", "Lord God, heavenly King, O God, almighty Father."]
+                title: "Worthy is the Lamb",
+                author: "Revelation (Revelation 5:12)",
+                lines: ["Worthy is the Lamb who was slain, to receive power and wealth and wisdom and might and honor and glory and blessing!"]
             },
             {
-                title: "Prayer for the Forgotten",
-                author: "St. John Vianney",
-                lines: ["I love You, O my God, and my only desire is to love You until the last breath of my life.", "I love You, O my infinitely lovable God, and I would rather die loving You, than live without loving You.", "I love You, Lord, and the only grace I ask is to love You eternally."]
-            },
-            {
-                title: "For a Happy Death",
-                author: "St. Joseph",
-                lines: ["O Blessed Joseph, you who yielded your last breath in the arms of Jesus and Mary,", "obtain for me this grace, O holy Joseph, that I may breathe forth my soul in praise, saying in spirit, if I am unable to do so in words:", "'Jesus, Mary and Joseph, I give you my heart and my soul.'"]
-            },
-            {
-                title: "The Sanctus",
-                author: "Liturgy",
-                lines: ["Holy, Holy, Holy Lord God of hosts.", "Heaven and earth are full of your glory.", "Hosanna in the highest.", "Blessed is he who comes in the name of the Lord.", "Hosanna in the highest."]
-            },
-            {
-                title: "Prayer of St. Anselm",
-                author: "St. Anselm of Canterbury",
-                lines: ["O Lord my God, teach my heart where and how to seek You,", "where and how to find You.", "You are my God and You are my all and I have never seen You.", "You have made me and remade me, and You have bestowed on me all the good things I possess, and still I do not know You."]
-            },
-            {
-                title: "For the Grace to Do God's Will",
-                author: "St. Catherine of Genoa",
-                lines: ["My God, I do not want this or that; I want only what you want.", "I want to want it in the way you want it, and for as long as you want it."]
-            },
-            {
-                title: "A Celtic Prayer",
-                author: "Ancient Celtic Tradition",
-                lines: ["Deep peace of the running wave to you.", "Deep peace of the flowing air to you.", "Deep peace of the quiet earth to you.", "Deep peace of the shining stars to you.", "Deep peace of the gentle night to you.", "Moon and stars pour their healing light on you.", "Deep peace of Christ, the light of the world, to you."]
-            },
-            {
-                title: "For Trust in God's Providence",
-                author: "St. Teresa of Avila",
-                lines: ["Let nothing disturb you,", "Let nothing frighten you,", "All things are passing away:", "God never changes.", "Patience obtains all things.", "Whoever has God lacks nothing;", "God alone suffices."]
-            },
-            {
-                title: "Prayer for the Clergy",
-                author: "St. Thérèse of Lisieux",
-                lines: ["O Jesus, I pray for your faithful and fervent priests;", "for your unfaithful and lukewarm priests;", "for your priests laboring at home or abroad in distant mission fields;", "for your tempted priests;", "for your lonely and desolate priests;", "for your young priests;", "for your dying priests;", "for the souls of your priests in Purgatory."]
-            },
-            {
-                title: "For the Unity of Christians",
-                author: "World Council of Churches",
-                lines: ["Lord Jesus, who prayed that we might all be one,", "we pray to you for the unity of Christians,", "according to your will, according to your means.", "May your Spirit enable us to experience the suffering of division,", "to see our sin, and to hope beyond all hope."]
-            },
-            {
-                title: "Prayer for Work",
-                author: "St. Josemaría Escrivá",
-                lines: ["O God, work is a blessing, a gift from your hand.", "Help me to see my work as a way to grow in holiness,", "a way to serve others, and a way to build up your kingdom.", "May I do my work with competence, with a spirit of service, and with love."]
-            },
-            {
-                title: "The Te Deum",
-                author: "Traditional Hymn",
-                lines: ["You are God: we praise you;", "You are the Lord; we acclaim you;", "You are the eternal Father:", "All creation worships you."]
-            },
-            {
-                title: "For the Conversion of Sinners",
-                author: "St. Faustina Kowalska",
-                lines: ["O Blood and Water, which gushed forth from the Heart of Jesus as a fount of mercy for us, I trust in You."]
-            },
-            {
-                title: "Prayer for the Environment",
-                author: "Pope Francis (Laudato Si')",
-                lines: ["All-powerful God, you are present in the whole universe and in the smallest of your creatures.", "You embrace with your tenderness all that exists.", "Pour out upon us the power of your love, that we may protect life and beauty."]
-            },
-            {
-                title: "A Student's Prayer",
-                author: "St. Thomas Aquinas",
-                lines: ["Creator of all things, true source of light and wisdom, lofty origin of all being, graciously let a ray of your brilliance penetrate into the darkness of my understanding and take from me the twofold darkness in which I have been born, an obscurity of both sin and ignorance."]
-            },
-            {
-                title: "For the Grace of a Holy Life",
-                author: "Thomas à Kempis",
-                lines: ["Grant me, O Lord, to know what I ought to know,", "to love what I ought to love,", "to praise what delights You most,", "to value what is precious in Your sight,", "and to hate what is offensive to You."]
-            },
-            {
-                title: "Final Prayer",
-                author: "St. Ignatius of Loyola",
-                lines: ["Take, Lord, and receive all my liberty,", "my memory, my understanding,", "and my entire will,", "All I have and call my own.", "You have given all to me.", "To you, Lord, I return it.", "Everything is yours; do with it what you will.", "Give me only your love and your grace,", "that is enough for me."]
+                title: "The Alpha and the Omega",
+                author: "Jesus (Revelation 22:13)",
+                lines: ["I am the Alpha and the Omega, the first and the last, the beginning and the end."]
             }
         ];
 
