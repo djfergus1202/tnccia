@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Setup Guide - Chemistry Platform</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/feather-icons@4.28.0/dist/feather.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #1a1a1a;
+            color: #e9ecef;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        .navbar-dark { background-color: #0d1421 !important; }
+        .card { background-color: #2d3748; border: 1px solid #4a5568; }
+        .btn-primary { background-color: #4299e1; border-color: #4299e1; }
+        .step-card { margin-bottom: 20px; }
+        .step-number { 
+            background-color: #4299e1; 
+            color: white; 
+            width: 30px; 
+            height: 30px; 
+            border-radius: 50%; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            font-weight: bold;
+        }
+        pre { background-color: #1a1d29; border: 1px solid #4a5568; }
+        .alert-info { background-color: #1e3a8a; border-color: #3b82f6; color: #e9ecef; }
+        .alert-success { background-color: #065f46; border-color: #10b981; color: #e9ecef; }
+        .alert-warning { background-color: #92400e; border-color: #f59e0b; color: #e9ecef; }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark">
+        <div class="container">
+            <a class="navbar-brand" href="index.html"><i data-feather="atom"></i> ChemPlatform</a>
+            <div class="navbar-nav ms-auto">
+                <a class="nav-link" href="index.html">Home</a>
+                <a class="nav-link active" href="setup-guide.html">Setup</a>
+                <a class="nav-link" href="github-setup.html">GitHub</a>
+                <a class="nav-link" href="deployment.html">Deploy</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container py-5">
+        <div class="row">
+            <div class="col-lg-8 mx-auto">
+                <h1 class="mb-4"><i data-feather="settings"></i> Quick Setup Guide</h1>
+                <p class="lead">Get your Chemistry Platform running in 5 minutes</p>
+
+                <!-- Step 1 -->
+                <div class="card step-card">
+                    <div class="card-header d-flex align-items-center">
+                        <span class="step-number me-3">1</span>
+                        <h5 class="mb-0">Download and Extract Package</h5>
+                    </div>
+                    <div class="card-body">
+                        <p>Download the GitHub deployment package and extract it:</p>
+                        <pre><code class="language-bash"># Extract the package
+tar -xzf chemistry-platform-github-final.tar.gz
+cd chemistry-platform-github</code></pre>
+                        <div class="alert alert-info">
+                            <i data-feather="info"></i> The package contains all files needed for deployment
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Step 2 -->
+                <div class="card step-card">
+                    <div class="card-header d-flex align-items-center">
+                        <span class="step-number me-3">2</span>
+                        <h5 class="mb-0">Environment Configuration</h5>
+                    </div>
+                    <div class="card-body">
+                        <p>Set up your environment variables:</p>
+                        <pre><code class="language-bash"># Copy environment template
+cp .env.example .env
+
+# Edit with your API keys
+nano .env</code></pre>
+                        
+                        <h6 class="mt-3">Required API Keys:</h6>
+                        <ul>
+                            <li><strong>DISCORD_BOT_TOKEN</strong> - From <a href="https://discord.com/developers/applications" target="_blank">Discord Developer Portal</a></li>
+                            <li><strong>GEMINI_API_KEY</strong> - From <a href="https://aistudio.google.com/" target="_blank">Google AI Studio</a></li>
+                            <li><strong>SESSION_SECRET</strong> - Random 32+ character string</li>
+                            <li><strong>DATABASE_URL</strong> - PostgreSQL connection string</li>
+                        </ul>
+                        
+                        <div class="alert alert-warning">
+                            <i data-feather="alert-triangle"></i> Never commit your .env file to GitHub - it's already in .gitignore
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Step 3 -->
+                <div class="card step-card">
+                    <div class="card-header d-flex align-items-center">
+                        <span class="step-number me-3">3</span>
+                        <h5 class="mb-0">Install Dependencies</h5>
+                    </div>
+                    <div class="card-body">
+                        <p>Install Python and Node.js dependencies:</p>
+                        <pre><code class="language-bash"># Python dependencies
+pip install -r requirements-github.txt
+
+# Node.js dependencies (for Discord bot)
+npm install</code></pre>
+                        
+                        <h6 class="mt-3">System Requirements:</h6>
+                        <ul>
+                            <li>Python 3.11+</li>
+                            <li>Node.js 18+</li>
+                            <li>PostgreSQL 12+</li>
+                            <li>2GB RAM minimum</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Step 4 -->
+                <div class="card step-card">
+                    <div class="card-header d-flex align-items-center">
+                        <span class="step-number me-3">4</span>
+                        <h5 class="mb-0">Database Setup</h5>
+                    </div>
+                    <div class="card-body">
+                        <p>Configure your PostgreSQL database:</p>
+                        <pre><code class="language-bash"># Local PostgreSQL (example)
+createdb chemistry_platform
+
+# Update DATABASE_URL in .env
+DATABASE_URL=postgresql://username:password@localhost:5432/chemistry_platform</code></pre>
+                        
+                        <div class="alert alert-info">
+                            <i data-feather="info"></i> For production, use managed database services like Heroku Postgres or Railway
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Step 5 -->
+                <div class="card step-card">
+                    <div class="card-header d-flex align-items-center">
+                        <span class="step-number me-3">5</span>
+                        <h5 class="mb-0">Run Applications</h5>
+                    </div>
+                    <div class="card-body">
+                        <p>Start the Flask web application and Discord bot:</p>
+                        
+                        <h6>Terminal 1: Flask Web App</h6>
+                        <pre><code class="language-bash">gunicorn main:app --bind 0.0.0.0:5000</code></pre>
+                        
+                        <h6 class="mt-3">Terminal 2: Discord Bot</h6>
+                        <pre><code class="language-bash">node enhanced_discord_bot.js</code></pre>
+                        
+                        <div class="alert alert-success">
+                            <i data-feather="check-circle"></i> Your platform will be available at http://localhost:5000
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Step 6 -->
+                <div class="card step-card">
+                    <div class="card-header d-flex align-items-center">
+                        <span class="step-number me-3">6</span>
+                        <h5 class="mb-0">Verify Setup</h5>
+                    </div>
+                    <div class="card-body">
+                        <p>Test that everything is working:</p>
+                        
+                        <h6>Health Check</h6>
+                        <pre><code class="language-bash">curl http://localhost:5000/health</code></pre>
+                        
+                        <h6 class="mt-3">Expected Response:</h6>
+                        <pre><code class="language-json">{
+  "status": "healthy",
+  "features": {
+    "video_generation": true,
+    "discord_commands": 53,
+    "research_system": true,
+    "achievement_system": true
+  }
+}</code></pre>
+                        
+                        <h6 class="mt-3">Test Discord Bot</h6>
+                        <ul>
+                            <li>Invite bot to Discord server</li>
+                            <li>Test command: <code>/create-simple-video topic:chemistry</code></li>
+                            <li>Check web interface for results</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Automated Setup -->
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0"><i data-feather="zap"></i> Automated Setup</h5>
+                    </div>
+                    <div class="card-body">
+                        <p>Use the included automation script for guided setup:</p>
+                        <pre><code class="language-bash"># Make script executable
+chmod +x deploy.sh
+
+# Run automated setup
+./deploy.sh
+
+# Choose option 3: "Setup local development"</code></pre>
+                        
+                        <p>The script will:</p>
+                        <ul>
+                            <li>Check system requirements</li>
+                            <li>Install dependencies automatically</li>
+                            <li>Create .env file from template</li>
+                            <li>Provide next steps guidance</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Troubleshooting -->
+                <div class="card mt-4">
+                    <div class="card-header">
+                        <h5 class="mb-0"><i data-feather="help-circle"></i> Common Issues</h5>
+                    </div>
+                    <div class="card-body">
+                        <h6>Port Already in Use</h6>
+                        <pre><code class="language-bash"># Kill process on port 5000
+lsof -ti:5000 | xargs kill -9
+
+# Or use different port
+gunicorn main:app --bind 0.0.0.0:8000</code></pre>
+                        
+                        <h6 class="mt-3">Discord Bot Token Invalid</h6>
+                        <ul>
+                            <li>Verify token in Discord Developer Portal</li>
+                            <li>Check token in .env file</li>
+                            <li>Ensure bot has proper permissions</li>
+                        </ul>
+                        
+                        <h6 class="mt-3">Database Connection Failed</h6>
+                        <ul>
+                            <li>Check PostgreSQL is running</li>
+                            <li>Verify DATABASE_URL format</li>
+                            <li>Test connection manually</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Next Steps -->
+                <div class="card mt-4">
+                    <div class="card-header">
+                        <h5 class="mb-0"><i data-feather="arrow-right"></i> Next Steps</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h6>Development</h6>
+                                <ul>
+                                    <li><a href="github-setup.html">Upload to GitHub</a></li>
+                                    <li>Customize educational content</li>
+                                    <li>Add custom Discord commands</li>
+                                </ul>
+                            </div>
+                            <div class="col-md-6">
+                                <h6>Production</h6>
+                                <ul>
+                                    <li><a href="deployment.html">Deploy to Heroku/Railway</a></li>
+                                    <li>Set up monitoring</li>
+                                    <li>Configure custom domain</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="text-center mt-4">
+                    <a href="github-setup.html" class="btn btn-primary">Next: Upload to GitHub</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://unpkg.com/feather-icons"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-core.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/autoloader/prism-autoloader.min.js"></script>
+    <script>feather.replace();</script>
+</body>
+</html>
